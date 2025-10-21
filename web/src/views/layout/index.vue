@@ -102,6 +102,7 @@
           </div>
         </div>
       </div>
+      <div class="left-page-container" v-if="isShowNav"></div>
       <!-- 容器 -->
       <el-container :class="['inner-container']">
         <!--取消整体的菜单展示 isShowMenu 一直为 false-->
@@ -493,6 +494,11 @@ export default {
   min-height: 660px;
   .outer-container{
     height: 100%;
+    .left-page-container {
+      //position: relative;
+      width: 80px;
+      height: 100%;
+    }
     .left-nav {
       width: 70px;
       text-align: center;
@@ -576,7 +582,6 @@ export default {
     .inner-container {
       width: calc(100% - 70px);
       height: 100%;
-      margin: 0 0 0 80px;
       border-radius: 10px;
       // border: 1px solid #e6e6e6;
       /*box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.15);*/
@@ -618,6 +623,7 @@ export default {
         border-radius: 8px 8px 8px 8px;
         border-left: 0.5px solid #e6e6e6;*/
         .page-container {
+          height: 100%;
           min-width: 1200px;
           overflow-x: auto;
           padding-right: 6px;
