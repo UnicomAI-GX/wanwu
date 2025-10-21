@@ -113,7 +113,7 @@
                     'doc/*':['.txt','.csv','.xlsx','.docx','.html','.pptx','.pdf']
                 },
                 chunkFileName:'',
-                fileInfo:null,
+                fileInfo:[],
                 imgUrl:''
             }
         },
@@ -181,7 +181,6 @@
                 let filename= file.name
                 //通过上传的文件名判断文件类型，用于回显
                 let fileType = filename.split('.')[filename.split('.').length-1]
-                
                 // 重置图片URL
                 this.imgUrl = '';
                 
@@ -217,18 +216,28 @@
                     }else{
                         this.fileList = fileList;
                     }
+                    const currentFileIndex = this.fileList.length - 1; // 当前文件在列表中的索引
+                    if (file.raw) {
+                        this.fileList[currentFileIndex].imgUrl = URL.createObjectURL(file.raw);
+                    }
                     this.checkScrollable();
                 } else {
                     // 非图片类型只保留最新一个
                     this.fileList = [];
                     this.fileList.push(file);
                 }
-                this.fileList[this.fileIndex].imgUrl = this.fileUrl;
                 
                 if(this.fileList.length > 0){
                     this.maxSizeBytes = 0;
                     this.isExpire = true;
-                    this.startUpload();
+                    //this.startUpload();
+                    // 为每个文件启动上传，而不是只上传索引0的文件
+                    for(let i = 0; i < this.fileList.length; i++) {
+                        if (!this.fileList[i].uploaded) { // 添加标记避免重复上传
+                            this.startUpload(i);
+                            this.fileList[i].uploaded = true;
+                        }
+                    }
                 }
             },
             uploadFile(fileName,oldFileName,fiePath){//文件上传完之后
@@ -239,7 +248,7 @@
                 //}
                 this.fileInfo.push({
                     fileName,
-                    fileSize:this.fileList[0]['size'],
+                    fileSize:this.fileList[this.fileIndex]['size'],
                     fileUrl:fiePath,
                 })
             },
