@@ -1429,6 +1429,24 @@ definitions:
     required:
     - tableName
     type: object
+  request.CreateWorkflowByTemplateReq:
+    properties:
+      avatar:
+        allOf:
+        - $ref: '#/definitions/request.Avatar'
+        description: 图标
+      desc:
+        description: 描述
+        type: string
+      name:
+        description: 名称
+        type: string
+      templateId:
+        type: string
+    required:
+    - name
+    - templateId
+    type: object
   request.CustomHomeConfig:
     properties:
       homeBgColor:
@@ -3380,6 +3398,11 @@ definitions:
         description: 随机unique id(每次动态生成)
         type: string
     type: object
+  response.DefaultTemplateURL:
+    properties:
+      templateUrl:
+        type: string
+    type: object
   response.DeleteFileResp:
     properties:
       status:
@@ -3557,6 +3580,17 @@ definitions:
         items:
           $ref: '#/definitions/response.KnowledgeMetaItem'
         type: array
+    type: object
+  response.GetWorkflowTemplateListResp:
+    properties:
+      downloadLink:
+        $ref: '#/definitions/response.DefaultTemplateURL'
+      list:
+        items:
+          $ref: '#/definitions/response.WorkflowTemplateInfo'
+        type: array
+      total:
+        type: integer
     type: object
   response.IDName:
     properties:
@@ -4598,6 +4632,65 @@ definitions:
       workFlowId:
         type: string
     type: object
+  response.WorkflowTemplateDetail:
+    properties:
+      author:
+        description: 作者
+        type: string
+      avatar:
+        allOf:
+        - $ref: '#/definitions/request.Avatar'
+        description: 图标
+      category:
+        description: 模板分类
+        type: string
+      description:
+        description: 模板描述
+        type: string
+      downloadCount:
+        description: 下载次数
+        type: integer
+      feature:
+        description: 模板特性说明
+        type: string
+      name:
+        description: 模板名称
+        type: string
+      scenario:
+        description: 模板应用场景
+        type: string
+      summary:
+        description: 模板介绍概览
+        type: string
+      templateId:
+        description: 模板ID
+        type: string
+    type: object
+  response.WorkflowTemplateInfo:
+    properties:
+      author:
+        description: 作者
+        type: string
+      avatar:
+        allOf:
+        - $ref: '#/definitions/request.Avatar'
+        description: 图标
+      category:
+        description: 模板分类
+        type: string
+      description:
+        description: 模板描述
+        type: string
+      downloadCount:
+        description: 下载次数
+        type: integer
+      name:
+        description: 模板名称
+        type: string
+      templateId:
+        description: 模板ID
+        type: string
+    type: object
 info:
   contact: {}
   description: |-
@@ -4607,6 +4700,7 @@ info:
     | Authorization | JWT token |
     | X-Language    | 语言Code  |
     | X-Org-Id      | 组织ID    |
+    | X-Client-Id   | 客户端标识|
 
     ## HTTP Status
     | HTTP Status             | 说明                   |
@@ -9543,6 +9637,150 @@ paths:
       summary: 修改用户状态
       tags:
       - permission.user
+  /workflow/template:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通过模板创建Workflow的请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateWorkflowByTemplateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.CozeWorkflowIDData'
+              type: object
+      security:
+      - JWT: []
+      summary: 复制工作流模板
+      tags:
+      - workflow
+  /workflow/template/detail:
+    get:
+      consumes:
+      - application/json
+      description: 获取工作流模板详情
+      parameters:
+      - description: 模板ID
+        in: query
+        name: templateId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.WorkflowTemplateDetail'
+              type: object
+      security:
+      - JWT: []
+      summary: 获取工作流模板详情
+      tags:
+      - guest
+  /workflow/template/download:
+    get:
+      consumes:
+      - application/json
+      description: 下载工作流模板
+      parameters:
+      - description: 模板ID
+        in: query
+        name: templateId
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWT: []
+      summary: 下载工作流模板
+      tags:
+      - guest
+  /workflow/template/list:
+    get:
+      consumes:
+      - application/json
+      description: 获取工作流模板列表
+      parameters:
+      - description: 模板名称
+        in: query
+        name: name
+        type: string
+      - description: 模板分类
+        in: query
+        name: category
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.GetWorkflowTemplateListResp'
+              type: object
+      security:
+      - JWT: []
+      summary: 获取工作流模板列表
+      tags:
+      - guest
+  /workflow/template/recommend:
+    get:
+      consumes:
+      - application/json
+      description: 获取工作流模板推荐
+      parameters:
+      - description: 模板ID
+        in: query
+        name: templateId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListResult'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/response.WorkflowTemplateInfo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - JWT: []
+      summary: 获取工作流模板推荐
+      tags:
+      - guest
   /workflow/tool/action:
     get:
       consumes:
