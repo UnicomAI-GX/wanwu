@@ -284,7 +284,7 @@ export default {
         justify-content:space-between;
     }
     .toolContent_item:hover{
-        background:#f4f5ff;
+        background:$color_opacity;
     }
 }
 .active{

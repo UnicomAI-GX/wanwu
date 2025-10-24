@@ -366,7 +366,7 @@
 .card-item-create {
   background: $color_opacity;
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.15);
-  border: 1px solid $border_color;
+  border: 1px solid rgba(56,75,247,0.47);
   .app-card-create {
     width: 100%;
     height: 100%;

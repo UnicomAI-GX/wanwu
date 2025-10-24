@@ -246,7 +246,7 @@ export default {
   }
   .tag_item {
     cursor: pointer;
-    background: #f4f5ff;
+    background: $color_opacity;
     padding: 5px;
     margin: 10px 0;
     border-radius: 4px;

@@ -865,13 +865,13 @@ export default {
   }
 .showMore{
   margin-left:5px;
-  background:#f4f5ff;
+  background:$color_opacity;
   padding:2px;
   border-radius:4px;
 }
 .metaItem{
   margin-left:5px;
-  background:#f4f5ff;
+  background:$color_opacity;
   padding:2px;
   border-radius:4px;
 }

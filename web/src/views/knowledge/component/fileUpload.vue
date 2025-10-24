@@ -1094,7 +1094,7 @@ export default {
 .splitterTag {
   margin-right: 10px;
   border: none;
-  background: #f4f5ff;
+  background: $color_opacity;
   color: $color;
   border-radius: 3px;
 }

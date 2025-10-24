@@ -281,7 +281,7 @@ export default {
   }
 
   .toolContent_item:hover {
-    background: #f4f5ff;
+    background: $color_opacity;
   }
 }
 
