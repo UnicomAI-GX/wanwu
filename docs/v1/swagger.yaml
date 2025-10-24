@@ -2283,7 +2283,7 @@ definitions:
         description: 应用类型
         type: string
       publishType:
-        description: 发布类型(public:公开发布,private:私密发布)
+        description: 发布类型(public:系统公开发布,organization:组织公开发布,private:私密发布)
         type: string
     type: object
   request.QueryKnowledgeReq:

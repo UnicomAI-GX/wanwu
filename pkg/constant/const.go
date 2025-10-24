@@ -9,8 +9,9 @@ const (
 
 // app publish type
 const (
-	AppPublishPublic  = "public"  // 公开发布
-	AppPublishPrivate = "private" // 私密发布
+	AppPublishPublic       = "public"       // 系统公开发布
+	AppPublishOrganization = "organization" // 组织公开发布
+	AppPublishPrivate      = "private"      // 私密发布
 )
 
 // tool type

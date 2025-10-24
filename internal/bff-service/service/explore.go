@@ -17,12 +17,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetExplorationAppList(ctx *gin.Context, userId string, req request.GetExplorationAppListRequest) (*response.ListResult, error) {
+func GetExplorationAppList(ctx *gin.Context, userId, orgId string, req request.GetExplorationAppListRequest) (*response.ListResult, error) {
 	explorationApp, err := app.GetExplorationAppList(ctx.Request.Context(), &app_service.GetExplorationAppListReq{
 		Name:       req.Name,
 		AppType:    req.AppType,
 		SearchType: req.SearchType,
 		UserId:     userId,
+		OrgId:      orgId,
 	})
 	if err != nil {
 		return nil, err

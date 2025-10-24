@@ -74,6 +74,7 @@ message GetExplorationAppListReq{
   string appType = 2;
   string searchType = 3;
   string userId = 4;
+  string orgId = 5;
 }
 
 message ExplorationAppList{
