@@ -293,9 +293,9 @@ export default {
                                     commonData,
                                     (worldObj,search_list) => {
                                         this.setStoreSessionStatus(0)
-                                        endStr += worldObj.world
-                                        endStr = convertLatexSyntax(endStr)
-                                        endStr = parseSub(endStr,lastIndex)
+                                        let newChunk = convertLatexSyntax(worldObj.world)
+                                        endStr += newChunk
+                                        endStr = parseSub(endStr, lastIndex)
                                         let fillData = {
                                             ...commonData,
                                             "response": md.render(endStr),
@@ -473,9 +473,9 @@ export default {
                                     commonData,
                                     (worldObj,search_list) => {
                                         this.setStoreSessionStatus(0)
-                                        endStr += worldObj.world
-                                        endStr = convertLatexSyntax(endStr)
-                                        endStr = parseSub(endStr,lastIndex)
+                                        let newChunk = convertLatexSyntax(worldObj.world)
+                                        endStr += newChunk
+                                        endStr = parseSub(endStr, lastIndex)
                                         const finalResponse = String(endStr)
                                         let fillData = {
                                             ...commonData,

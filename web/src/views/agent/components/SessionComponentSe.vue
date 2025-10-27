@@ -370,6 +370,8 @@ export default {
       },
       imgConfig: ["jpeg", "PNG", "png", "JPG", "jpg", "bmp", "webp"],
       audioConfig: ["mp3", "wav"],
+      fileScrollStateMap: {},
+      resizeTimer: null,
     };
   },
   computed: {
@@ -380,11 +382,21 @@ export default {
       handler(val, oldVal) {},
       immediate: true,
     },
+    'session_data.history':{
+      handler(){
+        this.$nextTick(() => {
+          this.updateAllFileScrollStates();
+        });
+      },
+      deep:true
+    }
   },
   mounted() {
     this.setupScrollListener();
     smoothscroll.polyfill();
     document.addEventListener('click', this.handleCitationClick);
+    window.addEventListener('resize', this.handleWindowResize);
+    this.updateAllFileScrollStates();
   },
   beforeDestroy() {
     if(this.handleCitationClick) {
@@ -395,6 +407,11 @@ export default {
       container.removeEventListener("scroll", this.handleScroll);
     }
     clearTimeout(this.scrollTimeout);
+
+    window.removeEventListener('resize', this.handleWindowResize);
+    if (this.resizeTimer) {
+      clearTimeout(this.resizeTimer);
+    }
     
     // 移除图片错误事件监听器
     if (this.imageErrorHandler) {
@@ -402,22 +419,41 @@ export default {
     }
   },
   methods: {
+    updateAllFileScrollStates() {
+      this.session_data.history.forEach((item, index) => {
+        if (item.fileList && item.fileList.length > 0) {
+          this.$nextTick(() => {
+            this.checkFileScrollState(index);
+          });
+        }
+      });
+    },
+    checkFileScrollState(index) {
+      const refKey = `imgList-${index}`;
+      const containerArray = this.$refs[refKey];
+      if (containerArray && containerArray.length > 0) {
+        const container = containerArray[0];
+        const canScroll = container.scrollWidth > container.clientWidth;
+        if (this.session_data.history[index]) {
+          this.$set(this.session_data.history[index], 'showScrollBtn', canScroll);
+        }
+        this.$set(this.fileScrollStateMap, index, canScroll);
+      }
+    },
+    handleWindowResize() {
+      if (this.resizeTimer) {
+        clearTimeout(this.resizeTimer);
+      }
+      this.resizeTimer = setTimeout(() => {
+        this.updateAllFileScrollStates();
+      }, 200);
+    },
     canScroll(i,showScrollBtn) {
-      if (showScrollBtn !== null) {
+      if (showScrollBtn !== null && showScrollBtn !== undefined) {
         return showScrollBtn;
       }
-      this.$nextTick(()=>{
-        const refKey = `imgList-${i}`;
-        const containerArray = this.$refs[refKey];
-        if (containerArray && containerArray.length > 0) {
-          const container = containerArray[0];
-          const canScrollNow = container.scrollWidth > container.clientWidth;
-          this.$set(this.session_data.history[i], 'showScrollBtn', canScrollNow);
-          return canScrollNow;
-        }
-      })
-
-      return false;
+      // 否则从 fileScrollStateMap 中获取
+      return this.fileScrollStateMap[i] || false;
     },
     prev(e,i){
       e.stopPropagation()
