@@ -486,10 +486,11 @@ def update_kb_name(user_id: str, old_kb_name: str, new_kb_name: str):
 
 def get_knowledge_based_answer(user_id, kb_names, question, rate, top_k, chunk_conent, chunk_size, return_meta=False,
                                prompt_template='', search_field='content', default_answer='根据已知信息，无法回答您的问题。',
-                               auto_citation=False, retrieve_method = "hybrid_search", kb_ids=[],
-                               filter_file_name_list=[], rerank_model_id='', rerank_mod = "rerank_model",
-                               weights: Optional[dict] | None = None,
-                               term_weight_coefficient=1, metadata_filtering_conditions = []):
+                               auto_citation=False, retrieve_method="hybrid_search", kb_ids=[],
+                               filter_file_name_list=[], rerank_model_id='', rerank_mod="rerank_model",
+                               weights: Optional[dict] | None = None, term_weight_coefficient=1,
+                               metadata_filtering_conditions=[], knowledge_base_info={}):
+    """ knowledge_base_info: {"user_id1": [{ "kb_id": "","kb_name": ""}, { "kb_id": "","kb_name": ""}]}"""
     try:
         if search_field == 'emc':
             search_field = 'embedding_content'
@@ -503,7 +504,11 @@ def get_knowledge_based_answer(user_id, kb_names, question, rate, top_k, chunk_c
             response_info['data']["prompt"] = question
             response_info['data']["searchList"] = []
             return response_info
-        knowledge_base_info = {user_id: kb_names}
+        if knowledge_base_info:  # 整理格式
+            for user_id, kb_info_list in knowledge_base_info.items():
+                knowledge_base_info[user_id] = [kb_info["kb_name"] for kb_info in kb_info_list]
+        else:
+            knowledge_base_info = {user_id: kb_names}
         milvus_useful_list = []  # 后过滤有效的知识片段
         es_useful_list = []  # 后过滤有效的知识片段
         label_useful_list = []  # 后过滤有效的知识片段
