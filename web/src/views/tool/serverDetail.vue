@@ -305,7 +305,7 @@ export default {
       })
     },
     back() {
-      this.$router.push({path: '/tool?tabActive=0&tabActive2=1'})
+      this.$router.push({path: '/tool?type=mcp&mcp=server'})
     },
   },
 };

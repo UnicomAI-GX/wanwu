@@ -170,7 +170,7 @@ export default {
       })
     },
     back() {
-      this.$router.push({path: '/tool?tabActive=1'})
+      this.$router.push({path: '/tool?type=tool&mcp=builtIn'})
     },
   },
 };

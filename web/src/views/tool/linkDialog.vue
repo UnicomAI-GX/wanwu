@@ -160,7 +160,7 @@ export default {
     },
     goCreate() {
       if (this.activeValue === 'tool') {
-        this.$router.push({path: '/tool?tabActive=1&tabActive2=1'})
+        this.$router.push({path: '/tool?type=tool&mcp=custom'})
       }
     },
     createText() {
