@@ -8,12 +8,9 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-func Schema2ProtocolTool(ctx context.Context, schema, operationID string) (*protocol.Tool, error) {
-	doc, err := LoadFromData([]byte(schema))
+func Schema2ProtocolTool(ctx context.Context, schema []byte, operationID string) (*protocol.Tool, error) {
+	doc, err := LoadFromData(ctx, schema)
 	if err != nil {
-		return nil, err
-	}
-	if err := ValidateDoc(ctx, doc); err != nil {
 		return nil, err
 	}
 	return Doc2ProtocolTool(doc, operationID)

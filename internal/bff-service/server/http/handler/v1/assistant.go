@@ -99,8 +99,8 @@ func GetAssistantInfo(ctx *gin.Context) {
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Param			data		body		request.AssistantIdRequest	true	"智能体id"
-//	@Success		200			{object}	response.Response{data=response.AssistantCreateResp}
+//	@Param			data	body		request.AssistantIdRequest	true	"智能体id"
+//	@Success		200		{object}	response.Response{data=response.AssistantCreateResp}
 //	@Router			/assistant/copy [post]
 func AssistantCopy(ctx *gin.Context) {
 	userId, orgId := getUserID(ctx), getOrgID(ctx)

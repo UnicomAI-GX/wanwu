@@ -42,7 +42,7 @@ func GetCustomTool(ctx *gin.Context, userID, orgID string, customToolId string) 
 	if err != nil {
 		return nil, err
 	}
-	doc, err := openapi3_util.LoadFromData([]byte(info.Schema))
+	doc, err := openapi3_util.LoadFromData(ctx.Request.Context(), []byte(info.Schema))
 	if err != nil {
 		return nil, grpc_util.ErrorStatus(errs.Code_BFFGeneral, err.Error())
 	}
@@ -154,11 +154,8 @@ func GetCustomToolSelect(ctx *gin.Context, userID, orgID, name string) (*respons
 }
 
 func GetCustomToolActions(ctx *gin.Context, userID, orgID string, req request.CustomToolSchemaReq) (*response.ListResult, error) {
-	doc, err := openapi3_util.LoadFromData([]byte(req.Schema))
+	doc, err := openapi3_util.LoadFromData(ctx.Request.Context(), []byte(req.Schema))
 	if err != nil {
-		return nil, grpc_util.ErrorStatus(errs.Code_BFFInvalidArg, err.Error())
-	}
-	if err := openapi3_util.ValidateDoc(ctx.Request.Context(), doc); err != nil {
 		return nil, grpc_util.ErrorStatus(errs.Code_BFFInvalidArg, err.Error())
 	}
 	list := openapiSchema2ToolList(doc)

@@ -156,11 +156,8 @@ func customToolActions4Workflow(actions []response.CustomToolActionInfo) []respo
 }
 
 func openapiSchema2ToolActionInputsAndOutputs4Workflow(ctx context.Context, schema, operationID string) ([]interface{}, []interface{}, error) {
-	doc, err := openapi3_util.LoadFromData([]byte(schema))
+	doc, err := openapi3_util.LoadFromData(ctx, []byte(schema))
 	if err != nil {
-		return nil, nil, err
-	}
-	if err := openapi3_util.ValidateDoc(ctx, doc); err != nil {
 		return nil, nil, err
 	}
 	var exist bool

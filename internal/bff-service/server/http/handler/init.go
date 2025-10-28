@@ -52,6 +52,11 @@ func Start(ctx context.Context) {
 		log.Fatalf("init service err: %v", err)
 	}
 
+	// start mcp server
+	if err := service.StartMCPServer(ctx); err != nil {
+		log.Fatalf("start mcp server err: %v", err)
+	}
+
 	// start http server
 	httpServ = &http.Server{
 		Addr:    ":" + strconv.Itoa(config.Cfg().Server.Port),
