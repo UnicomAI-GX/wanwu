@@ -141,17 +141,24 @@ func genMcpToolHandler(doc *openapi3.T, auth *APIAuth, operationID string) serve
 			if param.Value == nil {
 				continue
 			}
+			field := param.Value.In + "-" + param.Value.Name
 			switch param.Value.In {
 			case "path":
-				pathParams[param.Value.Name] = params[param.Value.Name]
+				pathParams[param.Value.Name] = params[field]
 			case "query":
-				queryParams[param.Value.Name] = params[param.Value.Name]
+				queryParams[param.Value.Name] = params[field]
 			case "header":
-				headerParams[param.Value.Name] = params[param.Value.Name].(string)
+				headerParams[param.Value.Name] = params[field].(string)
 			}
 		}
-		if requestBodyMap, ok := params["requestBody"].(map[string]interface{}); ok {
-			bodyParams = requestBodyMap
+		if operation.RequestBody != nil && operation.RequestBody.Value != nil {
+			for _, mediaType := range operation.RequestBody.Value.Content {
+				if mediaType.Schema != nil && mediaType.Schema.Value != nil {
+					for propName := range mediaType.Schema.Value.Properties {
+						bodyParams[propName] = params[propName]
+					}
+				}
+			}
 		}
 
 		// auth

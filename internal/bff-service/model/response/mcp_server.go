@@ -32,3 +32,17 @@ type MCPServerToolInfo struct {
 	Name            string `json:"name"`            // 应用或工具名称
 	Desc            string `json:"desc"`            // 描述
 }
+
+// MCPServerCustomToolSelect MCP Server自定义工具选择列表
+type MCPServerCustomToolSelect struct {
+	UniqueId     string                   `json:"uniqueId"`     // 统一的id
+	CustomToolId string                   `json:"customToolId"` // 自定义工具id
+	Name         string                   `json:"name"`         // 名称
+	Description  string                   `json:"description"`  // 描述
+	Methods      []MCPServerCustomToolApi `json:"methods"`      // 方法
+}
+
+type MCPServerCustomToolApi struct {
+	MethodName  string `json:"methodName"`  // 方法名称
+	Description string `json:"description"` // 方法描述
+}
