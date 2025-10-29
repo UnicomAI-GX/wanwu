@@ -170,7 +170,7 @@ func UpdateToolSquareAPIKey(ctx *gin.Context) {
 	if !gin_util.Bind(ctx, &req) {
 		return
 	}
-	gin_util.Response(ctx, nil, service.UpdateToolSquareAPIKey(ctx, getUserID(ctx), getOrgID(ctx), req))
+	gin_util.Response(ctx, nil, service.UpsertBuiltinToolAPIKey(ctx, getUserID(ctx), getOrgID(ctx), req))
 }
 
 // GetToolSelect
@@ -181,7 +181,7 @@ func UpdateToolSquareAPIKey(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			name	query		string	true	"工具名"
-//	@Success		200		{object}	response.Response{data=response.ListResult{list=[]response.ToolActionList}}
+//	@Success		200		{object}	response.Response{data=response.ListResult{list=[]response.ToolSelect}}
 //	@Router			/tool/select [get]
 func GetToolSelect(ctx *gin.Context) {
 	resp, err := service.GetToolSelect(ctx, getUserID(ctx), getOrgID(ctx), ctx.Query("name"))
@@ -203,7 +203,8 @@ func GetToolActionList(ctx *gin.Context) {
 	if !gin_util.BindQuery(ctx, &req) {
 		return
 	}
-	// FIXME
+	resp, err := service.GetToolActionList(ctx, getUserID(ctx), getOrgID(ctx), req)
+	gin_util.Response(ctx, resp, err)
 }
 
 // GetToolActionDetail
@@ -221,7 +222,8 @@ func GetToolActionDetail(ctx *gin.Context) {
 	if !gin_util.BindQuery(ctx, &req) {
 		return
 	}
-	// FIXME
+	resp, err := service.GetToolActionDetail(ctx, getUserID(ctx), getOrgID(ctx), req)
+	gin_util.Response(ctx, resp, err)
 }
 
 // CreateMCPServer

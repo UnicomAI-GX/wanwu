@@ -3,11 +3,9 @@ package service
 import (
 	"strings"
 
-	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
 	mcp_service "github.com/UnicomAI/wanwu/api/proto/mcp-service"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/request"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/response"
-	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,41 +46,18 @@ func GetToolSquareList(ctx *gin.Context, userID, orgID, name string) (*response.
 	}, nil
 }
 
-func UpdateToolSquareAPIKey(ctx *gin.Context, userID, orgID string, req request.ToolSquareAPIKeyReq) error {
-	toolInfo, _ := mcp.GetCustomToolInfo(ctx.Request.Context(), &mcp_service.GetCustomToolInfoReq{
+func UpsertBuiltinToolAPIKey(ctx *gin.Context, userID, orgID string, req request.ToolSquareAPIKeyReq) error {
+	_, err := mcp.UpsertBuiltinToolAPIKey(ctx.Request.Context(), &mcp_service.UpsertBuiltinToolAPIKeyReq{
 		ToolSquareId: req.ToolSquareID,
+		ApiKey:       req.APIKey,
 		Identity: &mcp_service.Identity{
 			UserId: userID,
 			OrgId:  orgID,
 		},
 	})
-	if toolInfo == nil {
-		return grpc_util.ErrorStatus(errs.Code_MCPGetCustomToolInfoErr, "tool not found")
+	if err != nil {
+		return err
 	}
-	if toolInfo.ApiAuth.ApiKey == "" {
-		_, _ = mcp.CreateCustomTool(ctx.Request.Context(), &mcp_service.CreateCustomToolReq{
-			ToolSquareId: req.ToolSquareID,
-			ApiAuth: &mcp_service.ApiAuthWebRequest{
-				ApiKey: req.APIKey,
-			},
-			Identity: &mcp_service.Identity{
-				UserId: userID,
-				OrgId:  orgID,
-			},
-		})
-	}
-	if toolInfo.CustomToolId != "" {
-		_, err := mcp.UpdateCustomTool(ctx.Request.Context(), &mcp_service.UpdateCustomToolReq{
-			CustomToolId: toolInfo.CustomToolId,
-			ApiAuth: &mcp_service.ApiAuthWebRequest{
-				ApiKey: req.APIKey,
-			},
-		})
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 

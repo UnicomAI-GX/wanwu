@@ -57,7 +57,7 @@ func registerCommon(apiV1 *gin.RouterGroup) {
 	mid.Sub("common").Reg(apiV1, "/appspace/app/key/list", http.MethodGet, v1.GetApiKeyList, "获取ApiKey列表")
 
 	// MCP通用
-	mid.Sub("common").Reg(apiV1, "/mcp/select", http.MethodGet, v1.GetMCPSelect, "获取MCP自定义列表")
+	//mid.Sub("common").Reg(apiV1, "/mcp/select", http.MethodGet, v1.GetMCPSelect, "获取MCP自定义列表")
 
 	// Safety通用
 	mid.Sub("common").Reg(apiV1, "/safe/sensitive/table/select", http.MethodGet, v1.GetSensitiveWordTableSelect, "获取敏感词表下拉列表")

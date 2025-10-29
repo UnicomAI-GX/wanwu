@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"github.com/UnicomAI/wanwu/pkg/constant"
 	"strings"
 
 	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
@@ -39,83 +40,11 @@ func (s *Service) CreateCustomTool(ctx context.Context, req *mcp_service.CreateC
 }
 
 func (s *Service) GetCustomToolInfo(ctx context.Context, req *mcp_service.GetCustomToolInfoReq) (*mcp_service.GetCustomToolInfoResp, error) {
-	if req.CustomToolId == "" && req.ToolSquareId == "" {
-		return nil, errStatus(errs.Code_MCPGetCustomToolInfoErr, toErrStatus("mcp_get_custom_tool_info_err", "customToolId and toolSquareId are empty"))
-	}
-	// 自定义工具详情（智能体、前端调用）
-	if req.CustomToolId != "" && req.ToolSquareId == "" {
-		info, err := s.cli.GetCustomTool(ctx, &model.CustomTool{
-			ID: util.MustU32(req.CustomToolId),
-		})
-		if err != nil {
-			return nil, errStatus(errs.Code_MCPGetCustomToolInfoErr, err)
-		}
-		return &mcp_service.GetCustomToolInfoResp{
-			CustomToolId:  util.Int2Str(info.ID),
-			Name:          info.Name,
-			Description:   info.Description,
-			Schema:        info.Schema,
-			PrivacyPolicy: info.PrivacyPolicy,
-			ApiAuth: &mcp_service.ApiAuthWebRequest{
-				Type:             info.Type,
-				ApiKey:           info.APIKey,
-				AuthType:         info.AuthType,
-				CustomHeaderName: info.CustomHeaderName,
-			},
-		}, nil
-	}
-
-	// 内置工具详情（智能体调用）
-	if req.CustomToolId == "" && req.ToolSquareId != "" && req.Identity != nil {
-		toolCfg, exist := config.Cfg().Tool(req.ToolSquareId)
-		if !exist {
-			return nil, errStatus(errs.Code_MCPGetSquareToolErr, toErrStatus("mcp_get_square_tool_err", "toolSquareId not exist"))
-		}
-		toolInfo := &mcp_service.GetCustomToolInfoResp{
-			ToolSquareId: toolCfg.ToolSquareId,
-			Name:         toolCfg.Name,
-			Description:  toolCfg.Desc,
-			Schema:       toolCfg.Schema,
-		}
-		if toolCfg.NeedApiKeyInput {
-			info, _ := s.cli.GetCustomTool(ctx, &model.CustomTool{
-				ToolSquareId: req.ToolSquareId,
-				UserID:       req.Identity.UserId,
-				OrgID:        req.Identity.OrgId,
-			})
-			if info != nil {
-				toolInfo.CustomToolId = util.Int2Str(info.ID)
-				toolInfo.ApiAuth = &mcp_service.ApiAuthWebRequest{
-					Type:             info.Type,
-					ApiKey:           info.APIKey,
-					AuthType:         info.AuthType,
-					CustomHeaderName: info.CustomHeaderName,
-				}
-			} else {
-				//如果没配置过，返回配置数据。
-				toolInfo.ApiAuth = &mcp_service.ApiAuthWebRequest{
-					Type:             toolCfg.Type,
-					ApiKey:           toolCfg.ApiKey,
-					AuthType:         toolCfg.AuthType,
-					CustomHeaderName: toolCfg.CustomHeaderName,
-				}
-			}
-			return toolInfo, nil
-		} else {
-			toolInfo.ApiAuth = &mcp_service.ApiAuthWebRequest{
-				Type:             toolCfg.Type,
-				ApiKey:           toolCfg.ApiKey,
-				AuthType:         toolCfg.AuthType,
-				CustomHeaderName: toolCfg.CustomHeaderName,
-			}
-			return toolInfo, nil
-		}
+	if req.CustomToolId == "" {
+		return nil, errStatus(errs.Code_MCPGetCustomToolInfoErr, toErrStatus("mcp_get_custom_tool_info_err", "customToolId is empty"))
 	}
 	info, err := s.cli.GetCustomTool(ctx, &model.CustomTool{
-		ID:           util.MustU32(req.CustomToolId),
-		ToolSquareId: req.ToolSquareId,
-		UserID:       req.Identity.UserId,
-		OrgID:        req.Identity.OrgId,
+		ID: util.MustU32(req.CustomToolId),
 	})
 	if err != nil {
 		return nil, grpc_util.ErrorStatus(errs.Code_MCPGetCustomToolInfoErr)
@@ -225,10 +154,10 @@ func (s *Service) GetSquareTool(ctx context.Context, req *mcp_service.GetSquareT
 	}
 	apiKey := ""
 	if mcpCfg.NeedApiKeyInput {
-		info, _ := s.cli.GetCustomTool(ctx, &model.CustomTool{
+		info, _ := s.cli.GetBuiltinTool(ctx, &model.CustomTool{
 			ToolSquareId: req.ToolSquareId,
-			UserID:       req.Identity.UserId,
 			OrgID:        req.Identity.OrgId,
+			UserID:       req.Identity.UserId,
 		})
 		if info != nil {
 			apiKey = info.APIKey
@@ -270,4 +199,130 @@ func buildSquareToolDetail(toolCfg config.ToolConfig, apiKey string) *mcp_servic
 		},
 		Schema: toolCfg.Schema,
 	}
+}
+
+func (s *Service) GetToolByIdList(ctx context.Context, req *mcp_service.GetToolByToolIdListReq) (*mcp_service.GetToolByToolIdListResp, error) {
+	// 内置工具
+	var toolSquareInfo []*mcp_service.ToolSquareInfo
+	for _, toolCfg := range config.Cfg().Tools {
+		for _, builtInTool := range req.BuiltInToolIdList {
+			if builtInTool != "" && !strings.Contains(toolCfg.Name, builtInTool) {
+				toolSquareInfo = append(toolSquareInfo, buildSquareToolInfo(*toolCfg))
+			}
+		}
+	}
+	// 自定义工具
+	var ids []uint32
+	for _, idStr := range req.CustomToolIdList {
+		id := util.MustU32(idStr)
+		ids = append(ids, id)
+	}
+
+	infos, err := s.cli.ListCustomToolsByCustomToolIDs(ctx, ids)
+	if err != nil {
+		return nil, errStatus(errs.Code_MCPGetCustomToolListErr, err)
+	}
+	list := make([]*mcp_service.GetCustomToolItem, 0)
+	for _, info := range infos {
+		list = append(list, &mcp_service.GetCustomToolItem{
+			CustomToolId: util.Int2Str(info.ID),
+			Name:         info.Name,
+			Description:  info.Description,
+		})
+	}
+	return &mcp_service.GetToolByToolIdListResp{
+		List:               list,
+		ToolSquareInfoList: toolSquareInfo,
+	}, nil
+}
+
+func (s *Service) UpsertBuiltinToolAPIKey(ctx context.Context, req *mcp_service.UpsertBuiltinToolAPIKeyReq) (*emptypb.Empty, error) {
+
+	if req.Identity == nil {
+		return nil, errStatus(errs.Code_MCPUpdateCustomToolErr, toErrStatus("mcp_update_custom_tool_err", "identity is empty"))
+	}
+	info, _ := s.cli.GetBuiltinTool(ctx, &model.CustomTool{
+		ToolSquareId: req.ToolSquareId,
+		OrgID:        req.Identity.OrgId,
+		UserID:       req.Identity.UserId,
+	})
+	if info != nil {
+		// update
+		if err := s.cli.UpdateCustomTool(ctx, &model.CustomTool{
+			ID:     info.ID,
+			APIKey: req.ApiKey,
+		}); err != nil {
+			return nil, errStatus(errs.Code_MCPUpdateCustomToolErr, err)
+		}
+		return &emptypb.Empty{}, nil
+	} else {
+		// create
+		if err := s.cli.CreateCustomTool(ctx, &model.CustomTool{
+			ToolSquareId: req.ToolSquareId,
+			APIKey:       req.ApiKey,
+			UserID:       req.Identity.UserId,
+			OrgID:        req.Identity.OrgId,
+		}); err != nil {
+			return nil, errStatus(errs.Code_MCPUpdateCustomToolErr, err)
+		}
+	}
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Service) GetToolSelect(ctx context.Context, req *mcp_service.GetToolSelectReq) (*mcp_service.GetToolListResp, error) {
+	if req.Identity == nil {
+		return nil, errStatus(errs.Code_MCPGetCustomToolListErr, toErrStatus("mcp_get_custom_tool_list_err", "identity is empty"))
+	}
+	// search custom tools
+	infos, err := s.cli.ListCustomTools(ctx, req.Identity.OrgId, req.Identity.UserId, req.Name)
+	if err != nil {
+		return nil, errStatus(errs.Code_MCPGetCustomToolListErr, err)
+	}
+	list := make([]*mcp_service.GetToolItem, 0)
+	for _, info := range infos {
+		needApiKeyInput := true
+		if info.Type == model.ApiAuthNone {
+			needApiKeyInput = false
+		}
+		list = append(list, &mcp_service.GetToolItem{
+			ToolId:          util.Int2Str(info.ID),
+			ToolName:        info.Name,
+			Desc:            info.Description,
+			ToolType:        constant.ToolTypeCustom,
+			ApiKey:          info.APIKey,
+			NeedApiKeyInput: needApiKeyInput,
+		})
+	}
+	// search builtin tools
+	// 先把该用户所有已配置apikey内置工具查出来，构造成map<ToolSquareId, *model.CustomTool>，然后通过ToolSquareId查询apikey
+	builtinTools, err := s.cli.ListBuiltinTools(ctx, req.Identity.OrgId, req.Identity.UserId)
+	if err != nil {
+		return nil, errStatus(errs.Code_MCPGetCustomToolListErr, err)
+	}
+	builtinToolMap := make(map[string]*model.CustomTool)
+	for _, tool := range builtinTools {
+		builtinToolMap[tool.ToolSquareId] = tool
+	}
+
+	for _, toolCfg := range config.Cfg().Tools {
+		if req.Name != "" && !strings.Contains(toolCfg.Name, req.Name) {
+			continue
+		}
+		toolTab := &mcp_service.GetToolItem{
+			ToolId:          toolCfg.ToolSquareId,
+			ToolName:        toolCfg.Name,
+			Desc:            toolCfg.Desc,
+			ToolType:        constant.ToolTypeBuiltIn,
+			NeedApiKeyInput: toolCfg.NeedApiKeyInput,
+		}
+		// 从map中查询内置工具
+		if tool, ok := builtinToolMap[toolCfg.ToolSquareId]; ok {
+			toolTab.ApiKey = tool.APIKey
+		}
+		list = append(list, toolTab)
+	}
+	return &mcp_service.GetToolListResp{
+		List:  list,
+		Total: int32(len(list)),
+	}, nil
 }

@@ -183,7 +183,7 @@ func AssistantWorkFlowEnableSwitch(ctx *gin.Context) {
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Param			data	body		request.AssistantMCPToolAddRequest	true	"mcp新增参数"
+//	@Param			data	body		request.AssistantMCPToolAddRequest	true	"mcp工具id、mcp类型、智能体id"
 //	@Success		200		{object}	response.Response
 //	@Router			/assistant/tool/mcp [post]
 func AssistantMCPCreate(ctx *gin.Context) {
@@ -204,7 +204,7 @@ func AssistantMCPCreate(ctx *gin.Context) {
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Param			data	body		request.AssistantMCPToolDelRequest	true	"mcp工具id，智能体id"
+//	@Param			data	body		request.AssistantMCPToolDelRequest	true	"mcp工具id、mcp类型、智能体id"
 //	@Success		200		{object}	response.Response
 //	@Router			/assistant/tool/mcp [delete]
 func AssistantMCPDelete(ctx *gin.Context) {
@@ -225,7 +225,7 @@ func AssistantMCPDelete(ctx *gin.Context) {
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Param			data	body		request.AssistantMCPToolEnableRequest	true	"mcp工具id、智能体id、enable"
+//	@Param			data	body		request.AssistantMCPToolEnableRequest	true	"mcp工具id、mcp类型、智能体id、enable"
 //	@Success		200		{object}	response.Response
 //	@Router			/assistant/tool/mcp/switch [put]
 func AssistantMCPEnableSwitch(ctx *gin.Context) {
@@ -238,66 +238,66 @@ func AssistantMCPEnableSwitch(ctx *gin.Context) {
 	gin_util.Response(ctx, nil, err)
 }
 
-// AssistantCustomToolCreate
+// AssistantToolCreate
 //
 //	@Tags			agent
-//	@Summary		添加自定义工具
-//	@Description	为智能体绑定自定义工具
+//	@Summary		添加自定义、内建工具
+//	@Description	为智能体绑定自定义、内建工具
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Param			data	body		request.AssistantCustomToolAddRequest	true	"自定义工具新增参数"
+//	@Param			data	body		request.AssistantToolAddRequest	true	"自定义、内建工具新增参数"
 //	@Success		200		{object}	response.Response
-//	@Router			/assistant/tool/custom [post]
-func AssistantCustomToolCreate(ctx *gin.Context) {
+//	@Router			/assistant/tool [post]
+func AssistantToolCreate(ctx *gin.Context) {
 	userId, orgId := getUserID(ctx), getOrgID(ctx)
-	var req request.AssistantCustomToolAddRequest
+	var req request.AssistantToolAddRequest
 	if !gin_util.Bind(ctx, &req) {
 		return
 	}
-	err := service.AssistantCustomToolCreate(ctx, userId, orgId, req)
+	err := service.AssistantToolCreate(ctx, userId, orgId, req)
 	gin_util.Response(ctx, nil, err)
 }
 
-// AssistantCustomToolDelete
+// AssistantToolDelete
 //
 //	@Tags			agent
-//	@Summary		删除自定义工具
-//	@Description	为智能体解绑自定义工具
+//	@Summary		删除自定义、内建工具
+//	@Description	为智能体解绑自定义、内建工具
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Param			data	body		request.AssistantCustomToolDelRequest	true	"智能体id与自定义工具id"
+//	@Param			data	body		request.AssistantToolDelRequest	true	"智能体id与自定义、内建工具id"
 //	@Success		200		{object}	response.Response
-//	@Router			/assistant/tool/custom [delete]
-func AssistantCustomToolDelete(ctx *gin.Context) {
+//	@Router			/assistant/tool [delete]
+func AssistantToolDelete(ctx *gin.Context) {
 	userId, orgId := getUserID(ctx), getOrgID(ctx)
-	var req request.AssistantCustomToolDelRequest
+	var req request.AssistantToolDelRequest
 	if !gin_util.Bind(ctx, &req) {
 		return
 	}
-	err := service.AssistantCustomToolDelete(ctx, userId, orgId, req)
+	err := service.AssistantToolDelete(ctx, userId, orgId, req)
 	gin_util.Response(ctx, nil, err)
 }
 
-// AssistantCustomToolEnableSwitch
+// AssistantToolEnableSwitch
 //
 //	@Tags			agent
-//	@Summary		启用/停用自定义工具
-//	@Description	修改智能体绑定的自定义工具的启用状态
+//	@Summary		启用/停用自定义、内建工具
+//	@Description	修改智能体绑定的自定义、内建工具的启用状态
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Param			data	body		request.AssistantCustomToolEnableRequest	true	"智能体id与自定义工具id"
+//	@Param			data	body		request.AssistantToolEnableRequest	true	"智能体id与自定义、内建工具id"
 //	@Success		200		{object}	response.Response
-//	@Router			/assistant/tool/custom/switch [put]
-func AssistantCustomToolEnableSwitch(ctx *gin.Context) {
+//	@Router			/assistant/tool/switch [put]
+func AssistantToolEnableSwitch(ctx *gin.Context) {
 	userId, orgId := getUserID(ctx), getOrgID(ctx)
-	var req request.AssistantCustomToolEnableRequest
+	var req request.AssistantToolEnableRequest
 	if !gin_util.Bind(ctx, &req) {
 		return
 	}
-	err := service.AssistantCustomToolEnableSwitch(ctx, userId, orgId, req)
+	err := service.AssistantToolEnableSwitch(ctx, userId, orgId, req)
 	gin_util.Response(ctx, nil, err)
 }
 

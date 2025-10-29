@@ -10,10 +10,13 @@ type MCPSelect struct {
 	MCPID       string `json:"mcpId"`       // mcpId
 	MCPSquareID string `json:"mcpSquareId"` // 广场mcpId(非空表示来源于广场)
 	Name        string `json:"name"`        // 名称
-	Description string `json:"description"` // 描述
-	ServerFrom  string `json:"serverFrom"`  // 来源
-	ServerURL   string `json:"serverUrl"`   // sseUrl
-	Type        string `json:"type"`        // mcp类型, 导入mcp: mcp;创建mcp: mcpserver
+	Type        string `json:"type"`
+	ToolId      string `json:"toolId"`                                           // 工具id
+	ToolName    string `json:"toolName"`                                         // 工具名称
+	ToolType    string `json:"toolType" validate:"required,oneof=mcp mcpserver"` // 工具类型
+	Description string `json:"description"`                                      // 描述
+	ServerFrom  string `json:"serverFrom"`                                       // 来源
+	ServerURL   string `json:"serverUrl"`                                        // sseUrl
 }
 
 type MCPToolList struct {
@@ -62,4 +65,8 @@ type MCPActions struct {
 	SSEURL    string           `json:"sseUrl"`    // SSE URL
 	Tools     []*protocol.Tool `json:"tools"`     // 工具列表
 	HasCustom bool             `json:"hasCustom"` // 是否已经发送到自定义
+}
+
+type MCPActionList struct {
+	Actions []*protocol.Tool `json:"actions"`
 }

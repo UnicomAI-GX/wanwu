@@ -138,6 +138,22 @@ func GetMCPList(ctx *gin.Context) {
 	gin_util.Response(ctx, resp, err)
 }
 
+// GetMCPTools
+//
+//	@Tags			mcp
+//	@Summary		获取MCP Tool列表
+//	@Description	获取MCP Tool列表
+//	@Accept			json
+//	@Produce		json
+//	@Param			mcpId		query		string	false	"mcpId(和serverUrl传一个)"
+//	@Param			serverUrl	query		string	false	"serverUrl,就是sseUrl(和mcpId传一个)"
+//	@Success		200			{object}	response.Response{data=response.MCPToolList}
+//	@Router			/mcp/tool/list [get]
+func GetMCPTools(ctx *gin.Context) {
+	resp, err := service.GetMCPToolList(ctx, ctx.Query("mcpId"), ctx.Query("serverUrl"))
+	gin_util.Response(ctx, resp, err)
+}
+
 // GetMCPSelect
 //
 //	@Tags			mcp
@@ -153,18 +169,21 @@ func GetMCPSelect(ctx *gin.Context) {
 	gin_util.Response(ctx, resp, err)
 }
 
-// GetMCPTools
+// GetMCPActionList
 //
 //	@Tags			mcp
-//	@Summary		获取MCP Tool列表
-//	@Description	获取MCP Tool列表
+//	@Summary		获取MCP Action列表
+//	@Description	获取MCP Action列表
 //	@Accept			json
 //	@Produce		json
-//	@Param			mcpId		query		string	false	"mcpId(和serverUrl传一个)"
-//	@Param			serverUrl	query		string	false	"serverUrl,就是sseUrl(和mcpId传一个)"
-//	@Success		200			{object}	response.Response{data=response.MCPToolList}
-//	@Router			/mcp/tool/list [get]
-func GetMCPTools(ctx *gin.Context) {
-	resp, err := service.GetMCPToolList(ctx, ctx.Query("mcpId"), ctx.Query("serverUrl"))
+//	@Param			data	query		request.MCPActionListReq	true	"mcp信息"
+//	@Success		200		{object}	response.Response{data=response.MCPActionList}
+//	@Router			/mcp/action/list [get]
+func GetMCPActionList(ctx *gin.Context) {
+	var req request.MCPActionListReq
+	if !gin_util.BindQuery(ctx, &req) {
+		return
+	}
+	resp, err := service.GetMCPActionList(ctx, getUserID(ctx), getOrgID(ctx), req)
 	gin_util.Response(ctx, resp, err)
 }

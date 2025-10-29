@@ -60,7 +60,7 @@ func (c *Client) DeleteAssistant(ctx context.Context, assistantID uint32) *err_c
 		if err := sqlopt.WithAssistantID(assistantID).Apply(tx).Delete(&model.AssistantMCP{}).Error; err != nil {
 			return toErrStatus("assistant_delete", err.Error())
 		}
-		if err := sqlopt.WithAssistantID(assistantID).Apply(tx).Delete(&model.AssistantCustom{}).Error; err != nil {
+		if err := sqlopt.WithAssistantID(assistantID).Apply(tx).Delete(&model.AssistantTool{}).Error; err != nil {
 			return toErrStatus("assistant_delete", err.Error())
 		}
 		return nil
@@ -138,7 +138,7 @@ func (c *Client) CheckSameAssistantName(ctx context.Context, userID, orgID, name
 	})
 }
 
-func (c *Client) CopyAssistant(ctx context.Context, assistant *model.Assistant, workflows []*model.AssistantWorkflow, mcps []*model.AssistantMCP, customTools []*model.AssistantCustom) (uint32, *err_code.Status) {
+func (c *Client) CopyAssistant(ctx context.Context, assistant *model.Assistant, workflows []*model.AssistantWorkflow, mcps []*model.AssistantMCP, customTools []*model.AssistantTool) (uint32, *err_code.Status) {
 	// 智能体名称前缀
 	prefix := assistant.Name + "_"
 
@@ -198,11 +198,11 @@ func (c *Client) CopyAssistant(ctx context.Context, assistant *model.Assistant, 
 		}
 
 		// 复制并保存新智能体自定义工具
-		for _, customTool := range customTools {
-			customTool.ID = 0
-			customTool.AssistantId = newAssistantId
-			if err = tx.Create(&customTool).Error; err != nil {
-				return toErrStatus("assistant_custom_tool_create", err.Error())
+		for _, tool := range customTools {
+			tool.ID = 0
+			tool.AssistantId = newAssistantId
+			if err = tx.Create(&tool).Error; err != nil {
+				return toErrStatus("assistant_tool_create", err.Error())
 			}
 		}
 		return nil

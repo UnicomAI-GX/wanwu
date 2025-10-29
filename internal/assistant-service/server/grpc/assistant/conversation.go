@@ -22,12 +22,13 @@ import (
 	mcp_service "github.com/UnicomAI/wanwu/api/proto/mcp-service"
 	"github.com/UnicomAI/wanwu/internal/assistant-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/assistant-service/config"
-	"github.com/UnicomAI/wanwu/internal/assistant-service/pkg/util"
+	"github.com/UnicomAI/wanwu/pkg/constant"
 	"github.com/UnicomAI/wanwu/pkg/es"
 	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	http_client "github.com/UnicomAI/wanwu/pkg/http-client"
 	"github.com/UnicomAI/wanwu/pkg/log"
 	mp "github.com/UnicomAI/wanwu/pkg/model-provider"
+	openapi3_util "github.com/UnicomAI/wanwu/pkg/openapi3-util"
 	pkgUtil "github.com/UnicomAI/wanwu/pkg/util"
 
 	"github.com/google/uuid"
@@ -263,7 +264,7 @@ func (s *Service) AssistantConversionStream(req *assistant_service.AssistantConv
 	}
 
 	// plugin参数配置
-	if err = s.setCustomAndWorkflowParams(ctx, sseReq, req.AssistantId); err != nil {
+	if err := s.setToolAndWorkflowParams(ctx, sseReq, req.AssistantId); err != nil {
 		SSEError(stream, "智能体plugin配置错误")
 		saveConversation(ctx, req, "智能体plugin配置错误", "")
 		return grpc_util.ErrorStatusWithKey(errs.Code_AssistantConversationErr, "assistant_conversation", "plugin配置错误")
@@ -535,11 +536,11 @@ func (s *Service) setKnowledgebaseParams(ctx context.Context, sseReq *config.Age
 	return nil
 }
 
-// 设置plugin参数：自定义工具和工作流
-func (s *Service) setCustomAndWorkflowParams(ctx context.Context, sseReq *config.AgentSSERequest, assistantId string) error {
-	customPluginList, err := buildCustomToolListAlgParam(ctx, s, assistantId)
+// 设置工具（自定义工具、内置工具与工作流）
+func (s *Service) setToolAndWorkflowParams(ctx context.Context, sseReq *config.AgentSSERequest, assistantId string) error {
+	toolPluginList, err := buildToolPluginListAlgParam(ctx, s, assistantId)
 	if err != nil {
-		return fmt.Errorf("智能体custom配置错误: %w", err)
+		return fmt.Errorf("智能体tool配置错误: %w", err)
 	}
 
 	workflowPluginList, err := buildWorkflowPluginListAlgParam(ctx, s, assistantId)
@@ -548,9 +549,9 @@ func (s *Service) setCustomAndWorkflowParams(ctx context.Context, sseReq *config
 	}
 
 	log.Debugf("智能体workflow配置，assistantId: %s, workflowPluginList: %s", assistantId, workflowPluginList)
-	allPlugin := append(customPluginList, workflowPluginList...)
+	allPlugin := append(toolPluginList, workflowPluginList...)
 	sseReq.PluginList = allPlugin
-	log.Debugf("智能体custom_plugin_list，assistantId: %s, custom_plugin_list: %s", assistantId, allPlugin)
+	log.Debugf("智能体tool_plugin_list，assistantId: %s, tool_plugin_list: %s", assistantId, allPlugin)
 	return nil
 }
 
@@ -585,24 +586,43 @@ func (s *Service) setMCPParams(ctx context.Context, sseReq *config.AgentSSEReque
 	}
 
 	mcpTools := make(map[string]config.MCPToolInfo)
-	for _, m := range mcpInfos {
-		if !m.Enable {
+	for _, mcp := range mcpInfos {
+		if !mcp.Enable {
 			continue
 		}
-		mcpCustom, err := MCP.GetCustomMCP(ctx, &mcp_service.GetCustomMCPReq{
-			McpId: m.MCPId,
-		})
-		if err != nil {
-			log.Errorf("Assistant服务获取MCP Custom信息失败，assistantId: %d, error: %v", assistant.ID, err)
-			// 单个MCP获取失败不影响整体流程
-			continue
-		}
-		mcpTools[mcpCustom.Info.Name] = config.MCPToolInfo{
-			URL:       mcpCustom.SseUrl,
-			Transport: "sse",
+
+		switch mcp.MCPType {
+		case constant.MCPTypeMCP:
+			mcpCustom, err := MCP.GetCustomMCP(ctx, &mcp_service.GetCustomMCPReq{
+				McpId: mcp.MCPId,
+			})
+			if err != nil {
+				log.Errorf("Assistant服务获取MCP Custom信息失败，assistantId: %d, error: %v", assistant.ID, err)
+				continue
+			}
+			mcpTools[mcpCustom.Info.Name] = config.MCPToolInfo{
+				URL:       mcpCustom.SseUrl,
+				Transport: "sse",
+			}
+			sseReq.McpTools = mcpTools
+			sseReq.ToolName = append(sseReq.ToolName, mcpCustom.Info.Name)
+		case constant.MCPTypeMCPServer:
+			mcpServer, err := MCP.GetMCPServer(ctx, &mcp_service.GetMCPServerReq{
+				McpServerId: mcp.MCPId,
+			})
+			if err != nil {
+				log.Errorf("Assistant服务获取MCP Server信息失败，assistantId: %d, error: %v", assistant.ID, err)
+				continue
+			}
+			mcpTools[mcpServer.Name] = config.MCPToolInfo{
+				URL:       mcpServer.SseUrl,
+				Transport: "sse",
+			}
+			sseReq.McpTools = mcpTools
+			sseReq.ToolName = append(sseReq.ToolName, mcpServer.Name)
 		}
 	}
-	sseReq.McpTools = mcpTools
+
 	return nil
 }
 
@@ -836,7 +856,7 @@ func buildWorkflowPluginListAlgParam(ctx context.Context, s *Service, assistantI
 			return nil, err
 		}
 		//校验schema
-		if _, err := util.ValidateOpenAPISchema(string(schemaByte)); err != nil {
+		if err := openapi3_util.ValidateSchema(ctx, schemaByte); err != nil {
 			return nil, err
 		}
 		pluginList = append(pluginList, config.PluginListAlgRequest{APISchema: schema})
@@ -845,56 +865,120 @@ func buildWorkflowPluginListAlgParam(ctx context.Context, s *Service, assistantI
 	return pluginList, nil
 }
 
-func buildCustomToolListAlgParam(ctx context.Context, s *Service, assistantId string) (pluginList []config.PluginListAlgRequest, err error) {
-	pluginList = []config.PluginListAlgRequest{}
-	// 获取自定义工具列表
+func buildToolPluginListAlgParam(ctx context.Context, s *Service, assistantId string) (pluginList []config.PluginListAlgRequest, err error) {
+	// 转换assistantId
 	assistantIdConv := pkgUtil.MustU32(assistantId)
-	resp, status := s.cli.GetAssistantCustomList(ctx, assistantIdConv)
+	resp, status := s.cli.GetAssistantToolList(ctx, assistantIdConv)
 	if status != nil {
 		return pluginList, errStatus(errs.Code_AssistantConversationErr, status)
 	}
-	for _, assistantCustomTool := range resp {
-		if !assistantCustomTool.Enable {
-			continue
+
+	// 遍历工具列表，处理每个有效工具
+	for _, tool := range resp {
+		if !tool.Enable {
+			continue // 跳过禁用的工具
 		}
-		tmp := config.PluginListAlgRequest{}
-		// 获取自定义工具详情
-		info, err := MCP.GetCustomToolInfo(ctx, &mcp_service.GetCustomToolInfoReq{
-			CustomToolId: assistantCustomTool.CustomId,
-		})
-		if err != nil {
-			//return pluginList, err
-			log.Infof("Assistant服务获取CustomTool信息失败，assistantId: %s,error: %v", assistantId, err)
-			continue
+
+		var rawSchema string        // 原始schema字符串
+		var apiAuth *config.APIAuth // API认证信息
+
+		// 根据工具类型获取详情和原始schema
+		switch tool.ToolType {
+		case constant.ToolTypeCustom:
+			// 获取自定义工具详情
+			customTool, err := MCP.GetCustomToolInfo(ctx, &mcp_service.GetCustomToolInfoReq{
+				CustomToolId: tool.ToolId,
+			})
+			if err != nil {
+				log.Infof("获取自定义工具信息失败，assistantId: %s, toolId: %s, err: %v", assistantId, tool.ToolId, err)
+				continue
+			}
+			rawSchema = customTool.Schema
+
+			// 构建自定义工具的API认证
+			if customTool.ApiAuth != nil {
+				apiAuth = convertToolApiAuth(customTool.ApiAuth)
+			}
+		case constant.ToolTypeBuiltIn:
+			// 获取内置工具详情
+			builtinTool, err := MCP.GetSquareTool(ctx, &mcp_service.GetSquareToolReq{
+				ToolSquareId: tool.ToolId,
+			})
+			if err != nil {
+				log.Infof("获取内置工具信息失败，assistantId: %s, toolId: %s, err: %v", assistantId, tool.ToolId, err)
+				continue
+			}
+			rawSchema = builtinTool.Schema
+
+			// 构建内置工具的API认证
+			if builtinTool.BuiltInTools.ApiKey != "" {
+				apiAuth = &config.APIAuth{
+					Type:  "apiKey",
+					In:    "header",
+					Name:  "Authorization",
+					Value: fmt.Sprintf("Bearer %s", builtinTool.BuiltInTools.ApiKey),
+				}
+			}
 		}
-		schema, err := util.ValidateOpenAPISchema(info.Schema)
-		if err != nil {
-			return pluginList, err
-		}
-		// 将*openapi3.T转换为map[string]interface{}
-		bytes, err := json.Marshal(schema)
-		if err != nil {
-			return pluginList, err
-		}
-		err = json.Unmarshal(bytes, &tmp.APISchema)
+
+		// 处理schema
+		apiSchema, err := processSchema(ctx, rawSchema, tool.ActionName)
 		if err != nil {
 			return pluginList, err
 		}
 
-		if info.ApiAuth.Type == "API Key" {
-			apiAuth := config.APIAuth{
-				Type:  "apiKey",
-				In:    "query",
-				Name:  info.ApiAuth.CustomHeaderName,
-				Value: info.ApiAuth.ApiKey,
-			}
-			tmp.APIAuth = &apiAuth
-		}
-		//TODO 适配 assistantActionModel.Type ==None情况
-		pluginList = append(pluginList, tmp)
+		pluginList = append(pluginList, config.PluginListAlgRequest{
+			APISchema: apiSchema,
+			APIAuth:   apiAuth,
+		})
 	}
 
 	return pluginList, nil
+}
+
+func convertToolApiAuth(auth *mcp_service.ApiAuthWebRequest) *config.APIAuth {
+	ret := &config.APIAuth{}
+	if auth != nil && auth.Type != "" && auth.Type != "None" {
+		ret.Type = "apiKey"
+		ret.In = "query"
+		if auth.AuthType == "Custom" {
+			if auth.CustomHeaderName != "" {
+				ret.Name = auth.CustomHeaderName
+				ret.Value = auth.ApiKey
+			}
+		} else {
+			ret.Name = "Authorization"
+			ret.Value = "Bearer " + auth.ApiKey
+		}
+	}
+	return ret
+}
+
+func processSchema(ctx context.Context, rawSchema string, actionName string) (map[string]interface{}, error) {
+	// 过滤schema中的指定operation_id
+	filteredSchema, err := openapi3_util.FilterSchemaOperations(ctx, []byte(rawSchema), []string{actionName})
+	if err != nil {
+		return nil, err
+	}
+
+	// 校验schema格式
+	validatedSchema, err := openapi3_util.LoadFromData(ctx, filteredSchema)
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换为map[string]interface{}
+	schemaBytes, err := json.Marshal(validatedSchema)
+	if err != nil {
+		return nil, err
+	}
+
+	var apiSchema map[string]interface{}
+	if err := json.Unmarshal(schemaBytes, &apiSchema); err != nil {
+		return nil, err
+	}
+
+	return apiSchema, nil
 }
 
 // SSEError 发送SSE错误响应

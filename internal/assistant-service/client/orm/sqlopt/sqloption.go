@@ -86,9 +86,33 @@ func WithCustomID(customId string) SQLOption {
 	})
 }
 
+func WithToolId(toolId string) SQLOption {
+	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
+		return db.Where("tool_id = ?", toolId)
+	})
+}
+
+func WithToolType(toolType string) SQLOption {
+	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
+		return db.Where("tool_type = ?", toolType)
+	})
+}
+
+func WithActionName(actionName string) SQLOption {
+	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
+		return db.Where("action_name = ?", actionName)
+	})
+}
+
 func WithMCPID(mcpId string) SQLOption {
 	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
 		return db.Where("mcp_id = ?", mcpId)
+	})
+}
+
+func WithMCPType(mcpType string) SQLOption {
+	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
+		return db.Where("mcp_type = ?", mcpType)
 	})
 }
 

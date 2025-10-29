@@ -11,6 +11,7 @@ import (
 	mcp_service "github.com/UnicomAI/wanwu/api/proto/mcp-service"
 	"github.com/UnicomAI/wanwu/internal/mcp-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/mcp-service/config"
+	"github.com/UnicomAI/wanwu/pkg/constant"
 	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	"github.com/UnicomAI/wanwu/pkg/util"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -97,8 +98,8 @@ func (s *Service) GetCustomMCPList(ctx context.Context, req *mcp_service.GetCust
 	return &mcp_service.CustomMCPList{Infos: infos}, nil
 }
 
-func (s *Service) GetCustomMCPByMCPIdList(ctx context.Context, req *mcp_service.GetCustomMCPByMCPIdListReq) (*mcp_service.CustomMCPList, error) {
-	// 校验MCP ID列表是否为空
+func (s *Service) GetMCPByMCPIdList(ctx context.Context, req *mcp_service.GetMCPByMCPIdListReq) (*mcp_service.GetMCPByMCPIdListResp, error) {
+	// 查询自定义MCP列表
 	if len(req.McpIdList) == 0 {
 		return nil, errStatus(errs.Code_MCPGetCustomMCPListErr, toErrStatus("mcp_get_custom_tool_list_err", "mcp id list is empty"))
 	}
@@ -117,7 +118,28 @@ func (s *Service) GetCustomMCPByMCPIdList(ctx context.Context, req *mcp_service.
 	for _, mcp := range mcps {
 		infos = append(infos, buildCustomMCPInfo(mcp))
 	}
-	return &mcp_service.CustomMCPList{Infos: infos}, nil
+
+	// 查询MCP Server 列表
+	mcpServerList, err := s.cli.ListMCPServerByIdList(ctx, req.McpServerIdList)
+	if err != nil {
+		return nil, errStatus(errs.Code_MCPGetMCPServerListErr, err)
+	}
+	serverToolInfos := make([]*mcp_service.MCPServerInfo, 0, len(mcpServerList))
+	for _, info := range mcpServerList {
+		toolNum, err := s.cli.CountMCPServerTools(ctx, info.MCPServerID)
+		if err != nil {
+			return nil, errStatus(errs.Code_MCPGetMCPServerListErr, err)
+		}
+		serverToolInfos = append(serverToolInfos, &mcp_service.MCPServerInfo{
+			McpServerId: info.MCPServerID,
+			Name:        info.Name,
+			Desc:        info.Description,
+			AvatarPath:  info.AvatarPath,
+			ToolNum:     toolNum,
+		})
+	}
+
+	return &mcp_service.GetMCPByMCPIdListResp{Infos: infos, Servers: serverToolInfos}, nil
 }
 
 func (s *Service) GetMCPAvatar(ctx context.Context, req *mcp_service.GetMCPAvatarReq) (*mcp_service.MCPAvatar, error) {
@@ -168,6 +190,7 @@ func buildCustomMCPInfo(mcp *model.MCPClient) *mcp_service.CustomMCPInfo {
 		McpId:  detail.McpId,
 		SseUrl: detail.SseUrl,
 		Info:   detail.Info,
+		Type:   constant.MCPTypeMCP,
 	}
 }
 

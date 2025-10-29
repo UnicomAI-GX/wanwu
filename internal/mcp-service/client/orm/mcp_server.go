@@ -82,3 +82,11 @@ func (c *Client) DeleteMCPServer(ctx context.Context, mcpServerId string) *errs.
 		return nil
 	})
 }
+
+func (c *Client) ListMCPServerByIdList(ctx context.Context, mcpServerIdList []string) ([]*model.MCPServer, *errs.Status) {
+	var mcpServerList []*model.MCPServer
+	if err := sqlopt.WithMcpServerIdList(mcpServerIdList).Apply(c.db).WithContext(ctx).Find(&mcpServerList).Error; err != nil {
+		return nil, toErrStatus("mcp_get_mcp_server_tool_list_err", err.Error())
+	}
+	return mcpServerList, nil
+}

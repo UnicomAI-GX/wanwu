@@ -287,21 +287,25 @@ func (s *Service) GetAssistantInfo(ctx context.Context, req *assistant_service.G
 	var mcpInfos []*assistant_service.AssistantMCPInfos
 	for _, mcp := range mcps {
 		mcpInfos = append(mcpInfos, &assistant_service.AssistantMCPInfos{
-			Id:     strconv.FormatUint(uint64(mcp.ID), 10),
-			McpId:  mcp.MCPId,
-			Enable: mcp.Enable,
+			Id:         strconv.FormatUint(uint64(mcp.ID), 10),
+			McpId:      mcp.MCPId,
+			McpType:    mcp.MCPType,
+			ActionName: mcp.ActionName,
+			Enable:     mcp.Enable,
 		})
 	}
 
-	// 获取关联的 CustomTool
-	customTools, _ := s.cli.GetAssistantCustomList(ctx, assistantId)
-	// 转换CustomTool
-	var customToolInfos []*assistant_service.AssistantCustomToolInfos
-	for _, customTool := range customTools {
-		customToolInfos = append(customToolInfos, &assistant_service.AssistantCustomToolInfos{
-			Id:           strconv.FormatUint(uint64(customTool.ID), 10),
-			CustomToolId: customTool.CustomId,
-			Enable:       customTool.Enable,
+	// 获取关联的 Tool
+	tools, _ := s.cli.GetAssistantToolList(ctx, assistantId)
+	// 转换 Tool
+	var toolInfos []*assistant_service.AssistantToolInfos
+	for _, tool := range tools {
+		toolInfos = append(toolInfos, &assistant_service.AssistantToolInfos{
+			Id:         strconv.FormatUint(uint64(tool.ID), 10),
+			ToolId:     tool.ToolId,
+			ToolType:   tool.ToolType,
+			ActionName: tool.ActionName,
+			Enable:     tool.Enable,
 		})
 	}
 
@@ -401,7 +405,7 @@ func (s *Service) GetAssistantInfo(ctx context.Context, req *assistant_service.G
 		Scope:               int32(assistant.Scope),
 		WorkFlowInfos:       workFlowInfos,
 		McpInfos:            mcpInfos,
-		CustomToolInfos:     customToolInfos,
+		ToolInfos:           toolInfos,
 		CreatTime:           assistant.CreatedAt,
 		UpdateTime:          assistant.UpdatedAt,
 	}, nil
@@ -431,14 +435,14 @@ func (s *Service) AssistantCopy(ctx context.Context, req *assistant_service.Assi
 		return nil, errStatus(errs.Code_AssistantErr, status)
 	}
 
-	// 获取关联的 custom tool
-	customTools, status := s.cli.GetAssistantCustomList(ctx, assistantId)
+	// 获取关联的 tool
+	tools, status := s.cli.GetAssistantToolList(ctx, assistantId)
 	if status != nil {
 		return nil, errStatus(errs.Code_AssistantErr, status)
 	}
 
 	// 复制智能体
-	assistantID, status := s.cli.CopyAssistant(ctx, parentAssistant, workflows, mcps, customTools)
+	assistantID, status := s.cli.CopyAssistant(ctx, parentAssistant, workflows, mcps, tools)
 	if status != nil {
 		return nil, errStatus(errs.Code_AssistantErr, status)
 	}

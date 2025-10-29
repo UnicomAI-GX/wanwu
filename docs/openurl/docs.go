@@ -1141,13 +1141,6 @@ const docTemplate = `{
                     "description": "创建时间",
                     "type": "string"
                 },
-                "customInfos": {
-                    "description": "自定义工具信息",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.CustomInfos"
-                    }
-                },
                 "desc": {
                     "description": "描述",
                     "type": "string"
@@ -1221,6 +1214,13 @@ const docTemplate = `{
                 "scope": {
                     "description": "作用域",
                     "type": "integer"
+                },
+                "toolInfos": {
+                    "description": "自定义工具、内置工具",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.ToolInfos"
+                    }
                 },
                 "updatedAt": {
                     "description": "更新时间",
@@ -1316,30 +1316,6 @@ const docTemplate = `{
                 }
             }
         },
-        "response.CustomInfos": {
-            "type": "object",
-            "properties": {
-                "customDesc": {
-                    "type": "string"
-                },
-                "customId": {
-                    "type": "string"
-                },
-                "enable": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "uniqueId": {
-                    "description": "随机unique id(每次动态生成)",
-                    "type": "string"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
-        },
         "response.ListResult": {
             "type": "object",
             "properties": {
@@ -1351,30 +1327,30 @@ const docTemplate = `{
         },
         "response.MCPInfos": {
             "type": "object",
+            "required": [
+                "mcpType"
+            ],
             "properties": {
+                "actionName": {
+                    "type": "string"
+                },
                 "enable": {
                     "type": "boolean"
-                },
-                "mcpDesc": {
-                    "type": "string"
                 },
                 "mcpId": {
                     "type": "string"
                 },
-                "mcpServerFrom": {
+                "mcpName": {
                     "type": "string"
                 },
-                "mcpServerUrl": {
-                    "type": "string"
-                },
-                "mcpSquareId": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
+                "mcpType": {
+                    "type": "string",
+                    "enum": [
+                        "mcp",
+                        "mcpserver"
+                    ]
                 },
                 "uniqueId": {
-                    "description": "随机unique id(每次动态生成)",
                     "type": "string"
                 },
                 "valid": {
@@ -1408,6 +1384,39 @@ const docTemplate = `{
                 }
             }
         },
+        "response.ToolInfos": {
+            "type": "object",
+            "required": [
+                "toolType"
+            ],
+            "properties": {
+                "actionName": {
+                    "type": "string"
+                },
+                "enable": {
+                    "type": "boolean"
+                },
+                "toolId": {
+                    "type": "string"
+                },
+                "toolName": {
+                    "type": "string"
+                },
+                "toolType": {
+                    "type": "string",
+                    "enum": [
+                        "builtin",
+                        "custom"
+                    ]
+                },
+                "uniqueId": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
         "response.VisionConfig": {
             "type": "object",
             "properties": {
@@ -1434,7 +1443,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "uniqueId": {
-                    "description": "随机unique id(每次动态生成)",
                     "type": "string"
                 },
                 "workFlowDesc": {

@@ -506,11 +506,6 @@ definitions:
       createdAt:
         description: 创建时间
         type: string
-      customInfos:
-        description: 自定义工具信息
-        items:
-          $ref: '#/definitions/response.CustomInfos'
-        type: array
       desc:
         description: 描述
         type: string
@@ -556,6 +551,11 @@ definitions:
       scope:
         description: 作用域
         type: integer
+      toolInfos:
+        description: 自定义工具、内置工具
+        items:
+          $ref: '#/definitions/response.ToolInfos'
+        type: array
       updatedAt:
         description: 更新时间
         type: string
@@ -620,22 +620,6 @@ definitions:
       title:
         type: string
     type: object
-  response.CustomInfos:
-    properties:
-      customDesc:
-        type: string
-      customId:
-        type: string
-      enable:
-        type: boolean
-      name:
-        type: string
-      uniqueId:
-        description: 随机unique id(每次动态生成)
-        type: string
-      valid:
-        type: boolean
-    type: object
   response.ListResult:
     properties:
       list: {}
@@ -644,25 +628,25 @@ definitions:
     type: object
   response.MCPInfos:
     properties:
+      actionName:
+        type: string
       enable:
         type: boolean
-      mcpDesc:
-        type: string
       mcpId:
         type: string
-      mcpServerFrom:
+      mcpName:
         type: string
-      mcpServerUrl:
-        type: string
-      mcpSquareId:
-        type: string
-      name:
+      mcpType:
+        enum:
+        - mcp
+        - mcpserver
         type: string
       uniqueId:
-        description: 随机unique id(每次动态生成)
         type: string
       valid:
         type: boolean
+    required:
+    - mcpType
     type: object
   response.RequestFile:
     properties:
@@ -680,6 +664,28 @@ definitions:
       data: {}
       msg:
         type: string
+    type: object
+  response.ToolInfos:
+    properties:
+      actionName:
+        type: string
+      enable:
+        type: boolean
+      toolId:
+        type: string
+      toolName:
+        type: string
+      toolType:
+        enum:
+        - builtin
+        - custom
+        type: string
+      uniqueId:
+        type: string
+      valid:
+        type: boolean
+    required:
+    - toolType
     type: object
   response.VisionConfig:
     properties:
@@ -699,7 +705,6 @@ definitions:
       name:
         type: string
       uniqueId:
-        description: 随机unique id(每次动态生成)
         type: string
       workFlowDesc:
         type: string

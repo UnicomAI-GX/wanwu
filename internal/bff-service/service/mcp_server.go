@@ -6,6 +6,7 @@ import (
 	"io"
 
 	app_service "github.com/UnicomAI/wanwu/api/proto/app-service"
+	assistant_service "github.com/UnicomAI/wanwu/api/proto/assistant-service"
 	err_code "github.com/UnicomAI/wanwu/api/proto/err-code"
 	mcp_service "github.com/UnicomAI/wanwu/api/proto/mcp-service"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/request"
@@ -108,7 +109,17 @@ func GetMCPServerDetail(ctx *gin.Context, mcpServerId string) (*response.MCPServ
 }
 
 func DeleteMCPServer(ctx *gin.Context, mcpServerId string) error {
-	_, err := app.DeleteApp(ctx.Request.Context(), &app_service.DeleteAppReq{
+	// 删除智能体表AssistantMCPServer相关记录
+	_, err := assistant.AssistantMCPDeleteByMCPId(ctx.Request.Context(), &assistant_service.AssistantMCPDeleteByMCPIdReq{
+		McpId:   mcpServerId,
+		McpType: constant.MCPTypeMCPServer,
+	})
+	if err != nil {
+		return err
+	}
+
+	// 删除MCPServer相关
+	_, err = app.DeleteApp(ctx.Request.Context(), &app_service.DeleteAppReq{
 		AppId:   mcpServerId,
 		AppType: constant.AppTypeMCPServer,
 	})

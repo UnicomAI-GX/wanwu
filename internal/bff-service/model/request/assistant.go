@@ -68,6 +68,8 @@ func (w *AssistantWorkFlowToolEnableRequest) Check() error { return nil }
 type AssistantMCPToolAddRequest struct {
 	AssistantId string `json:"assistantId" validate:"required"`
 	MCPId       string `json:"mcpId" validate:"required"`
+	MCPType     string `json:"mcpType" validate:"required,oneof=mcp mcpserver"`
+	ActionName  string `json:"actionName" validate:"required"`
 }
 
 func (m *AssistantMCPToolAddRequest) Check() error { return nil }
@@ -75,6 +77,8 @@ func (m *AssistantMCPToolAddRequest) Check() error { return nil }
 type AssistantMCPToolDelRequest struct {
 	AssistantId string `json:"assistantId" validate:"required"`
 	MCPId       string `json:"mcpId" validate:"required"`
+	MCPType     string `json:"mcpType" validate:"required,oneof=mcp mcpserver"`
+	ActionName  string `json:"actionName" validate:"required"`
 }
 
 func (w *AssistantMCPToolDelRequest) Check() error { return nil }
@@ -82,6 +86,8 @@ func (w *AssistantMCPToolDelRequest) Check() error { return nil }
 type AssistantMCPToolEnableRequest struct {
 	AssistantId string `json:"assistantId" validate:"required"`
 	MCPId       string `json:"mcpId" validate:"required"`
+	MCPType     string `json:"mcpType" validate:"required,oneof=mcp mcpserver"`
+	ActionName  string `json:"actionName" validate:"required"`
 	Enable      bool   `json:"enable"`
 }
 
@@ -158,24 +164,30 @@ type AssistantTemplateRequest struct {
 
 func (a *AssistantTemplateRequest) Check() error { return nil }
 
-type AssistantCustomToolAddRequest struct {
-	AssistantId  string `json:"assistantId" validate:"required"`
-	CustomToolId string `json:"customToolId" validate:"required"`
+type AssistantToolAddRequest struct {
+	AssistantId string `json:"assistantId" validate:"required"`
+	ToolId      string `json:"toolId" validate:"required"`
+	ToolType    string `json:"toolType" validate:"required,oneof=builtin custom"`
+	ActionName  string `json:"actionName" validate:"required"`
 }
 
-func (c *AssistantCustomToolAddRequest) Check() error { return nil }
+func (c *AssistantToolAddRequest) Check() error { return nil }
 
-type AssistantCustomToolDelRequest struct {
-	AssistantId  string `json:"assistantId" validate:"required"`
-	CustomToolId string `json:"customToolId" validate:"required"`
+type AssistantToolDelRequest struct {
+	AssistantId string `json:"assistantId" validate:"required"`
+	ToolId      string `json:"toolId" validate:"required"`
+	ToolType    string `json:"toolType" validate:"required,oneof=builtin custom"`
+	ActionName  string `json:"actionName" validate:"required"`
 }
 
-func (c *AssistantCustomToolDelRequest) Check() error { return nil }
+func (c *AssistantToolDelRequest) Check() error { return nil }
 
-type AssistantCustomToolEnableRequest struct {
-	AssistantId  string `json:"assistantId" validate:"required"`
-	CustomToolId string `json:"customToolId" validate:"required"`
-	Enable       bool   `json:"enable"`
+type AssistantToolEnableRequest struct {
+	AssistantId string `json:"assistantId" validate:"required"`
+	ToolId      string `json:"toolId" validate:"required"`
+	ToolType    string `json:"toolType" validate:"required,oneof=builtin custom"`
+	ActionName  string `json:"actionName" validate:"required"`
+	Enable      bool   `json:"enable"`
 }
 
-func (c *AssistantCustomToolEnableRequest) Check() error { return nil }
+func (c *AssistantToolEnableRequest) Check() error { return nil }

@@ -3,7 +3,6 @@ package orm
 import (
 	"context"
 	"errors"
-
 	err_code "github.com/UnicomAI/wanwu/api/proto/err-code"
 	"github.com/UnicomAI/wanwu/internal/mcp-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/mcp-service/client/orm/sqlopt"
@@ -35,7 +34,6 @@ func (c *Client) GetCustomTool(ctx context.Context, customTool *model.CustomTool
 	info := &model.CustomTool{}
 	if err := sqlopt.SQLOptions(
 		sqlopt.WithID(customTool.ID),
-		sqlopt.WithToolSquareID(customTool.ToolSquareId),
 		sqlopt.WithOrgID(customTool.OrgID),
 		sqlopt.WithUserID(customTool.UserID),
 	).Apply(c.db).WithContext(ctx).First(info).Error; err != nil {
@@ -88,4 +86,28 @@ func (c *Client) DeleteCustomTool(ctx context.Context, ID uint32) *err_code.Stat
 		return toErrStatus("mcp_delete_custom_tool_err", err.Error())
 	}
 	return nil
+}
+
+func (c *Client) ListBuiltinTools(ctx context.Context, orgID, userID string) ([]*model.CustomTool, *err_code.Status) {
+	var customToolInfos []*model.CustomTool
+	if err := sqlopt.SQLOptions(
+		sqlopt.WithOrgID(orgID),
+		sqlopt.WithUserID(userID),
+		sqlopt.WithToolSquareIDNotEmpty(),
+	).Apply(c.db).WithContext(ctx).Find(&customToolInfos).Error; err != nil {
+		return nil, toErrStatus("mcp_get_custom_tool_list_err", err.Error())
+	}
+	return customToolInfos, nil
+}
+
+func (c *Client) GetBuiltinTool(ctx context.Context, customTool *model.CustomTool) (*model.CustomTool, *err_code.Status) {
+	info := &model.CustomTool{}
+	if err := sqlopt.SQLOptions(
+		sqlopt.WithToolSquareID(customTool.ToolSquareId),
+		sqlopt.WithOrgID(customTool.OrgID),
+		sqlopt.WithUserID(customTool.UserID),
+	).Apply(c.db).WithContext(ctx).First(info).Error; err != nil {
+		return nil, toErrStatus("mcp_get_custom_tool_info_err", err.Error())
+	}
+	return info, nil
 }

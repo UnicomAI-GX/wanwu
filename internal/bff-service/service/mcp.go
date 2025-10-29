@@ -16,6 +16,7 @@ import (
 	"github.com/UnicomAI/wanwu/pkg/constant"
 	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	openapi3_util "github.com/UnicomAI/wanwu/pkg/openapi3-util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -90,7 +91,8 @@ func GetMCP(ctx *gin.Context, mcpID string) (*response.MCPDetail, error) {
 func DeleteMCP(ctx *gin.Context, mcpID string) error {
 	// 删除智能体表AssistantMCP相关记录
 	_, err := assistant.AssistantMCPDeleteByMCPId(ctx.Request.Context(), &assistant_service.AssistantMCPDeleteByMCPIdReq{
-		McpId: mcpID,
+		McpId:   mcpID,
+		McpType: constant.MCPTypeMCP,
 	})
 	if err != nil {
 		return err
@@ -133,10 +135,16 @@ func GetMCPSelect(ctx *gin.Context, userID, orgID string, name string) (*respons
 	var list []response.MCPSelect
 	for _, mcpInfo := range resp.Infos {
 		list = append(list, response.MCPSelect{
+			UniqueId: bff_util.ConcatAssistantToolUniqueId("mcp", mcpInfo.McpId),
+			// 兼容旧版
 			MCPID:       mcpInfo.McpId,
 			MCPSquareID: mcpInfo.Info.McpSquareId,
-			UniqueId:    bff_util.ConcatAssistantToolUniqueId("mcp", mcpInfo.McpId),
 			Name:        mcpInfo.Info.Name,
+			// 适用于智能体mcp下拉
+			ToolId:   mcpInfo.McpId,
+			ToolName: mcpInfo.Info.Name,
+			ToolType: mcpInfo.Type,
+			// 共有字段
 			Description: mcpInfo.Info.Desc,
 			ServerFrom:  mcpInfo.Info.From,
 			ServerURL:   mcpInfo.SseUrl,
@@ -192,6 +200,42 @@ func GetMCPToolList(ctx *gin.Context, mcpID, sseUrl string) (*response.MCPToolLi
 		return nil, grpc_util.ErrorStatus(err_code.Code_BFFGeneral, err.Error())
 	}
 	return &response.MCPToolList{Tools: tools}, nil
+}
+func GetMCPActionList(ctx *gin.Context, userID, orgID string, req request.MCPActionListReq) (*response.MCPActionList, error) {
+	var actions []*protocol.Tool
+	if req.ToolType == constant.MCPTypeMCPServer {
+		mcpServerList, err := mcp.GetMCPServerToolList(ctx.Request.Context(), &mcp_service.GetMCPServerToolListReq{
+			McpServerId: req.ToolId,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, tool := range mcpServerList.List {
+			var action *protocol.Tool
+
+			doc, err := openapi3_util.LoadFromData(ctx.Request.Context(), []byte(tool.Schema))
+			if err != nil {
+				return nil, err
+			}
+			for _, pathItem := range doc.Paths.Map() {
+				for _, operation := range pathItem.Operations() {
+					action = openapi3_util.Operation2ProtocolTool(operation)
+				}
+			}
+
+			actions = append(actions, action)
+		}
+	} else if req.ToolType == constant.MCPTypeMCP {
+		tools, err := GetMCPToolList(ctx, req.ToolId, "")
+		if err != nil {
+			return nil, err
+		}
+		actions = tools.Tools
+	}
+
+	return &response.MCPActionList{
+		Actions: actions,
+	}, nil
 }
 
 // --- internal ---

@@ -26,3 +26,8 @@ const (
 	MCPServerToolTypeCustomTool = "custom"  // 自定义工具
 	MCPServerToolTypeOpenAPI    = "openapi" // 用户导入的openapi
 )
+
+const (
+	MCPTypeMCP       = "mcp"       // mcp
+	MCPTypeMCPServer = "mcpserver" // mcp server
+)

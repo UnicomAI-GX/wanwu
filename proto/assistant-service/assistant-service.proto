@@ -29,18 +29,24 @@ service AssistantService {
   rpc AssistantMCPDelete(AssistantMCPDeleteReq) returns (google.protobuf.Empty) {}
   rpc AssistantMCPEnableSwitch(AssistantMCPEnableSwitchReq) returns (google.protobuf.Empty) {}
   rpc AssistantMCPGetList(AssistantMCPGetListReq) returns (AssistantMCPList) {}
+  rpc AssistantMCPDeleteByMCPId(AssistantMCPDeleteByMCPIdReq) returns (google.protobuf.Empty) {}
 
   // --- custom ---
-  rpc AssistantCustomToolCreate(AssistantCustomToolCreateReq) returns (google.protobuf.Empty) {}
-  rpc AssistantCustomToolDelete(AssistantCustomToolDeleteReq) returns (google.protobuf.Empty) {}
-  rpc AssistantMCPDeleteByMCPId(AssistantMCPDeleteByMCPIdReq) returns (google.protobuf.Empty) {}
-  rpc AssistantCustomToolEnableSwitch(AssistantCustomToolEnableSwitchReq) returns (google.protobuf.Empty) {}
-  rpc AssistantCustomToolGetList(AssistantCustomToolGetListReq) returns (AssistantCustomToolList) {}
+//  rpc AssistantCustomToolCreate(AssistantCustomToolCreateReq) returns (google.protobuf.Empty) {}
+//  rpc AssistantCustomToolDelete(AssistantCustomToolDeleteReq) returns (google.protobuf.Empty) {}
+//  rpc AssistantMCPDeleteByMCPId(AssistantMCPDeleteByMCPIdReq) returns (google.protobuf.Empty) {}
+//  rpc AssistantCustomToolEnableSwitch(AssistantCustomToolEnableSwitchReq) returns (google.protobuf.Empty) {}
+//  rpc AssistantCustomToolGetList(AssistantCustomToolGetListReq) returns (AssistantCustomToolList) {}
+
+  // --- custom builtin tool ---
+  rpc AssistantToolCreate(AssistantToolCreateReq) returns (google.protobuf.Empty) {}
+  rpc AssistantToolDelete(AssistantToolDeleteReq) returns (google.protobuf.Empty) {}
+  rpc AssistantToolEnableSwitch(AssistantToolEnableSwitchReq) returns (google.protobuf.Empty) {}
+  rpc AssistantToolDeleteByToolId(AssistantToolDeleteByToolIdReq) returns (google.protobuf.Empty) {}
 
   // --- conversation ---
   rpc ConversationCreate(ConversationCreateReq) returns (ConversationCreateResp) {}
   rpc ConversationDelete(ConversationDeleteReq) returns (google.protobuf.Empty) {}
-  rpc AssistantCustomToolDeleteByCustomToolId(AssistantCustomToolDeleteByCustomToolIdReq) returns (google.protobuf.Empty) {}
   rpc GetConversationList(GetConversationListReq) returns (GetConversationListResp) {}
   rpc GetConversationDetailList(GetConversationDetailListReq) returns (GetConversationDetailListResp) {}
   rpc AssistantConversionStream(AssistantConversionStreamReq) returns (stream AssistantConversionStreamResp) {}
@@ -174,11 +180,12 @@ message AssistantInfo {
   int32 scope = 11;
   repeated AssistantWorkFlowInfos workFlowInfos = 12;
   repeated AssistantMCPInfos mcpInfos = 13;
-  repeated AssistantCustomToolInfos customToolInfos = 14;
-  int64 creatTime = 15;
-  int64 updateTime = 16;
-  AssistantSafetyConfig safetyConfig = 17;
-  AssistantVisionConfig visionConfig = 18;
+//  repeated AssistantCustomToolInfos customToolInfos = 14;
+  repeated AssistantToolInfos toolInfos = 15;
+  int64 creatTime = 16;
+  int64 updateTime = 17;
+  AssistantSafetyConfig safetyConfig = 18;
+  AssistantVisionConfig visionConfig = 19;
 }
 
 
@@ -192,13 +199,23 @@ message AssistantWorkFlowInfos{
 message AssistantMCPInfos{
   string id = 1;
   string mcpId = 2;
-  bool enable = 3;
+  string mcpType = 3;
+  string actionName = 4;
+  bool enable = 5;
 }
 
-message AssistantCustomToolInfos{
+//message AssistantCustomToolInfos{
+//  string id = 1;
+//  string customToolId = 2;
+//  bool enable = 3;
+//}
+
+message AssistantToolInfos{
   string id = 1;
-  string customToolId = 2;
-  bool enable = 3;
+  string toolId = 2;
+  string toolType = 3;
+  string actionName = 4;
+  bool enable = 5;
 }
 
 message GetAssistantInfoReq {
@@ -234,25 +251,32 @@ message AssistantWorkFlowEnableSwitchReq {
 message AssistantMCPCreateReq {
   string assistantId = 1;
   string mcpId = 2;
-  Identity identity = 3;
+  string mcpType = 3;
+  string actionName = 4;
+  Identity identity = 5;
 }
 
 message AssistantMCPDeleteReq {
   string assistantId = 1;
   string mcpId = 2;
-  Identity identity = 3;
+  string mcpType = 3;
+  string actionName = 4;
+  Identity identity = 5;
 }
 
 message AssistantMCPDeleteByMCPIdReq {
   string mcpId = 1;
-  Identity identity = 2;
+  string mcpType = 2;
+  Identity identity = 3;
 }
 
 message AssistantMCPEnableSwitchReq {
   string assistantId = 1;
   string mcpId = 2;
-  bool enable = 3;
-  Identity identity = 4;
+  string mcpType = 3;
+  string actionName = 4;
+  bool enable = 5;
+  Identity identity = 6;
 }
 
 message AssistantMCPGetListReq {
@@ -275,49 +299,75 @@ message AssistantMCPList {
   repeated AssistantMCPInfo assistantMCPInfos = 1;
 }
 
-message AssistantCustomToolCreateReq {
-  string assistantId = 1;
-  string customToolId = 2;
+//message AssistantCustomToolCreateReq {
+//  string assistantId = 1;
+//  string customToolId = 2;
+//  Identity identity = 3;
+//}
+//
+//message AssistantCustomToolDeleteReq {
+//  string assistantId = 1;
+//  string customToolId = 2;
+//  Identity identity = 3;
+//}
+//
+message AssistantToolDeleteByToolIdReq {
+  string toolId = 1;
+  string toolType = 2;
   Identity identity = 3;
 }
-
-message AssistantCustomToolDeleteReq {
+//
+//message AssistantCustomToolEnableSwitchReq {
+//  string assistantId = 1;
+//  string customToolId = 2;
+//  bool enable = 3;
+//  Identity identity = 4;
+//}
+//
+message AssistantToolCreateReq {
   string assistantId = 1;
-  string customToolId = 2;
-  Identity identity = 3;
+  string toolId = 2;
+  string toolType = 3;
+  string actionName = 4;
+  Identity identity = 5;
 }
 
-message AssistantCustomToolDeleteByCustomToolIdReq {
-  string customToolId = 1;
-  Identity identity = 2;
-}
-
-message AssistantCustomToolEnableSwitchReq {
+message AssistantToolDeleteReq {
   string assistantId = 1;
-  string customToolId = 2;
-  bool enable = 3;
-  Identity identity = 4;
+  string toolId = 2;
+  string toolType = 3;
+  string actionName = 4;
 }
 
-message AssistantCustomToolGetListReq {
+message AssistantToolEnableSwitchReq {
   string assistantId = 1;
-  Identity identity = 2;
+  string toolId = 2;
+  string toolType = 3;
+  string actionName = 4;
+  bool enable = 5;
+  Identity identity = 6;
 }
 
-message AssistantCustomToolInfo {
-  uint32 id = 1;
-  uint32 assistantId = 2;
-  string customToolId = 3;
-  bool enable = 4;
-  string userId = 5;
-  string orgId = 6;
-  int64 createdAt = 7;
-  int64 updatedAt = 8;
-}
 
-message AssistantCustomToolList {
-  repeated AssistantCustomToolInfo assistantCustomToolInfos = 1;
-}
+//message AssistantCustomToolGetListReq {
+//  string assistantId = 1;
+//  Identity identity = 2;
+//}
+
+//message AssistantCustomToolInfo {
+//  uint32 id = 1;
+//  uint32 assistantId = 2;
+//  string customToolId = 3;
+//  bool enable = 4;
+//  string userId = 5;
+//  string orgId = 6;
+//  int64 createdAt = 7;
+//  int64 updatedAt = 8;
+//}
+//
+//message AssistantCustomToolList {
+//  repeated AssistantCustomToolInfo assistantCustomToolInfos = 1;
+//}
 
 message ConversationCreateReq {
   string assistantId = 1;

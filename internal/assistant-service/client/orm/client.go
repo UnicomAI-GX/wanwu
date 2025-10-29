@@ -30,7 +30,7 @@ func NewClient(db *gorm.DB) (*Client, error) {
 		model.Conversation{},
 		model.AssistantWorkflow{},
 		model.AssistantMCP{},
-		model.AssistantCustom{},
+		model.AssistantTool{},
 	); err != nil {
 		return nil, err
 	}

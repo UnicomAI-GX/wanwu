@@ -27,7 +27,6 @@ const (
 	MCPService_GetCustomMCP_FullMethodName                    = "/mcp_service.MCPService/GetCustomMCP"
 	MCPService_DeleteCustomMCP_FullMethodName                 = "/mcp_service.MCPService/DeleteCustomMCP"
 	MCPService_GetCustomMCPList_FullMethodName                = "/mcp_service.MCPService/GetCustomMCPList"
-	MCPService_GetCustomMCPByMCPIdList_FullMethodName         = "/mcp_service.MCPService/GetCustomMCPByMCPIdList"
 	MCPService_GetMCPToolList_FullMethodName                  = "/mcp_service.MCPService/GetMCPToolList"
 	MCPService_GetMCPAvatar_FullMethodName                    = "/mcp_service.MCPService/GetMCPAvatar"
 	MCPService_CreateCustomTool_FullMethodName                = "/mcp_service.MCPService/CreateCustomTool"
@@ -38,7 +37,7 @@ const (
 	MCPService_DeleteCustomTool_FullMethodName                = "/mcp_service.MCPService/DeleteCustomTool"
 	MCPService_GetSquareTool_FullMethodName                   = "/mcp_service.MCPService/GetSquareTool"
 	MCPService_GetSquareToolList_FullMethodName               = "/mcp_service.MCPService/GetSquareToolList"
-	MCPService_GetToolSelect_FullMethodName                   = "/mcp_service.MCPService/GetToolSelect"
+	MCPService_UpsertBuiltinToolAPIKey_FullMethodName         = "/mcp_service.MCPService/UpsertBuiltinToolAPIKey"
 	MCPService_CreateMCPServer_FullMethodName                 = "/mcp_service.MCPService/CreateMCPServer"
 	MCPService_DeleteMCPServer_FullMethodName                 = "/mcp_service.MCPService/DeleteMCPServer"
 	MCPService_UpdateMCPServer_FullMethodName                 = "/mcp_service.MCPService/UpdateMCPServer"
@@ -49,6 +48,9 @@ const (
 	MCPService_DeleteMCPServerTool_FullMethodName             = "/mcp_service.MCPService/DeleteMCPServerTool"
 	MCPService_GetMCPServerTool_FullMethodName                = "/mcp_service.MCPService/GetMCPServerTool"
 	MCPService_GetMCPServerToolList_FullMethodName            = "/mcp_service.MCPService/GetMCPServerToolList"
+	MCPService_GetToolSelect_FullMethodName                   = "/mcp_service.MCPService/GetToolSelect"
+	MCPService_GetToolByIdList_FullMethodName                 = "/mcp_service.MCPService/GetToolByIdList"
+	MCPService_GetMCPByMCPIdList_FullMethodName               = "/mcp_service.MCPService/GetMCPByMCPIdList"
 )
 
 // MCPServiceClient is the client API for MCPService service.
@@ -64,7 +66,6 @@ type MCPServiceClient interface {
 	GetCustomMCP(ctx context.Context, in *GetCustomMCPReq, opts ...grpc.CallOption) (*CustomMCPDetail, error)
 	DeleteCustomMCP(ctx context.Context, in *DeleteCustomMCPReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetCustomMCPList(ctx context.Context, in *GetCustomMCPListReq, opts ...grpc.CallOption) (*CustomMCPList, error)
-	GetCustomMCPByMCPIdList(ctx context.Context, in *GetCustomMCPByMCPIdListReq, opts ...grpc.CallOption) (*CustomMCPList, error)
 	// --- custom mcp action ---
 	GetMCPToolList(ctx context.Context, in *GetMCPToolListReq, opts ...grpc.CallOption) (*MCPToolList, error)
 	GetMCPAvatar(ctx context.Context, in *GetMCPAvatarReq, opts ...grpc.CallOption) (*MCPAvatar, error)
@@ -78,8 +79,7 @@ type MCPServiceClient interface {
 	// --- builtin tool ---
 	GetSquareTool(ctx context.Context, in *GetSquareToolReq, opts ...grpc.CallOption) (*SquareToolDetail, error)
 	GetSquareToolList(ctx context.Context, in *GetSquareToolListReq, opts ...grpc.CallOption) (*SquareToolList, error)
-	// --- custom & builtin tool ---
-	GetToolSelect(ctx context.Context, in *GetToolSelectReq, opts ...grpc.CallOption) (*GetToolListResp, error)
+	UpsertBuiltinToolAPIKey(ctx context.Context, in *UpsertBuiltinToolAPIKeyReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// --- mcp server ---
 	CreateMCPServer(ctx context.Context, in *CreateMCPServerReq, opts ...grpc.CallOption) (*CreateMCPServerResp, error)
 	DeleteMCPServer(ctx context.Context, in *DeleteMCPServerReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -91,6 +91,11 @@ type MCPServiceClient interface {
 	DeleteMCPServerTool(ctx context.Context, in *DeleteMCPServerToolReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetMCPServerTool(ctx context.Context, in *GetMCPServerToolReq, opts ...grpc.CallOption) (*MCPServerToolInfo, error)
 	GetMCPServerToolList(ctx context.Context, in *GetMCPServerToolListReq, opts ...grpc.CallOption) (*GetMCPServerToolListResp, error)
+	// --- custom builtin tool ---
+	GetToolSelect(ctx context.Context, in *GetToolSelectReq, opts ...grpc.CallOption) (*GetToolListResp, error)
+	GetToolByIdList(ctx context.Context, in *GetToolByToolIdListReq, opts ...grpc.CallOption) (*GetToolByToolIdListResp, error)
+	// --- mcp mcpserver tool ---
+	GetMCPByMCPIdList(ctx context.Context, in *GetMCPByMCPIdListReq, opts ...grpc.CallOption) (*GetMCPByMCPIdListResp, error)
 }
 
 type mCPServiceClient struct {
@@ -165,16 +170,6 @@ func (c *mCPServiceClient) GetCustomMCPList(ctx context.Context, in *GetCustomMC
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CustomMCPList)
 	err := c.cc.Invoke(ctx, MCPService_GetCustomMCPList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *mCPServiceClient) GetCustomMCPByMCPIdList(ctx context.Context, in *GetCustomMCPByMCPIdListReq, opts ...grpc.CallOption) (*CustomMCPList, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CustomMCPList)
-	err := c.cc.Invoke(ctx, MCPService_GetCustomMCPByMCPIdList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -281,10 +276,10 @@ func (c *mCPServiceClient) GetSquareToolList(ctx context.Context, in *GetSquareT
 	return out, nil
 }
 
-func (c *mCPServiceClient) GetToolSelect(ctx context.Context, in *GetToolSelectReq, opts ...grpc.CallOption) (*GetToolListResp, error) {
+func (c *mCPServiceClient) UpsertBuiltinToolAPIKey(ctx context.Context, in *UpsertBuiltinToolAPIKeyReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetToolListResp)
-	err := c.cc.Invoke(ctx, MCPService_GetToolSelect_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, MCPService_UpsertBuiltinToolAPIKey_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -391,6 +386,36 @@ func (c *mCPServiceClient) GetMCPServerToolList(ctx context.Context, in *GetMCPS
 	return out, nil
 }
 
+func (c *mCPServiceClient) GetToolSelect(ctx context.Context, in *GetToolSelectReq, opts ...grpc.CallOption) (*GetToolListResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetToolListResp)
+	err := c.cc.Invoke(ctx, MCPService_GetToolSelect_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mCPServiceClient) GetToolByIdList(ctx context.Context, in *GetToolByToolIdListReq, opts ...grpc.CallOption) (*GetToolByToolIdListResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetToolByToolIdListResp)
+	err := c.cc.Invoke(ctx, MCPService_GetToolByIdList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mCPServiceClient) GetMCPByMCPIdList(ctx context.Context, in *GetMCPByMCPIdListReq, opts ...grpc.CallOption) (*GetMCPByMCPIdListResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMCPByMCPIdListResp)
+	err := c.cc.Invoke(ctx, MCPService_GetMCPByMCPIdList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MCPServiceServer is the server API for MCPService service.
 // All implementations must embed UnimplementedMCPServiceServer
 // for forward compatibility.
@@ -404,7 +429,6 @@ type MCPServiceServer interface {
 	GetCustomMCP(context.Context, *GetCustomMCPReq) (*CustomMCPDetail, error)
 	DeleteCustomMCP(context.Context, *DeleteCustomMCPReq) (*emptypb.Empty, error)
 	GetCustomMCPList(context.Context, *GetCustomMCPListReq) (*CustomMCPList, error)
-	GetCustomMCPByMCPIdList(context.Context, *GetCustomMCPByMCPIdListReq) (*CustomMCPList, error)
 	// --- custom mcp action ---
 	GetMCPToolList(context.Context, *GetMCPToolListReq) (*MCPToolList, error)
 	GetMCPAvatar(context.Context, *GetMCPAvatarReq) (*MCPAvatar, error)
@@ -418,8 +442,7 @@ type MCPServiceServer interface {
 	// --- builtin tool ---
 	GetSquareTool(context.Context, *GetSquareToolReq) (*SquareToolDetail, error)
 	GetSquareToolList(context.Context, *GetSquareToolListReq) (*SquareToolList, error)
-	// --- custom & builtin tool ---
-	GetToolSelect(context.Context, *GetToolSelectReq) (*GetToolListResp, error)
+	UpsertBuiltinToolAPIKey(context.Context, *UpsertBuiltinToolAPIKeyReq) (*emptypb.Empty, error)
 	// --- mcp server ---
 	CreateMCPServer(context.Context, *CreateMCPServerReq) (*CreateMCPServerResp, error)
 	DeleteMCPServer(context.Context, *DeleteMCPServerReq) (*emptypb.Empty, error)
@@ -431,6 +454,11 @@ type MCPServiceServer interface {
 	DeleteMCPServerTool(context.Context, *DeleteMCPServerToolReq) (*emptypb.Empty, error)
 	GetMCPServerTool(context.Context, *GetMCPServerToolReq) (*MCPServerToolInfo, error)
 	GetMCPServerToolList(context.Context, *GetMCPServerToolListReq) (*GetMCPServerToolListResp, error)
+	// --- custom builtin tool ---
+	GetToolSelect(context.Context, *GetToolSelectReq) (*GetToolListResp, error)
+	GetToolByIdList(context.Context, *GetToolByToolIdListReq) (*GetToolByToolIdListResp, error)
+	// --- mcp mcpserver tool ---
+	GetMCPByMCPIdList(context.Context, *GetMCPByMCPIdListReq) (*GetMCPByMCPIdListResp, error)
 	mustEmbedUnimplementedMCPServiceServer()
 }
 
@@ -462,9 +490,6 @@ func (UnimplementedMCPServiceServer) DeleteCustomMCP(context.Context, *DeleteCus
 func (UnimplementedMCPServiceServer) GetCustomMCPList(context.Context, *GetCustomMCPListReq) (*CustomMCPList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCustomMCPList not implemented")
 }
-func (UnimplementedMCPServiceServer) GetCustomMCPByMCPIdList(context.Context, *GetCustomMCPByMCPIdListReq) (*CustomMCPList, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCustomMCPByMCPIdList not implemented")
-}
 func (UnimplementedMCPServiceServer) GetMCPToolList(context.Context, *GetMCPToolListReq) (*MCPToolList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMCPToolList not implemented")
 }
@@ -495,8 +520,8 @@ func (UnimplementedMCPServiceServer) GetSquareTool(context.Context, *GetSquareTo
 func (UnimplementedMCPServiceServer) GetSquareToolList(context.Context, *GetSquareToolListReq) (*SquareToolList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSquareToolList not implemented")
 }
-func (UnimplementedMCPServiceServer) GetToolSelect(context.Context, *GetToolSelectReq) (*GetToolListResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetToolSelect not implemented")
+func (UnimplementedMCPServiceServer) UpsertBuiltinToolAPIKey(context.Context, *UpsertBuiltinToolAPIKeyReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertBuiltinToolAPIKey not implemented")
 }
 func (UnimplementedMCPServiceServer) CreateMCPServer(context.Context, *CreateMCPServerReq) (*CreateMCPServerResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMCPServer not implemented")
@@ -527,6 +552,15 @@ func (UnimplementedMCPServiceServer) GetMCPServerTool(context.Context, *GetMCPSe
 }
 func (UnimplementedMCPServiceServer) GetMCPServerToolList(context.Context, *GetMCPServerToolListReq) (*GetMCPServerToolListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMCPServerToolList not implemented")
+}
+func (UnimplementedMCPServiceServer) GetToolSelect(context.Context, *GetToolSelectReq) (*GetToolListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetToolSelect not implemented")
+}
+func (UnimplementedMCPServiceServer) GetToolByIdList(context.Context, *GetToolByToolIdListReq) (*GetToolByToolIdListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetToolByIdList not implemented")
+}
+func (UnimplementedMCPServiceServer) GetMCPByMCPIdList(context.Context, *GetMCPByMCPIdListReq) (*GetMCPByMCPIdListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMCPByMCPIdList not implemented")
 }
 func (UnimplementedMCPServiceServer) mustEmbedUnimplementedMCPServiceServer() {}
 func (UnimplementedMCPServiceServer) testEmbeddedByValue()                    {}
@@ -671,24 +705,6 @@ func _MCPService_GetCustomMCPList_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MCPServiceServer).GetCustomMCPList(ctx, req.(*GetCustomMCPListReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MCPService_GetCustomMCPByMCPIdList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCustomMCPByMCPIdListReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MCPServiceServer).GetCustomMCPByMCPIdList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: MCPService_GetCustomMCPByMCPIdList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MCPServiceServer).GetCustomMCPByMCPIdList(ctx, req.(*GetCustomMCPByMCPIdListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -873,20 +889,20 @@ func _MCPService_GetSquareToolList_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MCPService_GetToolSelect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetToolSelectReq)
+func _MCPService_UpsertBuiltinToolAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertBuiltinToolAPIKeyReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MCPServiceServer).GetToolSelect(ctx, in)
+		return srv.(MCPServiceServer).UpsertBuiltinToolAPIKey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MCPService_GetToolSelect_FullMethodName,
+		FullMethod: MCPService_UpsertBuiltinToolAPIKey_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MCPServiceServer).GetToolSelect(ctx, req.(*GetToolSelectReq))
+		return srv.(MCPServiceServer).UpsertBuiltinToolAPIKey(ctx, req.(*UpsertBuiltinToolAPIKeyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1071,6 +1087,60 @@ func _MCPService_GetMCPServerToolList_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MCPService_GetToolSelect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetToolSelectReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MCPServiceServer).GetToolSelect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MCPService_GetToolSelect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MCPServiceServer).GetToolSelect(ctx, req.(*GetToolSelectReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MCPService_GetToolByIdList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetToolByToolIdListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MCPServiceServer).GetToolByIdList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MCPService_GetToolByIdList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MCPServiceServer).GetToolByIdList(ctx, req.(*GetToolByToolIdListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MCPService_GetMCPByMCPIdList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMCPByMCPIdListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MCPServiceServer).GetMCPByMCPIdList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MCPService_GetMCPByMCPIdList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MCPServiceServer).GetMCPByMCPIdList(ctx, req.(*GetMCPByMCPIdListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MCPService_ServiceDesc is the grpc.ServiceDesc for MCPService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1105,10 +1175,6 @@ var MCPService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCustomMCPList",
 			Handler:    _MCPService_GetCustomMCPList_Handler,
-		},
-		{
-			MethodName: "GetCustomMCPByMCPIdList",
-			Handler:    _MCPService_GetCustomMCPByMCPIdList_Handler,
 		},
 		{
 			MethodName: "GetMCPToolList",
@@ -1151,8 +1217,8 @@ var MCPService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MCPService_GetSquareToolList_Handler,
 		},
 		{
-			MethodName: "GetToolSelect",
-			Handler:    _MCPService_GetToolSelect_Handler,
+			MethodName: "UpsertBuiltinToolAPIKey",
+			Handler:    _MCPService_UpsertBuiltinToolAPIKey_Handler,
 		},
 		{
 			MethodName: "CreateMCPServer",
@@ -1193,6 +1259,18 @@ var MCPService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMCPServerToolList",
 			Handler:    _MCPService_GetMCPServerToolList_Handler,
+		},
+		{
+			MethodName: "GetToolSelect",
+			Handler:    _MCPService_GetToolSelect_Handler,
+		},
+		{
+			MethodName: "GetToolByIdList",
+			Handler:    _MCPService_GetToolByIdList_Handler,
+		},
+		{
+			MethodName: "GetMCPByMCPIdList",
+			Handler:    _MCPService_GetMCPByMCPIdList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -31,3 +31,22 @@ type MCPUpdate struct {
 func (req *MCPUpdate) Check() error {
 	return nil
 }
+
+type MCPActionListReq struct {
+	ToolId   string `json:"toolId" validate:"required"`
+	ToolType string `json:"toolType" validate:"required,oneof=mcp mcpserver"`
+}
+
+func (req *MCPActionListReq) Check() error {
+	return nil
+}
+
+type MCPActionReq struct {
+	ToolId     string `json:"toolId" validate:"required"`
+	ToolType   string `json:"toolType" validate:"required,oneof=mcp mcpserver"`
+	ActionName string `json:"actionName" validate:"required"`
+}
+
+func (req *MCPActionReq) Check() error {
+	return nil
+}

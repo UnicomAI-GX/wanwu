@@ -1074,38 +1074,6 @@ definitions:
     required:
     - assistantId
     type: object
-  request.AssistantCustomToolAddRequest:
-    properties:
-      assistantId:
-        type: string
-      customToolId:
-        type: string
-    required:
-    - assistantId
-    - customToolId
-    type: object
-  request.AssistantCustomToolDelRequest:
-    properties:
-      assistantId:
-        type: string
-      customToolId:
-        type: string
-    required:
-    - assistantId
-    - customToolId
-    type: object
-  request.AssistantCustomToolEnableRequest:
-    properties:
-      assistantId:
-        type: string
-      customToolId:
-        type: string
-      enable:
-        type: boolean
-    required:
-    - assistantId
-    - customToolId
-    type: object
   request.AssistantIdRequest:
     properties:
       assistantId:
@@ -1115,35 +1083,62 @@ definitions:
     type: object
   request.AssistantMCPToolAddRequest:
     properties:
+      actionName:
+        type: string
       assistantId:
         type: string
       mcpId:
         type: string
+      mcpType:
+        enum:
+        - mcp
+        - mcpserver
+        type: string
     required:
+    - actionName
     - assistantId
     - mcpId
+    - mcpType
     type: object
   request.AssistantMCPToolDelRequest:
     properties:
+      actionName:
+        type: string
       assistantId:
         type: string
       mcpId:
         type: string
+      mcpType:
+        enum:
+        - mcp
+        - mcpserver
+        type: string
     required:
+    - actionName
     - assistantId
     - mcpId
+    - mcpType
     type: object
   request.AssistantMCPToolEnableRequest:
     properties:
+      actionName:
+        type: string
       assistantId:
         type: string
       enable:
         type: boolean
       mcpId:
         type: string
+      mcpType:
+        enum:
+        - mcp
+        - mcpserver
+        type: string
     required:
+    - actionName
     - assistantId
     - mcpId
+    - mcpType
     type: object
   request.AssistantTemplateRequest:
     properties:
@@ -1151,6 +1146,65 @@ definitions:
         type: string
     required:
     - assistantTemplateId
+    type: object
+  request.AssistantToolAddRequest:
+    properties:
+      actionName:
+        type: string
+      assistantId:
+        type: string
+      toolId:
+        type: string
+      toolType:
+        enum:
+        - builtin
+        - custom
+        type: string
+    required:
+    - actionName
+    - assistantId
+    - toolId
+    - toolType
+    type: object
+  request.AssistantToolDelRequest:
+    properties:
+      actionName:
+        type: string
+      assistantId:
+        type: string
+      toolId:
+        type: string
+      toolType:
+        enum:
+        - builtin
+        - custom
+        type: string
+    required:
+    - actionName
+    - assistantId
+    - toolId
+    - toolType
+    type: object
+  request.AssistantToolEnableRequest:
+    properties:
+      actionName:
+        type: string
+      assistantId:
+        type: string
+      enable:
+        type: boolean
+      toolId:
+        type: string
+      toolType:
+        enum:
+        - builtin
+        - custom
+        type: string
+    required:
+    - actionName
+    - assistantId
+    - toolId
+    - toolType
     type: object
   request.AssistantWorkFlowAddRequest:
     properties:
@@ -3034,11 +3088,6 @@ definitions:
       createdAt:
         description: 创建时间
         type: string
-      customInfos:
-        description: 自定义工具信息
-        items:
-          $ref: '#/definitions/response.CustomInfos'
-        type: array
       desc:
         description: 描述
         type: string
@@ -3084,6 +3133,11 @@ definitions:
       scope:
         description: 作用域
         type: integer
+      toolInfos:
+        description: 自定义工具、内置工具
+        items:
+          $ref: '#/definitions/response.ToolInfos'
+        type: array
       updatedAt:
         description: 更新时间
         type: string
@@ -3401,22 +3455,6 @@ definitions:
       title:
         description: 平台名称
         type: string
-    type: object
-  response.CustomInfos:
-    properties:
-      customDesc:
-        type: string
-      customId:
-        type: string
-      enable:
-        type: boolean
-      name:
-        type: string
-      uniqueId:
-        description: 随机unique id(每次动态生成)
-        type: string
-      valid:
-        type: boolean
     type: object
   response.CustomLogin:
     properties:
@@ -4078,6 +4116,13 @@ definitions:
         - $ref: '#/definitions/response.CustomTab'
         description: 标签页信息
     type: object
+  response.MCPActionList:
+    properties:
+      actions:
+        items:
+          $ref: '#/definitions/protocol.Tool'
+        type: array
+    type: object
   response.MCPDetail:
     properties:
       avatar:
@@ -4151,25 +4196,25 @@ definitions:
     type: object
   response.MCPInfos:
     properties:
+      actionName:
+        type: string
       enable:
         type: boolean
-      mcpDesc:
-        type: string
       mcpId:
         type: string
-      mcpServerFrom:
+      mcpName:
         type: string
-      mcpServerUrl:
-        type: string
-      mcpSquareId:
-        type: string
-      name:
+      mcpType:
+        enum:
+        - mcp
+        - mcpserver
         type: string
       uniqueId:
-        description: 随机unique id(每次动态生成)
         type: string
       valid:
         type: boolean
+    required:
+    - mcpType
     type: object
   response.MCPSelect:
     properties:
@@ -4191,12 +4236,25 @@ definitions:
       serverUrl:
         description: sseUrl
         type: string
+      toolId:
+        description: 工具id
+        type: string
+      toolName:
+        description: 工具名称
+        type: string
+      toolType:
+        description: 工具类型
+        enum:
+        - mcp
+        - mcpserver
+        type: string
       type:
-        description: 'mcp类型, 导入mcp: mcp;创建mcp: mcpserver'
         type: string
       uniqueId:
         description: 随机unique id(每次动态生成)
         type: string
+    required:
+    - toolType
     type: object
   response.MCPServerCustomToolApi:
     properties:
@@ -4708,6 +4766,57 @@ definitions:
         items: {}
         type: array
     type: object
+  response.ToolInfos:
+    properties:
+      actionName:
+        type: string
+      enable:
+        type: boolean
+      toolId:
+        type: string
+      toolName:
+        type: string
+      toolType:
+        enum:
+        - builtin
+        - custom
+        type: string
+      uniqueId:
+        type: string
+      valid:
+        type: boolean
+    required:
+    - toolType
+    type: object
+  response.ToolSelect:
+    properties:
+      apiKey:
+        description: apiKey
+        type: string
+      desc:
+        description: 工具描述
+        type: string
+      needApiKeyInput:
+        description: 是否需要apiKey输入
+        type: boolean
+      toolId:
+        description: 工具id
+        type: string
+      toolName:
+        description: 工具名称
+        type: string
+      toolType:
+        description: 工具类型
+        enum:
+        - custom
+        - builtin
+        type: string
+      uniqueId:
+        description: unique id
+        type: string
+    required:
+    - toolType
+    type: object
   response.ToolSelect4Workflow:
     properties:
       actions:
@@ -4912,7 +5021,6 @@ definitions:
       name:
         type: string
       uniqueId:
-        description: 随机unique id(每次动态生成)
         type: string
       workFlowDesc:
         type: string
@@ -6040,18 +6148,18 @@ paths:
       summary: 智能体模板列表
       tags:
       - agent
-  /assistant/tool/custom:
+  /assistant/tool:
     delete:
       consumes:
       - application/json
-      description: 为智能体解绑自定义工具
+      description: 为智能体解绑自定义、内建工具
       parameters:
-      - description: 智能体id与自定义工具id
+      - description: 智能体id与自定义、内建工具id
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.AssistantCustomToolDelRequest'
+          $ref: '#/definitions/request.AssistantToolDelRequest'
       produces:
       - application/json
       responses:
@@ -6061,20 +6169,20 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - JWT: []
-      summary: 删除自定义工具
+      summary: 删除自定义、内建工具
       tags:
       - agent
     post:
       consumes:
       - application/json
-      description: 为智能体绑定自定义工具
+      description: 为智能体绑定自定义、内建工具
       parameters:
-      - description: 自定义工具新增参数
+      - description: 自定义、内建工具新增参数
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.AssistantCustomToolAddRequest'
+          $ref: '#/definitions/request.AssistantToolAddRequest'
       produces:
       - application/json
       responses:
@@ -6084,31 +6192,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - JWT: []
-      summary: 添加自定义工具
-      tags:
-      - agent
-  /assistant/tool/custom/switch:
-    put:
-      consumes:
-      - application/json
-      description: 修改智能体绑定的自定义工具的启用状态
-      parameters:
-      - description: 智能体id与自定义工具id
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.AssistantCustomToolEnableRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - JWT: []
-      summary: 启用/停用自定义工具
+      summary: 添加自定义、内建工具
       tags:
       - agent
   /assistant/tool/mcp:
@@ -6117,7 +6201,7 @@ paths:
       - application/json
       description: 为智能体解绑mcp
       parameters:
-      - description: mcp工具id，智能体id
+      - description: mcp工具id、mcp类型、智能体id
         in: body
         name: data
         required: true
@@ -6140,7 +6224,7 @@ paths:
       - application/json
       description: 为智能体绑定已发布的mcp工具
       parameters:
-      - description: mcp新增参数
+      - description: mcp工具id、mcp类型、智能体id
         in: body
         name: data
         required: true
@@ -6164,7 +6248,7 @@ paths:
       - application/json
       description: 修改智能体绑定的MCP的启用状态
       parameters:
-      - description: mcp工具id、智能体id、enable
+      - description: mcp工具id、mcp类型、智能体id、enable
         in: body
         name: data
         required: true
@@ -6180,6 +6264,30 @@ paths:
       security:
       - JWT: []
       summary: 启用/停用 MCP
+      tags:
+      - agent
+  /assistant/tool/switch:
+    put:
+      consumes:
+      - application/json
+      description: 修改智能体绑定的自定义、内建工具的启用状态
+      parameters:
+      - description: 智能体id与自定义、内建工具id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AssistantToolEnableRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWT: []
+      summary: 启用/停用自定义、内建工具
       tags:
       - agent
   /assistant/tool/workflow:
@@ -8217,6 +8325,38 @@ paths:
       summary: 修改自定义MCP
       tags:
       - tool
+  /mcp/action/list:
+    get:
+      consumes:
+      - application/json
+      description: 获取MCP Action列表
+      parameters:
+      - in: query
+        name: toolId
+        required: true
+        type: string
+      - enum:
+        - mcp
+        - mcpserver
+        in: query
+        name: toolType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MCPActionList'
+              type: object
+      summary: 获取MCP Action列表
+      tags:
+      - mcp
   /mcp/list:
     get:
       consumes:
@@ -10067,7 +10207,7 @@ paths:
                   - properties:
                       list:
                         items:
-                          $ref: '#/definitions/response.ToolActionList'
+                          $ref: '#/definitions/response.ToolSelect'
                         type: array
                     type: object
               type: object

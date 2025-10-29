@@ -16,7 +16,7 @@ type IClient interface {
 	GetAssistantsByIDs(ctx context.Context, assistantIDs []uint32) ([]*model.Assistant, *err_code.Status)
 	GetAssistantList(ctx context.Context, userID, orgID string, name string) ([]*model.Assistant, int64, *err_code.Status)
 	CheckSameAssistantName(ctx context.Context, userID, orgID, name, assistantID string) *err_code.Status
-	CopyAssistant(ctx context.Context, assistant *model.Assistant, workflows []*model.AssistantWorkflow, mcps []*model.AssistantMCP, customTools []*model.AssistantCustom) (uint32, *err_code.Status)
+	CopyAssistant(ctx context.Context, assistant *model.Assistant, workflows []*model.AssistantWorkflow, mcps []*model.AssistantMCP, customTools []*model.AssistantTool) (uint32, *err_code.Status)
 
 	//================AssistantWorkflow================
 	CreateAssistantWorkflow(ctx context.Context, workflow *model.AssistantWorkflow) *err_code.Status
@@ -27,20 +27,20 @@ type IClient interface {
 	DeleteAssistantWorkflowByWorkflowId(ctx context.Context, workflowId string) *err_code.Status
 
 	//================AssistantMCP================
-	CreateAssistantMCP(ctx context.Context, assistantId uint32, mcpId string, userId, orgID string) *err_code.Status
-	DeleteAssistantMCP(ctx context.Context, assistantId uint32, mcpId string) *err_code.Status
-	GetAssistantMCP(ctx context.Context, assistantId uint32, mcpId string) (*model.AssistantMCP, *err_code.Status)
-	DeleteAssistantMCPByMCPId(ctx context.Context, mcpId string) *err_code.Status
+	CreateAssistantMCP(ctx context.Context, assistantId uint32, mcpId, mcpType, actionName string, userId, orgID string) *err_code.Status
+	DeleteAssistantMCP(ctx context.Context, assistantId uint32, mcpId, mcpType, actionName string) *err_code.Status
+	GetAssistantMCP(ctx context.Context, assistantId uint32, mcpId, mcpType, actionName string) (*model.AssistantMCP, *err_code.Status)
+	DeleteAssistantMCPByMCPId(ctx context.Context, mcpId string, mcpType string) *err_code.Status
 	GetAssistantMCPList(ctx context.Context, assistantId uint32) ([]*model.AssistantMCP, *err_code.Status)
 	UpdateAssistantMCP(ctx context.Context, mcp *model.AssistantMCP) *err_code.Status
 
-	//================AssistantCustom================
-	CreateAssistantCustom(ctx context.Context, assistantId uint32, customId string, userId, orgID string) *err_code.Status
-	DeleteAssistantCustom(ctx context.Context, assistantId uint32, customId string) *err_code.Status
-	DeleteAssistantCustomByCustomToolId(ctx context.Context, customId string) *err_code.Status
-	GetAssistantCustom(ctx context.Context, assistantId uint32, customId string) (*model.AssistantCustom, *err_code.Status)
-	UpdateAssistantCustom(ctx context.Context, custom *model.AssistantCustom) *err_code.Status
-	GetAssistantCustomList(ctx context.Context, assistantId uint32) ([]*model.AssistantCustom, *err_code.Status)
+	//================AssistantTool================
+	CreateAssistantTool(ctx context.Context, assistantId uint32, toolId, toolType string, actionName string, userId, orgID string) *err_code.Status
+	DeleteAssistantTool(ctx context.Context, assistantId uint32, toolId string, toolType string, actionName string) *err_code.Status
+	UpdateAssistantTool(ctx context.Context, tool *model.AssistantTool) *err_code.Status
+	GetAssistantTool(ctx context.Context, assistantId uint32, toolId, toolType string, actionName string) (*model.AssistantTool, *err_code.Status)
+	GetAssistantToolList(ctx context.Context, assistantId uint32) ([]*model.AssistantTool, *err_code.Status)
+	DeleteAssistantToolByToolId(ctx context.Context, toolId string, toolType string) *err_code.Status
 
 	//================Conversation================
 	CreateConversation(ctx context.Context, conversation *model.Conversation) *err_code.Status

@@ -17,15 +17,15 @@ type Assistant struct {
 	SafetyConfig           request.AppSafetyConfig        `json:"safetyConfig"`        // 敏感词表配置
 	VisionConfig           VisionConfig                   `json:"visionConfig"`        // 视觉配置
 	Scope                  int32                          `json:"scope"`               // 作用域
-	WorkFlowInfos          []*WorkFlowInfos               `json:"workFlowInfos"`       // 工作流信息
-	MCPInfos               []*MCPInfos                    `json:"mcpInfos"`            // MCP信息
-	CustomInfos            []*CustomInfos                 `json:"customInfos"`         // 自定义工具信息
+	WorkFlowInfos          []*AssistantWorkFlowInfo       `json:"workFlowInfos"`       // 工作流信息
+	MCPInfos               []*AssistantMCPInfo            `json:"mcpInfos"`            // MCP信息
+	ToolInfos              []*AssistantToolInfo           `json:"toolInfos"`           // 自定义工具、内置工具
 	CreatedAt              string                         `json:"createdAt"`           // 创建时间
 	UpdatedAt              string                         `json:"updatedAt"`           // 更新时间
 }
 
-type WorkFlowInfos struct {
-	UniqueId     string `json:"uniqueId"` // 随机unique id(每次动态生成)
+type AssistantWorkFlowInfo struct {
+	UniqueId     string `json:"uniqueId"`
 	WorkFlowId   string `json:"workFlowId"`
 	ApiName      string `json:"apiName"`
 	Enable       bool   `json:"enable"`
@@ -33,24 +33,23 @@ type WorkFlowInfos struct {
 	WorkFlowDesc string `json:"workFlowDesc"`
 }
 
-type MCPInfos struct {
-	UniqueId      string `json:"uniqueId"` // 随机unique id(每次动态生成)
-	MCPId         string `json:"mcpId"`
-	MCPSquareId   string `json:"mcpSquareId"`
-	Enable        bool   `json:"enable"`
-	MCPName       string `json:"name"`
-	MCPDesc       string `json:"mcpDesc"`
-	MCPServerFrom string `json:"mcpServerFrom"`
-	MCPServerUrl  string `json:"mcpServerUrl"`
-	Valid         bool   `json:"valid"`
+type AssistantMCPInfo struct {
+	UniqueId   string `json:"uniqueId"`
+	MCPId      string `json:"mcpId"`
+	MCPType    string `json:"mcpType" validate:"required,oneof=mcp mcpserver"`
+	MCPName    string `json:"mcpName"`
+	ActionName string `json:"actionName"`
+	Enable     bool   `json:"enable"`
+	Valid      bool   `json:"valid"`
 }
 
-type CustomInfos struct {
-	UniqueId   string `json:"uniqueId"` // 随机unique id(每次动态生成)
-	CustomId   string `json:"customId"`
+type AssistantToolInfo struct {
+	UniqueId   string `json:"uniqueId"`
+	ToolId     string `json:"toolId"`
+	ToolType   string `json:"toolType" validate:"required,oneof=builtin custom"`
+	ToolName   string `json:"toolName"`
+	ActionName string `json:"actionName"`
 	Enable     bool   `json:"enable"`
-	CustomName string `json:"name"`
-	CustomDesc string `json:"customDesc"`
 	Valid      bool   `json:"valid"`
 }
 

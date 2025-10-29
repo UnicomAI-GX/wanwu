@@ -1788,14 +1788,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/assistant/tool/custom": {
+        "/assistant/tool": {
             "post": {
                 "security": [
                     {
                         "JWT": []
                     }
                 ],
-                "description": "为智能体绑定自定义工具",
+                "description": "为智能体绑定自定义、内建工具",
                 "consumes": [
                     "application/json"
                 ],
@@ -1805,15 +1805,15 @@ const docTemplate = `{
                 "tags": [
                     "agent"
                 ],
-                "summary": "添加自定义工具",
+                "summary": "添加自定义、内建工具",
                 "parameters": [
                     {
-                        "description": "自定义工具新增参数",
+                        "description": "自定义、内建工具新增参数",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.AssistantCustomToolAddRequest"
+                            "$ref": "#/definitions/request.AssistantToolAddRequest"
                         }
                     }
                 ],
@@ -1832,7 +1832,7 @@ const docTemplate = `{
                         "JWT": []
                     }
                 ],
-                "description": "为智能体解绑自定义工具",
+                "description": "为智能体解绑自定义、内建工具",
                 "consumes": [
                     "application/json"
                 ],
@@ -1842,54 +1842,15 @@ const docTemplate = `{
                 "tags": [
                     "agent"
                 ],
-                "summary": "删除自定义工具",
+                "summary": "删除自定义、内建工具",
                 "parameters": [
                     {
-                        "description": "智能体id与自定义工具id",
+                        "description": "智能体id与自定义、内建工具id",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.AssistantCustomToolDelRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/assistant/tool/custom/switch": {
-            "put": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "修改智能体绑定的自定义工具的启用状态",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "agent"
-                ],
-                "summary": "启用/停用自定义工具",
-                "parameters": [
-                    {
-                        "description": "智能体id与自定义工具id",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.AssistantCustomToolEnableRequest"
+                            "$ref": "#/definitions/request.AssistantToolDelRequest"
                         }
                     }
                 ],
@@ -1923,7 +1884,7 @@ const docTemplate = `{
                 "summary": "添加mcp工具",
                 "parameters": [
                     {
-                        "description": "mcp新增参数",
+                        "description": "mcp工具id、mcp类型、智能体id",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1960,7 +1921,7 @@ const docTemplate = `{
                 "summary": "删除mcp",
                 "parameters": [
                     {
-                        "description": "mcp工具id，智能体id",
+                        "description": "mcp工具id、mcp类型、智能体id",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1999,12 +1960,51 @@ const docTemplate = `{
                 "summary": "启用/停用 MCP",
                 "parameters": [
                     {
-                        "description": "mcp工具id、智能体id、enable",
+                        "description": "mcp工具id、mcp类型、智能体id、enable",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/request.AssistantMCPToolEnableRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/assistant/tool/switch": {
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "修改智能体绑定的自定义、内建工具的启用状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agent"
+                ],
+                "summary": "启用/停用自定义、内建工具",
+                "parameters": [
+                    {
+                        "description": "智能体id与自定义、内建工具id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AssistantToolEnableRequest"
                         }
                     }
                 ],
@@ -5427,6 +5427,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/mcp/action/list": {
+            "get": {
+                "description": "获取MCP Action列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mcp"
+                ],
+                "summary": "获取MCP Action列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "toolId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "mcp",
+                            "mcpserver"
+                        ],
+                        "type": "string",
+                        "name": "toolType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.MCPActionList"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/mcp/list": {
             "get": {
                 "description": "获取自定义MCP列表",
@@ -8606,7 +8659,7 @@ const docTemplate = `{
                                                         "list": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/response.ToolActionList"
+                                                                "$ref": "#/definitions/response.ToolSelect"
                                                             }
                                                         }
                                                     }
@@ -11259,54 +11312,6 @@ const docTemplate = `{
                 }
             }
         },
-        "request.AssistantCustomToolAddRequest": {
-            "type": "object",
-            "required": [
-                "assistantId",
-                "customToolId"
-            ],
-            "properties": {
-                "assistantId": {
-                    "type": "string"
-                },
-                "customToolId": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.AssistantCustomToolDelRequest": {
-            "type": "object",
-            "required": [
-                "assistantId",
-                "customToolId"
-            ],
-            "properties": {
-                "assistantId": {
-                    "type": "string"
-                },
-                "customToolId": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.AssistantCustomToolEnableRequest": {
-            "type": "object",
-            "required": [
-                "assistantId",
-                "customToolId"
-            ],
-            "properties": {
-                "assistantId": {
-                    "type": "string"
-                },
-                "customToolId": {
-                    "type": "string"
-                },
-                "enable": {
-                    "type": "boolean"
-                }
-            }
-        },
         "request.AssistantIdRequest": {
             "type": "object",
             "required": [
@@ -11321,40 +11326,69 @@ const docTemplate = `{
         "request.AssistantMCPToolAddRequest": {
             "type": "object",
             "required": [
+                "actionName",
                 "assistantId",
-                "mcpId"
+                "mcpId",
+                "mcpType"
             ],
             "properties": {
+                "actionName": {
+                    "type": "string"
+                },
                 "assistantId": {
                     "type": "string"
                 },
                 "mcpId": {
                     "type": "string"
+                },
+                "mcpType": {
+                    "type": "string",
+                    "enum": [
+                        "mcp",
+                        "mcpserver"
+                    ]
                 }
             }
         },
         "request.AssistantMCPToolDelRequest": {
             "type": "object",
             "required": [
+                "actionName",
                 "assistantId",
-                "mcpId"
+                "mcpId",
+                "mcpType"
             ],
             "properties": {
+                "actionName": {
+                    "type": "string"
+                },
                 "assistantId": {
                     "type": "string"
                 },
                 "mcpId": {
                     "type": "string"
+                },
+                "mcpType": {
+                    "type": "string",
+                    "enum": [
+                        "mcp",
+                        "mcpserver"
+                    ]
                 }
             }
         },
         "request.AssistantMCPToolEnableRequest": {
             "type": "object",
             "required": [
+                "actionName",
                 "assistantId",
-                "mcpId"
+                "mcpId",
+                "mcpType"
             ],
             "properties": {
+                "actionName": {
+                    "type": "string"
+                },
                 "assistantId": {
                     "type": "string"
                 },
@@ -11363,6 +11397,13 @@ const docTemplate = `{
                 },
                 "mcpId": {
                     "type": "string"
+                },
+                "mcpType": {
+                    "type": "string",
+                    "enum": [
+                        "mcp",
+                        "mcpserver"
+                    ]
                 }
             }
         },
@@ -11374,6 +11415,90 @@ const docTemplate = `{
             "properties": {
                 "assistantTemplateId": {
                     "type": "string"
+                }
+            }
+        },
+        "request.AssistantToolAddRequest": {
+            "type": "object",
+            "required": [
+                "actionName",
+                "assistantId",
+                "toolId",
+                "toolType"
+            ],
+            "properties": {
+                "actionName": {
+                    "type": "string"
+                },
+                "assistantId": {
+                    "type": "string"
+                },
+                "toolId": {
+                    "type": "string"
+                },
+                "toolType": {
+                    "type": "string",
+                    "enum": [
+                        "builtin",
+                        "custom"
+                    ]
+                }
+            }
+        },
+        "request.AssistantToolDelRequest": {
+            "type": "object",
+            "required": [
+                "actionName",
+                "assistantId",
+                "toolId",
+                "toolType"
+            ],
+            "properties": {
+                "actionName": {
+                    "type": "string"
+                },
+                "assistantId": {
+                    "type": "string"
+                },
+                "toolId": {
+                    "type": "string"
+                },
+                "toolType": {
+                    "type": "string",
+                    "enum": [
+                        "builtin",
+                        "custom"
+                    ]
+                }
+            }
+        },
+        "request.AssistantToolEnableRequest": {
+            "type": "object",
+            "required": [
+                "actionName",
+                "assistantId",
+                "toolId",
+                "toolType"
+            ],
+            "properties": {
+                "actionName": {
+                    "type": "string"
+                },
+                "assistantId": {
+                    "type": "string"
+                },
+                "enable": {
+                    "type": "boolean"
+                },
+                "toolId": {
+                    "type": "string"
+                },
+                "toolType": {
+                    "type": "string",
+                    "enum": [
+                        "builtin",
+                        "custom"
+                    ]
                 }
             }
         },
@@ -14122,13 +14247,6 @@ const docTemplate = `{
                     "description": "创建时间",
                     "type": "string"
                 },
-                "customInfos": {
-                    "description": "自定义工具信息",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.CustomInfos"
-                    }
-                },
                 "desc": {
                     "description": "描述",
                     "type": "string"
@@ -14202,6 +14320,13 @@ const docTemplate = `{
                 "scope": {
                     "description": "作用域",
                     "type": "integer"
+                },
+                "toolInfos": {
+                    "description": "自定义工具、内置工具",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.ToolInfos"
+                    }
                 },
                 "updatedAt": {
                     "description": "更新时间",
@@ -14674,30 +14799,6 @@ const docTemplate = `{
                 "title": {
                     "description": "平台名称",
                     "type": "string"
-                }
-            }
-        },
-        "response.CustomInfos": {
-            "type": "object",
-            "properties": {
-                "customDesc": {
-                    "type": "string"
-                },
-                "customId": {
-                    "type": "string"
-                },
-                "enable": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "uniqueId": {
-                    "description": "随机unique id(每次动态生成)",
-                    "type": "string"
-                },
-                "valid": {
-                    "type": "boolean"
                 }
             }
         },
@@ -15706,6 +15807,17 @@ const docTemplate = `{
                 }
             }
         },
+        "response.MCPActionList": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protocol.Tool"
+                    }
+                }
+            }
+        },
         "response.MCPDetail": {
             "type": "object",
             "properties": {
@@ -15810,30 +15922,30 @@ const docTemplate = `{
         },
         "response.MCPInfos": {
             "type": "object",
+            "required": [
+                "mcpType"
+            ],
             "properties": {
+                "actionName": {
+                    "type": "string"
+                },
                 "enable": {
                     "type": "boolean"
-                },
-                "mcpDesc": {
-                    "type": "string"
                 },
                 "mcpId": {
                     "type": "string"
                 },
-                "mcpServerFrom": {
+                "mcpName": {
                     "type": "string"
                 },
-                "mcpServerUrl": {
-                    "type": "string"
-                },
-                "mcpSquareId": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
+                "mcpType": {
+                    "type": "string",
+                    "enum": [
+                        "mcp",
+                        "mcpserver"
+                    ]
                 },
                 "uniqueId": {
-                    "description": "随机unique id(每次动态生成)",
                     "type": "string"
                 },
                 "valid": {
@@ -15843,6 +15955,9 @@ const docTemplate = `{
         },
         "response.MCPSelect": {
             "type": "object",
+            "required": [
+                "toolType"
+            ],
             "properties": {
                 "description": {
                     "description": "描述",
@@ -15868,8 +15983,23 @@ const docTemplate = `{
                     "description": "sseUrl",
                     "type": "string"
                 },
+                "toolId": {
+                    "description": "工具id",
+                    "type": "string"
+                },
+                "toolName": {
+                    "description": "工具名称",
+                    "type": "string"
+                },
+                "toolType": {
+                    "description": "工具类型",
+                    "type": "string",
+                    "enum": [
+                        "mcp",
+                        "mcpserver"
+                    ]
+                },
                 "type": {
-                    "description": "mcp类型, 导入mcp: mcp;创建mcp: mcpserver",
                     "type": "string"
                 },
                 "uniqueId": {
@@ -16640,6 +16770,79 @@ const docTemplate = `{
                 }
             }
         },
+        "response.ToolInfos": {
+            "type": "object",
+            "required": [
+                "toolType"
+            ],
+            "properties": {
+                "actionName": {
+                    "type": "string"
+                },
+                "enable": {
+                    "type": "boolean"
+                },
+                "toolId": {
+                    "type": "string"
+                },
+                "toolName": {
+                    "type": "string"
+                },
+                "toolType": {
+                    "type": "string",
+                    "enum": [
+                        "builtin",
+                        "custom"
+                    ]
+                },
+                "uniqueId": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "response.ToolSelect": {
+            "type": "object",
+            "required": [
+                "toolType"
+            ],
+            "properties": {
+                "apiKey": {
+                    "description": "apiKey",
+                    "type": "string"
+                },
+                "desc": {
+                    "description": "工具描述",
+                    "type": "string"
+                },
+                "needApiKeyInput": {
+                    "description": "是否需要apiKey输入",
+                    "type": "boolean"
+                },
+                "toolId": {
+                    "description": "工具id",
+                    "type": "string"
+                },
+                "toolName": {
+                    "description": "工具名称",
+                    "type": "string"
+                },
+                "toolType": {
+                    "description": "工具类型",
+                    "type": "string",
+                    "enum": [
+                        "custom",
+                        "builtin"
+                    ]
+                },
+                "uniqueId": {
+                    "description": "unique id",
+                    "type": "string"
+                }
+            }
+        },
         "response.ToolSelect4Workflow": {
             "type": "object",
             "properties": {
@@ -16953,7 +17156,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "uniqueId": {
-                    "description": "随机unique id(每次动态生成)",
                     "type": "string"
                 },
                 "workFlowDesc": {

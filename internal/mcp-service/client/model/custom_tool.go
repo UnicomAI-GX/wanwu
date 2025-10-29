@@ -1,5 +1,9 @@
 package model
 
+const (
+	ApiAuthNone = "none"
+)
+
 type CustomTool struct {
 	ID               uint32 `gorm:"primary_key"`
 	ToolSquareId     string `gorm:"index:idx_custom_tool_square_id"`

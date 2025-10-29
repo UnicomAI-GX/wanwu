@@ -6,6 +6,7 @@ import (
 	mcp_service "github.com/UnicomAI/wanwu/api/proto/mcp-service"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/request"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/response"
+	"github.com/UnicomAI/wanwu/pkg/constant"
 	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	openapi3_util "github.com/UnicomAI/wanwu/pkg/openapi3-util"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -67,8 +68,9 @@ func GetCustomTool(ctx *gin.Context, userID, orgID string, customToolId string) 
 
 func DeleteCustomTool(ctx *gin.Context, userID, orgID string, req request.CustomToolIDReq) error {
 	// 删除智能体AssistantCustom中记录
-	_, err := assistant.AssistantCustomToolDeleteByCustomToolId(ctx.Request.Context(), &assistant_service.AssistantCustomToolDeleteByCustomToolIdReq{
-		CustomToolId: req.CustomToolID,
+	_, err := assistant.AssistantToolDeleteByToolId(ctx.Request.Context(), &assistant_service.AssistantToolDeleteByToolIdReq{
+		ToolId:   req.CustomToolID,
+		ToolType: constant.ToolTypeCustom,
 	})
 	if err != nil {
 		return err
