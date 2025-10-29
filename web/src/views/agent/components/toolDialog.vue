@@ -23,7 +23,14 @@
                     class="toolContent_item"
                     >
                         <el-collapse  @change="handleToolChange">
-                            <el-collapse-item :title="item.name" :name="item.toolId">
+                            <el-collapse-item  :name="item.toolId">
+                            <template slot="title">
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <span>{{item.name}}</span>
+                                    <el-button type="text" @click.stop="openTool($event,item,type)" v-if="!item.checked">添加</el-button>
+                                    <el-button type="text" v-else style="color:#ccc;">已添加</el-button>
+                                </div>
+                            </template>
                                 <template v-if="item.children && item.children.length">
                                     <div v-for="tool in item.children">
                                         <div>

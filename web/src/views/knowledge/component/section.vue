@@ -118,7 +118,7 @@
                     @change="handleStatusChange(item, index)"
                   >
                   </el-switch>
-                  <el-dropdown @command="handleCommand" placement="bottom" :disabled="[0].includes(permissionType)">
+                  <el-dropdown @command="handleCommand" placement="bottom" v-if="[10,20,30].includes(permissionType)">
                     <span class="el-dropdown-link">
                       <i class="el-icon-more more"></i>
                     </span>
@@ -134,7 +134,7 @@
               <div class="text item" @click="handleClick(item, index)">
                 {{ item.content }}
               </div>
-              <div class="tagList">
+              <div class="tagList" v-if="[10,20,30].includes(permissionType)">
                 <span :class="['smartDate','tagList']" @click.stop="addTag(item.labels,item.contentId)" v-if="item.labels.length === 0">
                   <span class="el-icon-price-tag icon-tag"></span>
                   创建关键词
@@ -347,7 +347,7 @@ export default {
       }
       return score.toFixed(5);
     },
-     editSegment(row, index) {
+    editSegment(row, index) {
       const key = `${row.contentId}-${index}`;
       this.$set(this.editingSegments, key, true);
       this.$set(this.editingContent, key, row.childContent[index].content);

@@ -728,11 +728,12 @@ export default {
       this.editForm.knowledgebases.splice(index, 1);
     },
     getKnowledgeData(data) {
-      const originalIds = new Set(
-        this.editForm.knowledgebases.map((item) => item.id)
-      );
-      const newItems = data.filter((item) => !originalIds.has(item.id));
-      this.editForm.knowledgebases.push(...newItems);
+      //const originalIds = new Set(
+       // this.editForm.knowledgebases.map((item) => item.id)
+     //);
+     // const newItems = data.filter((item) => !originalIds.has(item.id));
+     // this.editForm.knowledgebases.push(...newItems);
+      this.$set(this.editForm, 'knowledgebases', [...data]);
     },
     handleMetaClose() {
       this.metaSetVisible = false;

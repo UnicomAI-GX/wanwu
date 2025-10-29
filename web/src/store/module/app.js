@@ -22,7 +22,7 @@ export const app = {
         historyAppList:[],
         embeddingList:[],
         fromList:'',
-        permissionType:''
+        permissionType:-1
     },
 
     mutations: {
@@ -30,7 +30,7 @@ export const app = {
             state.permissionType = data
         },
         CLEAR_PERMISSION_TYPE(state){
-            state.permissionType = ''
+            state.permissionType = -1
         },
         SET_MAX_PICNUM(state,data){
             state.maxPicNum = data

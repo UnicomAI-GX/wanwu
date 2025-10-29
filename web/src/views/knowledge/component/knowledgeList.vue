@@ -35,26 +35,25 @@
             </el-tooltip>
           </div>
           <div class="tags">
-            <!-- <span :class="['smartDate','tagList']">{{n.docCount || 0}}个文档</span> -->
-            <span :class="['smartDate','tagList']" v-if="formattedTagNames(n.knowledgeTagList).length === 0" @click.stop="addTag(n.knowledgeId)">
+            <span :class="['smartDate','tagList']" v-if="formattedTagNames(n.knowledgeTagList).length === 0" @click.stop="addTag(n.knowledgeId,n)">
               <span class="el-icon-price-tag icon-tag"></span>
               添加标签
             </span>
-            <span v-else @click.stop="addTag(n.knowledgeId)">{{formattedTagNames(n.knowledgeTagList) }}</span>
+            <span v-else @click.stop="addTag(n.knowledgeId,n)">{{formattedTagNames(n.knowledgeTagList) }}</span>
           </div>
           <div class="editor">
             <el-tooltip class="item" effect="dark" :content="n.orgName" placement="right-start">
-              <span style="margin-right:52px; color:#88888B;">{{n.orgName.length > 10 ? n.orgName.substring(0, 10) + '...' : n.orgName}}</span>
+              <span style="margin-right:52px; color:#999;font-size:12px;">{{n.orgName.length > 10 ? n.orgName.substring(0, 10) + '...' : n.orgName}}</span>
             </el-tooltip>
             <div v-if="n.share" class="publishType" style="right:22px;">
-                <span v-if="n.share" class="publishType-tag"><span class="el-icon-lock"></span> 私密</span>
-                <span v-else class="publishType-tag"><span class="el-icon-unlock"></span> 公开</span>
+                <span v-if="n.share" class="publishType-tag"><span class="el-icon-unlock"></span> 公开</span>
+                <span v-else class="publishType-tag"><span class="el-icon-lock"></span> 私密</span>
             </div>
             <el-dropdown @command="handleClick($event, n)" placement="top">
               <span class="el-dropdown-link">
                 <i class="el-icon-more icon edit-icon" @click.stop></i>
               </span>
-              <el-dropdown-menu slot="dropdown">
+              <el-dropdown-menu slot="dropdown" v-if="[10,20,30].includes(n.permissionType)">
                 <el-dropdown-item command="edit">{{$t('common.button.edit')}}</el-dropdown-item>
                 <el-dropdown-item command="delete" v-if="[30].includes(n.permissionType)">{{$t('common.button.delete')}}</el-dropdown-item>
                 <el-dropdown-item command="power" v-if="[20,30].includes(n.permissionType)">权限</el-dropdown-item>
@@ -103,10 +102,6 @@ export default {
     }
   },
   
-  beforeDestroy() {
-    //this.clearPermissionType();
-  },
-  
   methods:{
   ...mapActions("app", ["setPermissionType","clearPermissionType"]),
   formattedTagNames(data){
@@ -119,8 +114,14 @@ export default {
     }
     return tags;
   },
-  addTag(id){
-    this.$refs.tagDialog.showDiaglog(id);
+  addTag(id,n){
+    if([0].includes(n.permissionType)){
+      this.$message.warning('无操作权限')
+      return;
+    }
+    this.$nextTick(() =>{
+      this.$refs.tagDialog.showDiaglog(id);
+    })
   },
   showCreate(){
     this.$parent.showCreate();
