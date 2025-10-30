@@ -49,6 +49,10 @@ func (s *Service) AddKnowledgeUser(ctx context.Context, req *knowledgebase_permi
 
 func (s *Service) EditKnowledgeUser(ctx context.Context, req *knowledgebase_permission_service.EditKnowledgeUserReq) (*emptypb.Empty, error) {
 	editList := buildKnowledgePermissionEditList(req)
+	if err := checkKnowledgePermission(ctx, req.UserId, req.OrgId, req.KnowledgeId, editList[0]); err != nil {
+		log.Errorf(fmt.Sprintf("EditKnowledgeUser checkKnowledgeDelete 权限不足失败(%v)  参数(%v)", err, req))
+		return nil, util.ErrCode(errs.Code_KnowledgePermissionDeny)
+	}
 	err := db.GetHandle(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := orm.BatchEditKnowledgePermission(tx, editList); err != nil {
 			return err
