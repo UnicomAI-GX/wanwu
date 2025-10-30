@@ -163,12 +163,15 @@ func genMcpToolHandler(doc *openapi3.T, auth *APIAuth, operationID string) serve
 
 		// auth
 		if auth != nil {
-			switch auth.In {
-			case "header":
-				headerParams[auth.Name] = auth.Value
-			case "query":
-				queryParams[auth.Name] = auth.Value
-			}
+			// switch auth.In {
+			// case "header":
+			// 	headerParams[auth.Name] = auth.Value
+			// case "query":
+			// 	queryParams[auth.Name] = auth.Value
+			// }
+			// FIXME 目前自定义工具auth设计有缺陷，header/query都传参
+			headerParams[auth.Name] = auth.Value
+			queryParams[auth.Name] = auth.Value
 		}
 
 		// http client
