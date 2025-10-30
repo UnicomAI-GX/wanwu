@@ -37,6 +37,9 @@ func SelectKnowledgeList(ctx context.Context, userId, orgId, name string, tagIdL
 		return make([]*model.KnowledgeBase, 0), nil, nil
 	}
 	knowledgeIdList = intersectionKnowledgeIdList(knowledgeIdList, buildPermissionKnowledgeIdList(permissionKnowledgeList))
+	if len(knowledgeIdList) == 0 {
+		return make([]*model.KnowledgeBase, 0), nil, nil
+	}
 	var knowledgeList []*model.KnowledgeBase
 	err = sqlopt.SQLOptions(sqlopt.WithKnowledgeIDList(knowledgeIdList), sqlopt.LikeName(name), sqlopt.WithDelete(0)).
 		Apply(db.GetHandle(ctx), &model.KnowledgeBase{}).
@@ -73,6 +76,9 @@ func SelectKnowledgeByIdList(ctx context.Context, knowledgeIdList []string, user
 		return make([]*model.KnowledgeBase, 0), nil, nil
 	}
 	knowledgeIdList = intersectionKnowledgeIdList(knowledgeIdList, buildPermissionKnowledgeIdList(permissionKnowledgeList))
+	if len(knowledgeIdList) == 0 {
+		return make([]*model.KnowledgeBase, 0), nil, nil
+	}
 	var knowledgeList []*model.KnowledgeBase
 	err = sqlopt.SQLOptions(sqlopt.WithKnowledgeIDList(knowledgeIdList), sqlopt.WithDelete(0)).
 		Apply(db.GetHandle(ctx), &model.KnowledgeBase{}).
