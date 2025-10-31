@@ -96,7 +96,7 @@ def batch_add_chunks(user_id: str, kb_name: str, file_name: str, max_sentence_si
     else:
         chunk_total_num = allocate_chunk_result["data"]["chunk_total_num"]
         meta_data = allocate_chunk_result["data"]["meta_data"]
-        current_chunk_num = chunk_total_num - len(chunks)
+        current_chunk_num = chunk_total_num - len(chunks) + 1
         if not kb_id:  # kb_id为空，则根据kb_name获取kb_id
             kb_id = milvus_utils.get_milvus_kb_name_id(user_id, kb_name)  # 获取kb_id
         for chunk in chunks:
@@ -145,7 +145,7 @@ def batch_add_child_chunks(user_id: str, kb_name: str, file_name: str, chunk_id:
         child_chunk_total_num = allocate_child_chunk_result["data"]["child_chunk_total_num"]
         parent_content = allocate_child_chunk_result["data"]["content"]
         meta_data = allocate_child_chunk_result["data"]["meta_data"]
-        child_chunk_current_num = child_chunk_total_num - len(child_contents)
+        child_chunk_current_num = child_chunk_total_num - len(child_contents) + 1
         if not kb_id:  # kb_id为空，则根据kb_name获取kb_id
             kb_id = milvus_utils.get_milvus_kb_name_id(user_id, kb_name)  # 获取kb_id
         for child_content in child_contents:

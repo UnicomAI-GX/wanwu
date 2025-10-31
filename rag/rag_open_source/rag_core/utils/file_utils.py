@@ -74,9 +74,9 @@ def split_parent_child_chunks(filepath: str,config: SplitConfig):
                     continue
                 meta_data = {
                     "file_name": file_name,
-                    "child_chunk_current_num": index,
+                    "child_chunk_current_num": index+1,
                     "child_chunk_total_num": len(child_list),
-                    "chunk_current_num": p_index,
+                    "chunk_current_num": p_index+1,
                     "chunk_total_num": len(docs)
                 }
                 sub_chunks.append({
