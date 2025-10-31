@@ -235,7 +235,7 @@ export default {
                 body: JSON.stringify({...this.sseParams,'history':history}),
                 openWhenHidden: true, //页面退至后台保持连接
                 onopen: async(e) => {
-                    console.log("已建立SSE连接~",new Date().getTime());
+                    //console.log("已建立SSE连接~",new Date().getTime());
                     if (e.status !== 200) {
                         try {
                             const errorData = await e.json();
@@ -298,11 +298,10 @@ export default {
                                         this.setStoreSessionStatus(0)
                                         endStr += worldObj.world
                                         endStr = convertLatexSyntax(endStr)
-                                        endStr = parseSub(endStr, lastIndex)   
-                                        console.log('===>',md.render(endStr))                       
+                                        endStr = parseSub(endStr, lastIndex)                        
                                         let fillData = {
                                             ...commonData,
-                                            "response": md.render(endStr),
+                                            "response":md.render(endStr),
                                             oriResponse:endStr,
                                             finish:worldObj.finish,
                                             searchList:(search_list && search_list.length) ? search_list.map(n => ({

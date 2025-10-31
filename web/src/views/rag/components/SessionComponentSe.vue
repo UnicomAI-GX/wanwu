@@ -211,6 +211,7 @@ marked.setOptions({
   },
 });
 
+
 export default {
   props: ["sessionStatus", "defaultUrl"],
   mixins: [commonMixin],

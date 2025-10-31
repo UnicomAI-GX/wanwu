@@ -1322,7 +1322,7 @@ export default {
     font-size: 13px;
     color: #8b8b8b;
     font-weight: bold;
-    margin-left: 6px;
+    margin:0 0 10px 6px;
     cursor: pointer;
   }
 }

@@ -134,6 +134,8 @@ export default {
       return (
         !this.permissionType === 0 ||
         !this.permissionType === 10 ||
+        (this.permissionType === 20 && row.permissionType === 0) ||
+        (this.permissionType === 20 && row.permissionType === 10) ||
         (this.permissionType === 30 && row.permissionType === 0) ||
         (this.permissionType === 30 && row.permissionType === 10) ||
         (this.permissionType === 30 && row.permissionType === 20)
