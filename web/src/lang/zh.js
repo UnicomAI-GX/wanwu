@@ -805,10 +805,18 @@ export default {
         keyWordPlaceholder:'输入问题中的关键词或文档中的词语搜索',
         newKeyWord:'新建关键词'
     },
+    knowledgeSelect:{
+        title:'选择知识库',
+        searchPlaceholder:'输入知识库名称搜索',
+        public:'公开',
+        private:'私密',
+        createTime:'创建时间',
+        add:'添加',
+        added:'已添加',
+    },
     metaData:{
         batchEdit:'批量编辑元数据值',
         selected:'已选择',
-        cancel:'取消',
     },
     explore:{
         unFavorite:'是否确定将该应用从常用应用列表中移除?',
