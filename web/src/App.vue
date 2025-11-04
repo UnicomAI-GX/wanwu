@@ -23,9 +23,9 @@
   -moz-osx-font-smoothing: grayscale; /*firefox*/
 }
 body,html{
-  width: 100%;
-  //height: 100%;
-  //overflow: hidden;
+  /*width: 100%;
+  height: 100%;
+  overflow: hidden;*/
   /*font-family:'Microsoft YaHei', Arial, sans-serif;*/
   font-family: 'Source Han Sans SC', 'Segoe UI';
 }

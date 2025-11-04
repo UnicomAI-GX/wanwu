@@ -491,7 +491,7 @@ export default {
 .full-menu.layout {
   height:100%;
   /*background: linear-gradient(1deg, #FFFFFF 42%, #FFFFFF 42%, #EBEDFE 98%, #EEF0FF 98%);*/
-  min-height: 660px;
+  /*min-height: 660px;*/
   .outer-container{
     height: 100%;
     .left-page-container {
@@ -617,15 +617,16 @@ export default {
         position: relative;
         margin: 0!important;
         padding: 0!important;
-        height: 100%;
+        width: 100vh;
+        height: 100vh;
         overflow: auto;
         /*background: linear-gradient(1deg, #FFFFFF 42%, #FFFFFF 42%, #EBEDFE 98%, #EEF0FF 98%);
         border-radius: 8px 8px 8px 8px;
         border-left: 0.5px solid #e6e6e6;*/
         .page-container {
-          height: 100%;
+          //height: 100%;
           min-width: 1250px;
-          overflow-x: auto;
+          overflow: auto;
           padding-right: 2px;
         }
       }
