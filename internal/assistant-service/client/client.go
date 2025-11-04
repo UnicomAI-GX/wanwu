@@ -38,6 +38,7 @@ type IClient interface {
 	CreateAssistantTool(ctx context.Context, assistantId uint32, toolId, toolType string, actionName string, userId, orgID string) *err_code.Status
 	DeleteAssistantTool(ctx context.Context, assistantId uint32, toolId string, toolType string, actionName string) *err_code.Status
 	UpdateAssistantTool(ctx context.Context, tool *model.AssistantTool) *err_code.Status
+	UpdateAssistantToolConfig(ctx context.Context, assistantId uint32, toolId, toolConfig string) *err_code.Status
 	GetAssistantTool(ctx context.Context, assistantId uint32, toolId, toolType string, actionName string) (*model.AssistantTool, *err_code.Status)
 	GetAssistantToolList(ctx context.Context, assistantId uint32) ([]*model.AssistantTool, *err_code.Status)
 	DeleteAssistantToolByToolId(ctx context.Context, toolId string, toolType string) *err_code.Status

@@ -74,6 +74,26 @@ func (c *Client) UpdateAssistantTool(ctx context.Context, tool *model.AssistantT
 	return nil
 }
 
+func (c *Client) UpdateAssistantToolConfig(ctx context.Context, assistantId uint32, toolId, toolConfig string) *err_code.Status {
+	// 更新
+	result := sqlopt.SQLOptions(
+		sqlopt.WithAssistantID(assistantId),
+		sqlopt.WithToolId(toolId),
+	).Apply(c.db.WithContext(ctx)).
+		Model(&model.AssistantTool{}).
+		Updates(map[string]interface{}{
+			"tool_config": toolConfig,
+		})
+	if result.Error != nil {
+		return toErrStatus("assistant_tool_config_update", result.Error.Error())
+	}
+	if result.RowsAffected == 0 {
+		return toErrStatus("assistant_tool_config_update", "tool not exists")
+	}
+
+	return nil
+}
+
 func (c *Client) GetAssistantTool(ctx context.Context, assistantId uint32, toolId, toolType, actionName string) (*model.AssistantTool, *err_code.Status) {
 	tool := &model.AssistantTool{}
 	if err := sqlopt.SQLOptions(

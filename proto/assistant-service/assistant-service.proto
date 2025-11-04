@@ -42,6 +42,7 @@ service AssistantService {
   rpc AssistantToolCreate(AssistantToolCreateReq) returns (google.protobuf.Empty) {}
   rpc AssistantToolDelete(AssistantToolDeleteReq) returns (google.protobuf.Empty) {}
   rpc AssistantToolEnableSwitch(AssistantToolEnableSwitchReq) returns (google.protobuf.Empty) {}
+  rpc AssistantToolConfig(AssistantToolConfigReq) returns (google.protobuf.Empty) {}
   rpc AssistantToolDeleteByToolId(AssistantToolDeleteByToolIdReq) returns (google.protobuf.Empty) {}
 
   // --- conversation ---
@@ -216,6 +217,7 @@ message AssistantToolInfos{
   string toolType = 3;
   string actionName = 4;
   bool enable = 5;
+  string toolConfig = 6;
 }
 
 message GetAssistantInfoReq {
@@ -346,6 +348,13 @@ message AssistantToolEnableSwitchReq {
   string actionName = 4;
   bool enable = 5;
   Identity identity = 6;
+}
+
+message AssistantToolConfigReq {
+  string assistantId = 1;
+  string toolId = 2;
+  string toolConfig = 3;
+  Identity identity = 4;
 }
 
 

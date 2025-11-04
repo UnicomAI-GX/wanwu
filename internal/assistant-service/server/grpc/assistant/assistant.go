@@ -312,6 +312,7 @@ func (s *Service) GetAssistantInfo(ctx context.Context, req *assistant_service.G
 			ToolType:   tool.ToolType,
 			ActionName: tool.ActionName,
 			Enable:     tool.Enable,
+			ToolConfig: tool.ToolConfig,
 		})
 	}
 

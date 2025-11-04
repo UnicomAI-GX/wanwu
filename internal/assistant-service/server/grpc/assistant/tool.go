@@ -50,3 +50,13 @@ func (s *Service) AssistantToolEnableSwitch(ctx context.Context, req *assistant_
 	}
 	return &empty.Empty{}, nil
 }
+
+func (s *Service) AssistantToolConfig(ctx context.Context, req *assistant_service.AssistantToolConfigReq) (*empty.Empty, error) {
+	assistantId := util.MustU32(req.AssistantId)
+
+	if status := s.cli.UpdateAssistantToolConfig(ctx, assistantId, req.ToolId, req.ToolConfig); status != nil {
+		return nil, errStatus(errs.Code_AssistantToolErr, status)
+	}
+
+	return &empty.Empty{}, nil
+}

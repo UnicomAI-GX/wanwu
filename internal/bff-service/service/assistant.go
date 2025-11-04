@@ -277,6 +277,23 @@ func AssistantToolEnableSwitch(ctx *gin.Context, userId, orgId string, req reque
 	return err
 }
 
+func AssistantToolConfig(ctx *gin.Context, userId, orgId string, req request.AssistantToolConfigRequest) error {
+	toolConfigJSON, err := json.Marshal(req.ToolConfig)
+	if err != nil {
+		return err
+	}
+	_, err = assistant.AssistantToolConfig(ctx.Request.Context(), &assistant_service.AssistantToolConfigReq{
+		AssistantId: req.AssistantId,
+		ToolId:      req.ToolId,
+		ToolConfig:  string(toolConfigJSON),
+		Identity: &assistant_service.Identity{
+			UserId: userId,
+			OrgId:  orgId,
+		},
+	})
+	return err
+}
+
 func assistantMCPConvert(ctx *gin.Context, assistantMCPInfos []*assistant_service.AssistantMCPInfos) ([]*response.AssistantMCPInfo, error) {
 	// 若查询结果为空，返回空列表
 	if len(assistantMCPInfos) == 0 {
@@ -449,6 +466,12 @@ func assistantToolsConvert(ctx *gin.Context, assistantToolInfos []*assistant_ser
 		}
 
 		if exists {
+			var toolConfig response.ToolConfig
+			if info.ToolConfig != "" {
+				if err := json.Unmarshal([]byte(info.ToolConfig), &toolConfig); err != nil {
+					log.Warnf("解析ToolConfig失败，使用空配置，error: %v, toolConfig: %s", err, info.ToolConfig)
+				}
+			}
 			retToolInfos = append(retToolInfos, &response.AssistantToolInfo{
 				UniqueId:   bff_util.ConcatAssistantToolUniqueId(info.ToolType, info.ToolId),
 				ToolId:     info.ToolId,
@@ -457,6 +480,7 @@ func assistantToolsConvert(ctx *gin.Context, assistantToolInfos []*assistant_ser
 				ActionName: info.ActionName,
 				Enable:     info.Enable,
 				Valid:      true,
+				ToolConfig: toolConfig,
 			})
 		}
 	}

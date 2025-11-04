@@ -33,6 +33,7 @@ func registerAssistant(apiV1 *gin.RouterGroup) {
 	mid.Sub("agent").Reg(apiV1, "/assistant/tool", http.MethodPost, v1.AssistantToolCreate, "添加智能体工具，包括自定义工具和内置工具")
 	mid.Sub("agent").Reg(apiV1, "/assistant/tool", http.MethodDelete, v1.AssistantToolDelete, "删除智能体工具，包括自定义工具和内置工具")
 	mid.Sub("agent").Reg(apiV1, "/assistant/tool/switch", http.MethodPut, v1.AssistantToolEnableSwitch, "智能体启用/停用自定义内置工具")
+	mid.Sub("agent").Reg(apiV1, "/assistant/tool/config", http.MethodPut, v1.AssistantToolConfig, "配置智能体工具，包括自定义工具和内置工具")
 
 	mid.Sub("agent").Reg(apiV1, "/assistant/conversation", http.MethodPost, v1.ConversationCreate, "创建智能体对话")
 	mid.Sub("agent").Reg(apiV1, "/assistant/conversation", http.MethodDelete, v1.ConversationDelete, "删除智能体对话")

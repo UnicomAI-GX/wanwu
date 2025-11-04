@@ -44,13 +44,18 @@ type AssistantMCPInfo struct {
 }
 
 type AssistantToolInfo struct {
-	UniqueId   string `json:"uniqueId"`
-	ToolId     string `json:"toolId"`
-	ToolType   string `json:"toolType" validate:"required,oneof=builtin custom"`
-	ToolName   string `json:"toolName"`
-	ActionName string `json:"actionName"`
-	Enable     bool   `json:"enable"`
-	Valid      bool   `json:"valid"`
+	UniqueId   string     `json:"uniqueId"`
+	ToolId     string     `json:"toolId"`
+	ToolType   string     `json:"toolType" validate:"required,oneof=builtin custom"`
+	ToolName   string     `json:"toolName"`
+	ActionName string     `json:"actionName"`
+	Enable     bool       `json:"enable"`
+	Valid      bool       `json:"valid"`
+	ToolConfig ToolConfig `json:"toolConfig"`
+}
+
+type ToolConfig struct {
+	RerankId string `json:"rerankId,omitempty"`
 }
 
 type ConversationInfo struct {

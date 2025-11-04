@@ -322,6 +322,27 @@ func AssistantToolEnableSwitch(ctx *gin.Context) {
 	gin_util.Response(ctx, nil, err)
 }
 
+// AssistantToolConfig
+//
+//	@Tags			agent
+//	@Summary		配置智能体工具
+//	@Description	配置智能体工具，包括自定义工具和内置工具
+//	@Security		JWT
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		request.AssistantToolConfigRequest	true	"智能体工具配置参数"
+//	@Success		200		{object}	response.Response
+//	@Router			/assistant/tool/config [put]
+func AssistantToolConfig(ctx *gin.Context) {
+	userId, orgId := getUserID(ctx), getOrgID(ctx)
+	var req request.AssistantToolConfigRequest
+	if !gin_util.Bind(ctx, &req) {
+		return
+	}
+	err := service.AssistantToolConfig(ctx, userId, orgId, req)
+	gin_util.Response(ctx, nil, err)
+}
+
 // ConversationCreate
 //
 //	@Tags			agent
