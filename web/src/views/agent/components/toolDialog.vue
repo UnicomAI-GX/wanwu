@@ -163,7 +163,7 @@ export default {
             if(this.activeValue === 'tool'){
                 this.$router.push({path:'/tool?type=tool&mcp=custom'})
             }else if(this.activeValue === 'mcp'){
-                this.$router.push({path:'/tool?type=mcp&mcp=mcp'})
+                this.$router.push({path:'/tool?type=mcp&mcp=integrate'})
             }else{
                 this.$router.push({path:'/appSpace/workflow'})
             }

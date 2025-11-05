@@ -209,8 +209,10 @@
         <!-- 右侧内容 -->
         <el-main>
           <div class="page-container">
-            <router-view></router-view>
-            <div id="container" class="qk-container"></div>
+            <div class="right-page-content">
+              <router-view></router-view>
+              <div id="container" class="qk-container"></div>
+            </div>
           </div>
         </el-main>
       </el-container>
@@ -491,7 +493,7 @@ export default {
 .full-menu.layout {
   height:100%;
   /*background: linear-gradient(1deg, #FFFFFF 42%, #FFFFFF 42%, #EBEDFE 98%, #EEF0FF 98%);*/
-  min-height: 660px;
+  /*min-height: 660px;*/
   .outer-container{
     height: 100%;
     .left-page-container {
@@ -500,12 +502,12 @@ export default {
       height: 100%;
     }
     .left-nav {
-      width: 70px;
+      width: 75px;
       text-align: center;
       padding: 0.5% 0 8px 0;
       position: fixed;
       height: calc(100% - 16px);
-      overflow: scroll;
+      overflow: auto;
       background: #F7F7FC;
       border-radius: 8px;
       box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
@@ -570,7 +572,7 @@ export default {
       .nav-bottom {
         position: absolute;
         bottom: 0;
-        width: 70px;
+        width: 100%;
         text-align: center;
         padding-bottom: 10px;
         img {
@@ -580,7 +582,7 @@ export default {
     }
     /*element ui 样式重写*/
     .inner-container {
-      width: calc(100% - 70px);
+      width: calc(100% - 80px);
       height: 100%;
       border-radius: 10px;
       // border: 1px solid #e6e6e6;
@@ -617,16 +619,20 @@ export default {
         position: relative;
         margin: 0!important;
         padding: 0!important;
-        height: 100%;
+        width: 100%;
+        height: 100vh;
         overflow: auto;
         /*background: linear-gradient(1deg, #FFFFFF 42%, #FFFFFF 42%, #EBEDFE 98%, #EEF0FF 98%);
         border-radius: 8px 8px 8px 8px;
         border-left: 0.5px solid #e6e6e6;*/
         .page-container {
           height: 100%;
-          min-width: 1250px;
-          overflow-x: auto;
+          overflow: auto;
           padding-right: 2px;
+          .right-page-content {
+            min-width: 1250px;
+            height: 100%;
+          }
         }
       }
       /deep/ .el-menu-item {
