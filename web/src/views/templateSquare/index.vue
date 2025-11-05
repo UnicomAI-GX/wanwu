@@ -7,24 +7,32 @@
       </div>
       <!-- tabs -->
       <div class="templateSquare-tabs">
-        <div :class="['templateSquare-tab',{ 'active': type === workflow }]" @click="tabClick(workflow)">工作流模板</div>
+        <div :class="['templateSquare-tab',{ 'active': type === workflow }]" @click="tabClick(workflow)">
+          {{$t('tempSquare.workflow')}}
+        </div>
+        <div :class="['templateSquare-tab',{ 'active': type === prompt }]" @click="tabClick(prompt)">
+          {{$t('tempSquare.prompt')}}
+        </div>
       </div>
 
       <TempSquare :isPublic="isPublic" :type="workflow" ref="tempSquare" v-if="type === workflow" />
+      <PromptTempSquare :isPublic="isPublic" :type="prompt" ref="promptTempSquare" v-if="type === prompt" />
     </div>
   </div>
 </template>
 <script>
 import TempSquare from './tempSquare.vue'
-import { WORKFLOW } from "./constants"
+import PromptTempSquare from "./promptTempSquare.vue"
+import { WORKFLOW, PROMPT } from "./constants"
 
 export default {
-  components: { TempSquare },
+  components: { TempSquare, PromptTempSquare },
   data() {
     return {
       isPublic: true,
       bgColor: 'linear-gradient(1deg, rgb(247, 252, 255) 50%, rgb(233, 246, 254) 98%)',
       workflow: WORKFLOW,
+      prompt: PROMPT,
       type: WORKFLOW
     };
   },

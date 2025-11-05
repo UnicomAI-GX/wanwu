@@ -206,9 +206,9 @@ export default {
       publishType: 'private',
       dialogVisible: false,
       publishList: [
-        {key: 'private', value: this.$t('workFlow.publishText')},
-        {key: 'organization', value: this.$t('workFlow.publicOrgText')},
-        {key: 'public', value: this.$t('workFlow.publicTotalText')}
+        {key: 'private', value: this.$t('workflow.publishText')},
+        {key: 'organization', value: this.$t('workflow.publicOrgText')},
+        {key: 'public', value: this.$t('workflow.publicTotalText')}
       ]
     };
   },

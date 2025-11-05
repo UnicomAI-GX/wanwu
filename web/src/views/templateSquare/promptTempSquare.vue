@@ -47,21 +47,13 @@
                     </div>
                   </div>
                   <div class="card-des">{{ item.desc }}</div>
-                  <div class="card-bottom">
-                    <div class="card-bottom-left">{{$t('tempSquare.downloadCount')}}：{{item.downloadCount || 0}}</div>
-                    <div class="card-bottom-right">
-                      <i
-                        v-if="!isPublic"
-                        class="el-icon-copy-document"
-                        :title="$t('tempSquare.copy')"
-                        @click.stop="copyTemplate(item)"
-                      ></i>
-                      <i
-                        class="el-icon-download"
-                        :title="$t('tempSquare.download')"
-                        @click.stop="downloadTemplate(item)"
-                      ></i>
-                    </div>
+                  <div class="card-bottom" style="display: block; width: 100%; text-align: right">
+                    <i
+                      v-if="!isPublic"
+                      class="el-icon-copy-document"
+                      :title="$t('tempSquare.copy')"
+                      @click.stop="copyTemplate(item)"
+                    ></i>
                   </div>
                 </div>
               </div>
@@ -98,14 +90,16 @@ export default {
       typeRadio: 'all',
       typeList: [
         {name: this.$t('tempSquare.all'), key: 'all'},
-        {name: this.$t('tempSquare.gov'), key: 'gov'},
-        {name: this.$t('tempSquare.industry'), key: 'industry'},
-        {name: this.$t('tempSquare.edu'), key: 'edu'},
-        {name: this.$t('tempSquare.tourism'), key: 'tourism'},
-        // {name: this.$t('tempSquare.medical'), key: 'medical'},
-        {name: this.$t('tempSquare.data'), key: 'data'},
-        {name: this.$t('tempSquare.creator'), key: 'create'},
-        {name: this.$t('tempSquare.search'), key: 'search'},
+        {name: this.$t('tempSquare.learn'), key: 'learn'},
+        {name: this.$t('tempSquare.media'), key: 'media'},
+        {name: this.$t('tempSquare.role'), key: 'role'},
+        {name: this.$t('tempSquare.work'), key: 'work'},
+        {name: this.$t('tempSquare.emotion'), key: 'emotion'},
+        {name: this.$t('tempSquare.legal'), key: 'legal'},
+        {name: this.$t('tempSquare.life'), key: 'life'},
+        {name: this.$t('tempSquare.health'), key: 'health'},
+        {name: this.$t('tempSquare.email'), key: 'email'},
+        {name: this.$t('tempSquare.text'), key: 'copy'},
       ]
     };
   },
@@ -141,18 +135,6 @@ export default {
     },
     copyTemplate(item) {
       this.$refs.cloneWorkflowDialog.openDialog(item)
-    },
-    downloadTemplate(item) {
-      downloadWorkflow({ templateId : item.templateId }).then(response => {
-        const blob = new Blob([response], { type: response.type })
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a")
-        link.href = url
-        link.download = item.name + '.json'
-        link.click()
-        window.URL.revokeObjectURL(link.href)
-        this.doGetWorkflowTempList()
-      })
     },
     handleClick(val) {
       const path = `${this.isPublic ? '/public' : ''}/templateSquare/detail`

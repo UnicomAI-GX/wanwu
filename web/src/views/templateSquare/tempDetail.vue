@@ -17,21 +17,23 @@
     <div class="tempSquare-main">
       <div class="left-info">
         <div class="tempSquare-tabs">
-          <div :class="['tempSquare-tab',{ 'active': tabActive === 0 }]" @click="tabClick(0)">介绍概览</div>
+          <div :class="['tempSquare-tab',{ 'active': tabActive === 0 }]" @click="tabClick(0)">
+            {{$t('tempSquare.info')}}
+          </div>
         </div>
 
         <div>
           <div class="overview bg-border" >
             <div class="overview-item">
-              <div class="item-title">• &nbsp;使用概述</div>
+              <div class="item-title">• &nbsp;{{$t('tempSquare.summary')}}</div>
               <div class="item-desc" v-html="parseTxt(detail.summary)"></div>
             </div>
             <div class="overview-item">
-              <div class="item-title">• &nbsp;特性说明</div>
+              <div class="item-title">• &nbsp;{{$t('tempSquare.feature')}}</div>
               <div class="item-desc" v-html="parseTxt(detail.feature)"></div>
             </div>
             <div class="overview-item">
-              <div class="item-title">• &nbsp;应用场景</div>
+              <div class="item-title">• &nbsp;{{$t('tempSquare.scenario')}}</div>
               <div class="item-desc" >
                 <div v-html="parseTxt(detail.scenario)"></div>
               </div>
@@ -39,13 +41,13 @@
           </div>
           <div class="overview bg-border" v-if="detail.note">
             <div class="overview-item">
-              <div class="item-title">• &nbsp;注意事项</div>
+              <div class="item-title">• &nbsp;{{$t('tempSquare.note')}}</div>
               <div class="item-desc" v-html="parseTxt(detail.note)"></div>
             </div>
           </div>
           <div class="overview bg-border" v-if="detail.detail">
             <div class="overview-item">
-              <div class="item-title">• &nbsp;详情</div>
+              <div class="item-title">• &nbsp;{{$t('tempSquare.detail')}}</div>
               <div class="item-desc">
                 <div class="readme-content markdown-body tempSquare-markdown" v-html="md.render(detail.detail || '')"></div>
               </div>
@@ -55,7 +57,7 @@
       </div>
 
       <div class="right-recommend">
-        <p style="margin: 20px 0;color: #333;">其他模板查看</p>
+        <p style="margin: 20px 0;color: #333;">{{$t('tempSquare.otherTemp')}}</p>
         <div class="recommend-item" v-for="(item ,i) in recommendList" :key="`${i}rc`" @click="handleClick(item)">
           <img class="logo" v-if="item.avatar && item.avatar.path" :src="item.avatar.path" />
           <p class="name">{{item.name}}</p>
