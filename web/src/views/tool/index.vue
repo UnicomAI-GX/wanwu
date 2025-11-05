@@ -22,14 +22,15 @@
 import mcp from './mcp'
 import tool from './tool'
 import prompt from './prompt'
+import { MCP, TOOL, PROMPT } from './constants'
 
 export default {
   data() {
     return {
-      tabActive: 0,
-      mcp: 'mcp',
-      tool: 'tool',
-      prompt: 'prompt',
+      tabActive: MCP,
+      mcp: MCP,
+      tool: TOOL,
+      prompt: PROMPT,
     };
   },
   watch: {
@@ -47,8 +48,8 @@ export default {
     this.tabActive = type
   },
   methods: {
-    tabClick(status) {
-      this.tabActive = status
+    tabClick(type) {
+      this.tabActive = type
     },
   },
   components: {

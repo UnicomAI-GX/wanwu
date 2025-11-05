@@ -68,6 +68,7 @@
 <script>
 import { uploadAvatar } from "@/api/user"
 import { copyPromptTemplate, createCustomPrompt, editCustomPrompt } from "@/api/templateSquare"
+import { PROMPT } from "@/views/tool/constants"
 
 export default {
   props: {
@@ -187,7 +188,7 @@ export default {
             if (res.code === 0) {
               this.$message.success(this.$t('tempSquare.copySuccess'))
               this.dialogVisible = false
-              this.$router.push({ path: '/tool', query: { type: 'prompt' } })
+              this.$router.push({ path: '/tool', query: { type: PROMPT } })
             }
             return
           }
