@@ -41,7 +41,7 @@ type AssistantMCPInfo struct {
 	ActionName string         `json:"actionName"`
 	Enable     bool           `json:"enable"`
 	Valid      bool           `json:"valid"`
-	AvatarPath request.Avatar `json:"avatar"`
+	Avatar     request.Avatar `json:"avatar"`
 }
 
 type AssistantToolInfo struct {
@@ -53,7 +53,7 @@ type AssistantToolInfo struct {
 	Enable     bool           `json:"enable"`
 	Valid      bool           `json:"valid"`
 	ToolConfig ToolConfig     `json:"toolConfig"`
-	AvatarPath request.Avatar `json:"avatar"`
+	Avatar     request.Avatar `json:"avatar"`
 }
 
 type ToolConfig struct {

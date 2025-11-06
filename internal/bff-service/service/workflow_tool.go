@@ -100,7 +100,7 @@ func GetWorkflowToolDetail(ctx *gin.Context, userId, orgId, toolId, toolType, op
 			return nil, err
 		}
 		schema = resp.Schema
-		iconUrl, _ = net_url.JoinPath(config.Cfg().Server.ApiBaseUrl, cacheMCPAvatar(ctx, resp.Info.AvatarPath).Path)
+		iconUrl, _ = net_url.JoinPath(config.Cfg().Server.ApiBaseUrl, cacheMCPServiceAvatar(ctx, resp.Info.AvatarPath).Path)
 	case constant.ToolTypeCustom:
 		resp, err := mcp.GetCustomToolInfo(ctx.Request.Context(), &mcp_service.GetCustomToolInfoReq{
 			CustomToolId: toolId,

@@ -11,7 +11,6 @@ import (
 	mcp_service "github.com/UnicomAI/wanwu/api/proto/mcp-service"
 	"github.com/UnicomAI/wanwu/internal/mcp-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/mcp-service/config"
-	"github.com/UnicomAI/wanwu/pkg/constant"
 	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	"github.com/UnicomAI/wanwu/pkg/util"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -164,11 +163,11 @@ func (s *Service) GetMCPAvatar(ctx context.Context, req *mcp_service.GetMCPAvata
 
 func buildCustomMCPDetail(mcp *model.MCPClient) *mcp_service.CustomMCPDetail {
 	ret := &mcp_service.CustomMCPDetail{
-		McpId:  util.Int2Str(mcp.ID),
-		SseUrl: mcp.SseUrl,
+		McpId:      util.Int2Str(mcp.ID),
+		SseUrl:     mcp.SseUrl,
+		AvatarPath: mcp.AvatarPath,
 		Info: &mcp_service.SquareMCPInfo{
 			McpSquareId: mcp.McpSquareId,
-			AvatarPath:  mcp.AvatarPath,
 			Name:        mcp.Name,
 			Desc:        mcp.Desc,
 			From:        mcp.From,
@@ -180,7 +179,7 @@ func buildCustomMCPDetail(mcp *model.MCPClient) *mcp_service.CustomMCPDetail {
 			// 广场MCP不存在，则将McpSquareId置空
 			ret.Info.McpSquareId = ""
 		} else {
-			ret.Info.AvatarPath = mcp.AvatarPath
+			ret.Info.AvatarPath = mcpSquareInfo.AvatarPath
 			ret.Info.Category = mcpSquareInfo.Category
 			ret.Intro = buildSquareMCPIntro(mcpSquareInfo)
 		}
@@ -191,10 +190,10 @@ func buildCustomMCPDetail(mcp *model.MCPClient) *mcp_service.CustomMCPDetail {
 func buildCustomMCPInfo(mcp *model.MCPClient) *mcp_service.CustomMCPInfo {
 	detail := buildCustomMCPDetail(mcp)
 	return &mcp_service.CustomMCPInfo{
-		McpId:  detail.McpId,
-		SseUrl: detail.SseUrl,
-		Info:   detail.Info,
-		Type:   constant.MCPTypeMCP,
+		McpId:      detail.McpId,
+		SseUrl:     detail.SseUrl,
+		AvatarPath: detail.AvatarPath,
+		Info:       detail.Info,
 	}
 }
 

@@ -293,20 +293,20 @@ func assistantMCPConvert(ctx *gin.Context, assistantMCPInfos []*assistant_servic
 	for _, info := range assistantMCPInfos {
 		var exists bool
 		var mcpName string
-		var avatarPath request.Avatar
+		var avatar request.Avatar
 
 		switch info.McpType {
 		case constant.MCPTypeMCP:
 			if item, ok := mcpDetailMap[info.McpId]; ok {
 				exists = true
 				mcpName = item.Info.Name
-				avatarPath = cacheCustomMCPAvatar(ctx, item.Info.AvatarPath)
+				avatar = cacheMCPAvatar(ctx, item.Info.AvatarPath, item.AvatarPath)
 			}
 		case constant.MCPTypeMCPServer:
 			if item, ok := mcpserverDetailMap[info.McpId]; ok {
 				exists = true
 				mcpName = item.Name
-				avatarPath = cacheCustomMCPAvatar(ctx, item.AvatarPath)
+				avatar = cacheMCPServerAvatar(ctx, item.AvatarPath)
 			}
 		}
 
@@ -319,7 +319,7 @@ func assistantMCPConvert(ctx *gin.Context, assistantMCPInfos []*assistant_servic
 				ActionName: info.ActionName,
 				Enable:     info.Enable,
 				Valid:      true,
-				AvatarPath: avatarPath,
+				Avatar:     avatar,
 			})
 		}
 	}
@@ -335,11 +335,12 @@ func assistantToolsConvert(ctx *gin.Context, assistantToolInfos []*assistant_ser
 
 	// 提取工具ID列表
 	var customToolIds, builtinToolIds []string
-	for _, b := range assistantToolInfos {
-		if b.ToolType == constant.ToolTypeCustom {
-			customToolIds = append(customToolIds, b.ToolId)
-		} else if b.ToolType == constant.ToolTypeBuiltIn {
-			builtinToolIds = append(builtinToolIds, b.ToolId)
+	for _, tool := range assistantToolInfos {
+		switch tool.ToolType {
+		case constant.ToolTypeCustom:
+			customToolIds = append(customToolIds, tool.ToolId)
+		case constant.ToolTypeBuiltIn:
+			builtinToolIds = append(builtinToolIds, tool.ToolId)
 		}
 	}
 
@@ -375,13 +376,13 @@ func assistantToolsConvert(ctx *gin.Context, assistantToolInfos []*assistant_ser
 			if item, ok := customToolMap[info.ToolId]; ok {
 				exists = true
 				toolName = item.Name
-				avatar = cacheCustomToolAvatar(ctx, item.AvatarPath)
+				avatar = cacheToolAvatar(ctx, constant.ToolTypeCustom, item.AvatarPath)
 			}
 		case constant.ToolTypeBuiltIn:
 			if item, ok := builtinToolMap[info.ToolId]; ok {
 				exists = true
 				toolName = item.Name
-				avatar = cacheMCPAvatar(ctx, item.AvatarPath)
+				avatar = cacheToolAvatar(ctx, constant.ToolTypeBuiltIn, item.AvatarPath)
 			}
 		}
 
@@ -401,7 +402,7 @@ func assistantToolsConvert(ctx *gin.Context, assistantToolInfos []*assistant_ser
 				Enable:     info.Enable,
 				Valid:      true,
 				ToolConfig: toolConfig,
-				AvatarPath: avatar,
+				Avatar:     avatar,
 			})
 		}
 	}

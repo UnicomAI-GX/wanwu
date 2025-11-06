@@ -139,15 +139,16 @@ message MCPAvatar {
 message CustomMCPDetail {
     string mcpId = 1;
     string sseUrl = 2;
-    SquareMCPInfo info = 3;
-    SquareMCPIntro intro = 4;
+    string avatarPath = 3;
+    SquareMCPInfo info = 4;
+    SquareMCPIntro intro = 5;
 }
 
 message CustomMCPInfo {
     string mcpId = 1;
     string sseUrl = 2;
-    SquareMCPInfo info = 3;
-    string type = 4;
+    string avatarPath = 3;
+    SquareMCPInfo info = 4;
 }
 
 message SquareMCPDetail {

@@ -373,7 +373,7 @@ func createMCPServerTool(ctx *gin.Context, mcpServerID string, builder mcpServer
 func toMCPServerInfo(ctx *gin.Context, mcpServerInfo *mcp_service.MCPServerInfo) response.MCPServerInfo {
 	return response.MCPServerInfo{
 		MCPServerID: mcpServerInfo.McpServerId,
-		Avatar:      CacheAvatar(ctx, mcpServerInfo.AvatarPath, true),
+		Avatar:      cacheMCPServerAvatar(ctx, mcpServerInfo.AvatarPath),
 		Name:        mcpServerInfo.Name,
 		Desc:        mcpServerInfo.Desc,
 		ToolNum:     mcpServerInfo.ToolNum,
@@ -393,7 +393,7 @@ func toMCPServerDetail(ctx *gin.Context, mcpServerInfo *mcp_service.MCPServerInf
 	}
 	return &response.MCPServerDetail{
 		MCPServerID:       mcpServerInfo.McpServerId,
-		Avatar:            CacheAvatar(ctx, mcpServerInfo.AvatarPath, true),
+		Avatar:            cacheMCPServerAvatar(ctx, mcpServerInfo.AvatarPath),
 		Name:              mcpServerInfo.Name,
 		Desc:              mcpServerInfo.Desc,
 		SSEURL:            mcpServerInfo.SseUrl,

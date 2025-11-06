@@ -27,14 +27,6 @@ func GetToolSelect(ctx *gin.Context, userID, orgID string, name string) (*respon
 
 	var list []response.ToolSelect
 	for _, item := range resp.List {
-
-		var avatar request.Avatar
-		if item.ToolType == constant.ToolTypeBuiltIn {
-			avatar = cacheMCPAvatar(ctx, item.AvatarPath)
-		} else if item.ToolType == constant.ToolTypeCustom {
-			avatar = cacheCustomToolAvatar(ctx, item.AvatarPath)
-		}
-
 		list = append(list, response.ToolSelect{
 			UniqueId: util.ConcatAssistantToolUniqueId("tool-", item.ToolId),
 			ToolInfo: response.ToolInfo{
@@ -44,7 +36,7 @@ func GetToolSelect(ctx *gin.Context, userID, orgID string, name string) (*respon
 				Desc:            item.Desc,
 				APIKey:          item.ApiKey,
 				NeedApiKeyInput: item.NeedApiKeyInput,
-				Avatar:          avatar,
+				Avatar:          cacheToolAvatar(ctx, item.ToolType, item.AvatarPath),
 			},
 		})
 	}

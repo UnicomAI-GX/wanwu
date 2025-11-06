@@ -34,7 +34,7 @@ func GetToolSquareList(ctx *gin.Context, userID, orgID, name string) (*response.
 	for _, item := range resp.Infos {
 		list = append(list, response.ToolSquareInfo{
 			ToolSquareID: item.ToolSquareId,
-			Avatar:       cacheMCPAvatar(ctx, item.AvatarPath),
+			Avatar:       cacheMCPServiceAvatar(ctx, item.AvatarPath),
 			Name:         item.Name,
 			Desc:         item.Desc,
 			Tags:         getToolTags(item.Tags),
@@ -83,7 +83,7 @@ func toToolSquareDetail(ctx *gin.Context, toolSquare *mcp_service.SquareToolDeta
 func toToolSquareInfo(ctx *gin.Context, toolSquareInfo *mcp_service.ToolSquareInfo) response.ToolSquareInfo {
 	return response.ToolSquareInfo{
 		ToolSquareID: toolSquareInfo.ToolSquareId,
-		Avatar:       cacheMCPAvatar(ctx, toolSquareInfo.AvatarPath),
+		Avatar:       cacheMCPServiceAvatar(ctx, toolSquareInfo.AvatarPath),
 		Name:         toolSquareInfo.Name,
 		Desc:         toolSquareInfo.Desc,
 		Tags:         getToolTags(toolSquareInfo.Tags),
