@@ -114,7 +114,14 @@ export default {
             endPlaceholder: '结束时间',
             week: '最近一周',
             month: '最近一个月',
-            threeMonth: '最新三个月'
+            threeMonth: '最新三个月',
+            day: '最近一天',
+            data: '数据查询周期',
+            oneMonth: '最近一月',
+            startDate: '开始日期',
+            endDate: '结束日期',
+            custom: '自定义',
+            at: '至'
         },
         confirm: {
             confirm: '确定',
@@ -959,5 +966,24 @@ export default {
         docWord:'文档中的词语',
         linkKnowledge:'关联知识库',
         undateTime:'更新时间'
-    }
+    },
+    statistics: {
+        title: '统计分析',
+        overview: '数据概况',
+        cumulativeClient: '累计用户量',
+        additionClient: '新增用户量',
+        activeClient: '日均用户量',
+        browse: '平台浏览量',
+        percentage: '环比上周期',
+    },
+    statisticsEcharts: {
+        units: ["", "万", "亿", "万亿", "亿亿"],
+        date: '日期',
+        unit: '单位',
+        minute: '分',
+        saveImage: '保存为图片',
+        dateView: '数据视图',
+        close: '关闭',
+        reload: '刷新'
+    },
 }

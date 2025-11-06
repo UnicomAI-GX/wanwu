@@ -13,6 +13,9 @@
       <div :class="['setting-tab',{ 'active': tabActive === 1 }]" @click="tabClick(1)">
         {{$t('infoSetting.title')}}
       </div>
+      <div :class="['setting-tab',{ 'active': tabActive === 2 }]" @click="tabClick(2) " v-if="checkPerm(statisticsPerm)">
+        {{$t('statistics.title')}}
+      </div>
     </div>
 
     <div v-if="tabActive === 0" style="margin: 0 20px">
@@ -34,6 +37,9 @@
     <div v-if="tabActive === 1" style="margin: 30px 20px 0 20px;">
       <InfoSetting />
     </div>
+    <div v-if="tabActive === 2" style="margin: 30px 20px 0 20px;">
+      <Statistics />
+    </div>
   </div>
 </template>
 
@@ -42,15 +48,17 @@ import User from "./user/index.vue"
 import Role from "./role/index.vue"
 import Org from "./org/index.vue"
 import InfoSetting from "@/views/infoSetting/index.vue";
+import Statistics from "@/views/userCenter/components/statistics";
 import { checkPerm, PERMS } from "@/router/permission"
 
 export default {
-  components: {User, Role, Org, InfoSetting},
+  components: {User, Role, Org, InfoSetting, Statistics},
   data() {
     return {
       radio: '',
       tabActive: 0,
       settingPerm: PERMS.SETTING,
+      statisticsPerm: PERMS.STATISTIC,
       list: [
         {name: '用户', key: 'user', perm: PERMS.PERMISSION_USER},
         {name: '角色', key: 'role', perm: PERMS.PERMISSION_ROLE},

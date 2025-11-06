@@ -169,3 +169,55 @@ export function formatScore(score) {
 export function avatarSrc(path){
     return basePath + '/user/api/' + path
 }
+
+// 换算单位万/亿/万亿，保留2位小数
+export const formatAmount = (num, returnType = 'string', preserveRange = false) => {
+    const units = i18n.t("statisticsEcharts.units");
+    const isHasDecimal = num.toString().includes('.');
+    let formatNum = num
+    let simplifiedNum = num.toString();
+
+    // 99999以内原样显示
+    if (preserveRange && num < 100000) {
+        if (returnType === 'object') {
+            return {
+                value: simplifiedNum,
+                type: ''
+            };
+        } else {
+            return simplifiedNum;
+        }
+    }
+
+    if (isHasDecimal) {
+        formatNum = Number(num.toString().slice(0, num.toString().indexOf('.')))
+    }
+    // 获取数字的数量级
+    let unitIndex = Math.floor((String(formatNum).length - 1) / 4);
+
+    if (unitIndex > 0) {
+        const unit = units[unitIndex];
+
+        const divisor = Math.pow(10, unitIndex * 4);
+        //缩小相应倍数，并保留2位小数
+        const formattedValue = (num / divisor).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+
+        if (returnType === 'object') {
+            return {
+                value: formattedValue,
+                type: unit
+            };
+        } else {
+            simplifiedNum = formattedValue + unit;
+        }
+    } else if (returnType === 'object') {
+        // 数量级为0时的对象格式返回
+        return {
+            value: simplifiedNum,
+            type: ''
+        };
+    }
+
+    return simplifiedNum;
+}
+
