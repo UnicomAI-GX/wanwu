@@ -44,7 +44,11 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="知识图谱:" prop="knowledgeGraph.switch">
+            <el-form-item prop="knowledgeGraph.switch">
+                <template #label>
+                   <span>知识图谱:</span>
+                   <span></span>
+                </template>
                 <el-switch v-model="ruleForm.knowledgeGraph.switch"></el-switch>
             </el-form-item>
             <el-form-item label="模型选择:" prop="knowledgeGraph.llmModelId" v-if="ruleForm.knowledgeGraph.switch">
