@@ -39,11 +39,13 @@ from utils import file_utils
 from utils import rerank_utils
 from utils import minio_utils
 from utils import redis_utils
+from utils import timing
 import time
 
 from logging_config import setup_logging
 from settings import REPLACE_MINIO_DOWNLOAD_URL
 from settings import USE_POST_FILTER
+from settings import GRAPH_SERVER_URL
 from utils.constant import USER_DATA_PATH
 
 logger_name = 'rag_kb_utils'
@@ -853,3 +855,275 @@ def convert_office_file(file_path, target_dir, target_format):
     else:
         logger.info(f"convert_office_file err => {file_path} ,res_filename:{res_filename}")
         return False
+
+@timing.timing_decorator(logger, include_args=False)
+def get_extrac_graph_data(chunks, file_name, schema=None):
+    """获取知识图谱数据"""
+    try:
+        start_time = datetime.now()
+        headers = {
+            "Content-Type": "application/json",
+        }
+        data = {
+            "chunks": chunks,
+            "schema": schema,
+            "file_name":file_name
+        }
+        # 将JSON数据转换好格式
+        json_data = json.dumps(data)
+        EXTRAC_GRAPH_DATA_URL = GRAPH_SERVER_URL + "/extrac_graph_data"
+        response = requests.post(EXTRAC_GRAPH_DATA_URL, headers=headers, data=json_data, timeout=600)
+        if response.status_code == 200:
+            result_data = json.loads(response.text)
+            finish_time1 = datetime.now()
+            time_difference1 = finish_time1 - start_time
+            logger.info(f"extrac_graph_data -{EXTRAC_GRAPH_DATA_URL}: 请求成功 耗时：{time_difference1}")
+            # logger.info(f"extrac_graph_data result_data:{result_data}")
+            return result_data
+        else:
+            # 如果不是200，则抛出一个自定义异常
+            raise Exception(f"{EXTRAC_GRAPH_DATA_URL} 请求失败，错误信息：" + response.text)
+        # print('query_rewrite_cls: %d',result)
+    except Exception as e:
+        raise Exception("get_extrac_graph_data 发生异常：" + str(e))
+
+
+
+@timing.timing_decorator(logger, include_args=False)
+def generate_community_reports(kb_name, file_name, graph_data):
+    """获取知识图谱社区报告"""
+    try:
+        start_time = datetime.now()
+        headers = {
+            "Content-Type": "application/json",
+        }
+        data = {
+            "graph_data": graph_data,
+            "kb_name": kb_name,
+            "file_name": file_name
+        }
+        # 将JSON数据转换好格式
+        json_data = json.dumps(data)
+        GENERATE_COMMUNITY_REPORTS_URL = GRAPH_SERVER_URL + "/generate_community_reports"
+        response = requests.post(GENERATE_COMMUNITY_REPORTS_URL, headers=headers, data=json_data, timeout=600)
+        if response.status_code == 200:
+            result_data = json.loads(response.text)
+            finish_time1 = datetime.now()
+            time_difference1 = finish_time1 - start_time
+            logger.info(f"generate_community_reports -{GENERATE_COMMUNITY_REPORTS_URL}: 请求成功 耗时：{time_difference1}")
+            return result_data
+        else:
+            # 如果不是200，则抛出一个自定义异常
+            raise Exception(f"{GENERATE_COMMUNITY_REPORTS_URL} 请求失败，错误信息：" + response.text)
+    except Exception as e:
+        raise Exception("generate_community_reports 发生异常：" + str(e))
+
+
+@timing.timing_decorator(logger, include_args=False)
+def delete_file_from_graph(kb_name, file_name):
+    """知识图谱删除文件"""
+    try:
+        start_time = datetime.now()
+        headers = {
+            "Content-Type": "application/json",
+        }
+        data = {
+            "kb_name": kb_name,
+            "file_name": file_name
+        }
+        # 将JSON数据转换好格式
+        json_data = json.dumps(data)
+        DELETE_FILE_URL = GRAPH_SERVER_URL + "/delete_file"
+        response = requests.post(DELETE_FILE_URL, headers=headers, data=json_data, timeout=600)
+        if response.status_code == 200:
+            result_data = json.loads(response.text)
+            finish_time1 = datetime.now()
+            time_difference1 = finish_time1 - start_time
+            logger.info(f"graph delete_file -{DELETE_FILE_URL}: 请求成功 耗时：{time_difference1}")
+            return result_data
+        else:
+            # 如果不是200，则抛出一个自定义异常
+            raise Exception(f"{DELETE_FILE_URL} 请求失败，错误信息：" + response.text)
+    except Exception as e:
+        raise Exception("graph delete_file 发生异常：" + str(e))
+
+@timing.timing_decorator(logger, include_args=False)
+def delete_file_from_graph(kb_name, file_name):
+    """知识图谱删除文件"""
+    try:
+        start_time = datetime.now()
+        headers = {
+            "Content-Type": "application/json",
+        }
+        data = {
+            "kb_name": kb_name,
+            "file_name": file_name
+        }
+        # 将JSON数据转换好格式
+        json_data = json.dumps(data)
+        DELETE_FILE_URL = GRAPH_SERVER_URL + "/delete_file"
+        response = requests.post(DELETE_FILE_URL, headers=headers, data=json_data, timeout=600)
+        if response.status_code == 200:
+            result_data = json.loads(response.text)
+            finish_time1 = datetime.now()
+            time_difference1 = finish_time1 - start_time
+            logger.info(f"graph delete_file -{DELETE_FILE_URL}: 请求成功 耗时：{time_difference1}")
+            return result_data
+        else:
+            # 如果不是200，则抛出一个自定义异常
+            raise Exception(f"{DELETE_FILE_URL} 请求失败，错误信息：" + response.text)
+    except Exception as e:
+        raise Exception("graph delete_file 发生异常：" + str(e))
+
+@timing.timing_decorator(logger, include_args=False)
+def delete_kb_graph(kb_name):
+    """知识图谱删除"""
+    try:
+        start_time = datetime.now()
+        headers = {
+            "Content-Type": "application/json",
+        }
+        data = {
+            "kb_name": kb_name,
+        }
+        # 将JSON数据转换好格式
+        json_data = json.dumps(data)
+        DELETE_KB_URL = GRAPH_SERVER_URL + "/delete_kb"
+        response = requests.post(DELETE_KB_URL, headers=headers, data=json_data, timeout=600)
+        if response.status_code == 200:
+            result_data = json.loads(response.text)
+            finish_time1 = datetime.now()
+            time_difference1 = finish_time1 - start_time
+            logger.info(f"graph delete_kb_graph -{DELETE_KB_URL}: 请求成功 耗时：{time_difference1}")
+            return result_data
+        else:
+            # 如果不是200，则抛出一个自定义异常
+            raise Exception(f"{DELETE_KB_URL} 请求失败，错误信息：" + response.text)
+    except Exception as e:
+        raise Exception("graph delete_kb 发生异常：" + str(e))
+
+
+def get_graph_vocabulary_set(kb_ids: list):
+    """处理获取知识图谱实体词表数据"""
+    graph_redis_client = redis_utils.get_redis_connection()
+    kb_graph_vocabulary_list = []
+    for kb_id in kb_ids:
+        kb_graph_vocabulary_set = redis_utils.query_graph_vocabulary_set(graph_redis_client, kb_id)
+        res_vocabulary_list = [v.split("|||schema_type:")[0] for v in kb_graph_vocabulary_set]
+        res_vocabulary_type_list = [v.split("|||schema_type:")[1] for v in kb_graph_vocabulary_set]
+        kb_graph_vocabulary_list.append((res_vocabulary_list, res_vocabulary_type_list))
+    # 处理返回结果
+    return kb_graph_vocabulary_list
+
+
+def load_graph_from_json(relationships: list) -> nx.MultiDiGraph:
+    """
+    Load a knowledge graph from JSON format
+
+    Expected JSON format:
+    [
+        {
+            "start_node": {
+                "label": "entity",
+                "properties": {"name": "Entity Name", "description": "..."}
+            },
+            "relation": "relation_type",
+            "end_node": {
+                "label": "entity",
+                "properties": {"name": "Entity Name", "description": "..."}
+            }
+        }
+    ]
+    """
+    graph = nx.MultiDiGraph()
+    # Track nodes to avoid duplicates and assign consistent IDs
+    node_mapping = {}  # (label, name) -> node_id
+    node_counter = 0
+
+    for rel in relationships:
+        start_node_data = rel["start_node"]
+        end_node_data = rel["end_node"]
+        relation = rel["relation"]
+
+        # Create unique key for start node - ensure name is a string
+        start_name = start_node_data["properties"].get("name", "")
+        if isinstance(start_name, list):
+            start_name = ", ".join(str(item) for item in start_name)
+        elif not isinstance(start_name, str):
+            start_name = str(start_name)
+
+        start_key = (start_node_data["label"], start_name)
+        if start_key not in node_mapping:
+            node_id = f"{start_node_data['label']}_{node_counter}"
+            node_mapping[start_key] = node_id
+            node_counter += 1
+
+            # Add node with all properties
+            node_attrs = {
+                "label": start_node_data["label"],
+                "properties": start_node_data["properties"]
+            }
+
+            # Add level based on label
+            if start_node_data["label"] == "attribute":
+                node_attrs["level"] = 1
+            elif start_node_data["label"] == "entity":
+                node_attrs["level"] = 2
+            elif start_node_data["label"] == "keyword":
+                node_attrs["level"] = 3
+            elif start_node_data["label"] == "community":
+                node_attrs["level"] = 4
+            else:
+                node_attrs["level"] = 2  # Default level
+
+            graph.add_node(node_id, **node_attrs)
+
+        # Create unique key for end node - ensure name is a string
+        end_name = end_node_data["properties"].get("name", "")
+        if isinstance(end_name, list):
+            end_name = ", ".join(str(item) for item in end_name)
+        elif not isinstance(end_name, str):
+            end_name = str(end_name)
+
+        end_key = (end_node_data["label"], end_name)
+        if end_key not in node_mapping:
+            node_id = f"{end_node_data['label']}_{node_counter}"
+            node_mapping[end_key] = node_id
+            node_counter += 1
+
+            # Add node with all properties
+            node_attrs = {
+                "label": end_node_data["label"],
+                "properties": end_node_data["properties"]
+            }
+
+            # Add level based on label
+            if end_node_data["label"] == "attribute":
+                node_attrs["level"] = 1
+            elif end_node_data["label"] == "entity":
+                node_attrs["level"] = 2
+            elif end_node_data["label"] == "keyword":
+                node_attrs["level"] = 3
+            elif end_node_data["label"] == "community":
+                node_attrs["level"] = 4
+            else:
+                node_attrs["level"] = 2  # Default level
+
+            graph.add_node(node_id, **node_attrs)
+
+        # Add edge
+        start_id = node_mapping[start_key]
+        end_id = node_mapping[end_key]
+        graph.add_edge(start_id, end_id, relation=relation)
+
+    # ========= deduplicate triples in lv1 and lv2 =========
+    new_graph = nx.MultiDiGraph()
+    for node, node_data in graph.nodes(data=True):
+        new_graph.add_node(node, **node_data)
+    seen_keys = set()
+    for u, v, key, data in graph.edges(keys=True, data=True):
+        if (u, v, key) not in seen_keys:
+            seen_keys.add((u, v, key))
+            new_graph.add_edge(u, v, key=key, **data)
+    # ========= deduplicate triples in lv1 and lv2 =========
+    return new_graph

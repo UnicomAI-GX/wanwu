@@ -26,7 +26,7 @@ KAFKA_TOPICS = config.getstr('KAFKA', 'TOPICS')
 KAFKA_GROUP_ID = config.getstr('KAFKA', 'GROUP_ID')
 KAFKA_ENABLE_AUTO_COMMIT = config.getboolean('KAFKA', 'ENABLE_AUTO_COMMIT')
 FLYWHEEL_KAFKA_TOPIC = config.getstr('KAFKA', 'FLYWHEEL_KAFKA_TOPIC')
-
+GRAPH_SERVER_URL = config.getstr('KAFKA', 'GRAPH_SERVER_URL')
 MQ_REL_URL = os.getenv("KAFKA_MQ_REL_URL")
 if MQ_REL_URL is None:
     MQ_REL_URL = config.getstr('KAFKA', 'MQ_REL_URL')
