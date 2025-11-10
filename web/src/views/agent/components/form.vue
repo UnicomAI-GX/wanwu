@@ -685,7 +685,7 @@ export default {
         this.$refs.promptTemplate.getPromptTemplateList()
     },
     handleShowPrompt(){
-      this.$refs.createPrompt.openDialog();
+      this.$refs.createPrompt.openDialog({prompt: this.editForm.instructions});
     },
     getPrompt(prompt){
       this.editForm.instructions = prompt;
