@@ -35,7 +35,7 @@ def kafkal():
                                      sasl_mechanism='PLAIN',
                                      sasl_plain_username=KAFKA_SASL_PLAIN_USERNAME,
                                      sasl_plain_password=KAFKA_SASL_PLAIN_PASSWORD,
-                                     group_id=KAFKA_GROUP_ID,
+                                     group_id=KAFKA_GRAPH_GROUP_ID,
                                      enable_auto_commit=KAFKA_ENABLE_AUTO_COMMIT,
                                      max_poll_records=1,  # 设置每次最多拉取1条消息
                                      # max_poll_interval_ms=8000000,  # 设置最大轮询间隔为120分钟
@@ -44,7 +44,7 @@ def kafkal():
         else:
             consumer = KafkaConsumer(KAFKA_GRAPH_TOPICS,
                                      bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-                                     group_id=KAFKA_GROUP_ID,
+                                     group_id=KAFKA_GRAPH_GROUP_ID,
                                      enable_auto_commit=KAFKA_ENABLE_AUTO_COMMIT,
                                      max_poll_records=1,  # 设置每次最多拉取1条消息
                                      # max_poll_interval_ms=8000000,  # 设置最大轮询间隔为120分钟
