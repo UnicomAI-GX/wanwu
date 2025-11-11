@@ -110,6 +110,7 @@ export default {
       this.prompt = ''
       this.modelId = ''
       this.dialogVisible = false
+      this.loading = false
     },
     stopEventSource() {
       this.ctrlAbort && this.ctrlAbort.abort()
