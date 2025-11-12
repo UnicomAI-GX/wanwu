@@ -34,11 +34,11 @@ def add_file(user_id, kb_name, file_name, file_meta, kb_id=""):
         return {'code': 1, "message": f"{e}"}
 
 
-def allocate_chunks(user_id, kb_name, file_name, count, kb_id=""):
+def allocate_chunks(user_id, kb_name, file_name, count, chunk_type="text", kb_id=""):
     url = ES_BASE_URL + '/api/v1/rag/es/allocate_chunks'
     headers = {'Content-Type': 'application/json'}
 
-    req_data = {'user_id': user_id, 'kb_name': kb_name, 'kb_id': kb_id, 'file_name': file_name, 'count': count}
+    req_data = {'user_id': user_id, 'kb_name': kb_name, 'kb_id': kb_id, 'file_name': file_name, 'count': count, "chunk_type":chunk_type}
 
     try:
         response = requests.post(url, headers=headers, json=req_data, timeout=TIME_OUT)

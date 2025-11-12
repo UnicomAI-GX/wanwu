@@ -21,6 +21,7 @@ if KAFKA_BOOTSTRAP_SERVERS is None or KAFKA_SASL_PLAIN_USERNAME is None or KAFKA
     KAFKA_SASL_PLAIN_USERNAME = config.getstr('KAFKA', 'SASL_PLAIN_USERNAME')
     KAFKA_SASL_PLAIN_PASSWORD = config.getstr('KAFKA', 'SASL_PLAIN_PASSWORD')
 KAFKA_USE_ASYN_ADD = config.getboolean('KAFKA', 'USE_ASYN_ADD')
+KAFKA_USE_GRAPH_ASYN_ADD = config.getboolean('KAFKA', 'USE_GRAPH_ASYN_ADD')
 KAFKA_SASL_USE = config.getboolean('KAFKA', 'SASL_USE')
 KAFKA_TOPICS = config.getstr('KAFKA', 'TOPICS')
 KAFKA_GRAPH_TOPICS = config.getstr('KAFKA', 'GRAPH_TOPICS')
@@ -34,6 +35,9 @@ if MQ_REL_URL is None:
     MQ_REL_URL = config.getstr('KAFKA', 'MQ_REL_URL')
 MQ_URL_URL = config.getstr('KAFKA', 'MQ_URL_URL')
 MQ_URLINSERT_URL = config.getstr('KAFKA', 'MQ_URLINSERT_URL')
+MQ_KB_STATUS_URL = os.getenv("KAFKA_MQ_KB_STATUS_URL")
+if MQ_KB_STATUS_URL is None:
+    MQ_KB_STATUS_URL = config.getstr('KAFKA', 'MQ_KB_STATUS_URL')
 
 DOC_STATUS_INIT_URL = os.getenv("KAFKA_DOC_STATUS_INIT_URL")
 if DOC_STATUS_INIT_URL is None:

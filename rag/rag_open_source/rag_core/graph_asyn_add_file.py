@@ -1,10 +1,14 @@
+import time
+
 from utils import minio_utils
 from utils import es_utils
+from utils import milvus_utils
 from utils import mq_rel_utils
 from utils import redis_utils
 from utils import graph_utils
 from utils import knowledge_base_utils
 
+from concurrent.futures import ThreadPoolExecutor
 from kafka import KafkaConsumer, TopicPartition, OffsetAndMetadata
 import json
 import threading
@@ -26,6 +30,7 @@ graph_redis_client = redis_utils.get_redis_connection()
 
 
 def kafkal():
+    executor = ThreadPoolExecutor(max_workers=5) if KAFKA_ENABLE_AUTO_COMMIT else None
     while True:
         print('开始消费消息')
         if KAFKA_SASL_USE:
@@ -78,19 +83,31 @@ def kafkal():
                     logger.info('consumer.commit offset：' + repr(offsets))
                     master_control_logger.info('consumer.commit offset：' + repr(offsets))
 
-                if KAFKA_USE_ASYN_ADD:
+                if KAFKA_USE_GRAPH_ASYN_ADD:
                     # ============ 异步添加 =============
-                    lock = threading.Lock()
-                    thread = threading.Thread(target=add_files, args=(
-                        user_id, kb_name, filename, file_id, enable_knowledge_graph, graph_schema_objectname, graph_schema_filename, graph_model_id, ""))
-                    lock.acquire()
-                    thread.start()
-                    lock.release()
-                    # ============ 异步添加 =============
+                    if message_type == "graph":
+                        executor.submit(extrac_graph_data,
+                                        user_id, kb_name, filename, file_id, enable_knowledge_graph,
+                                        graph_schema_objectname, graph_schema_filename, graph_model_id, kb_id)
+                    elif message_type == "community_report":
+                        executor.submit(generate_community_report,
+                                        user_id, kb_name, enable_knowledge_graph, graph_model_id, kb_id)
+                    else:
+                        logger.warning(f"未知的message_type: {message_type}")
+                        master_control_logger.warning(f"未知的message_type: {message_type}")
+                        continue
                 else:
                     # ============ 顺序添加 =============
-                    add_files(user_id, kb_name, filename, file_id, enable_knowledge_graph, graph_schema_objectname, graph_schema_filename, graph_model_id, kb_id=kb_id)
-                    # ============ 顺序添加 =============
+                    if message_type == "graph":
+                        extrac_graph_data(user_id, kb_name, filename, file_id, enable_knowledge_graph,
+                                        graph_schema_objectname, graph_schema_filename, graph_model_id, kb_id=kb_id)
+                    elif message_type == "community_report":
+                        generate_community_report(user_id, kb_name, file_id, enable_knowledge_graph, graph_model_id,
+                                                kb_id)
+                    else:
+                        logger.warning(f"未知的message_type: {message_type}")
+                        master_control_logger.warning(f"未知的message_type: {message_type}")
+                        continue
                 logger.info('----->kafka异步消费完成：user_id=%s,kb_name=%s,filename=%s,file_id=%s,process finished' % (user_id, kb_name,filename,file_id))
                 master_control_logger.info('----->kafka异步消费完成：user_id=%s,kb_name=%s,filename=%s,file_id=%s,process finished' % (user_id, kb_name, filename, file_id))
 
@@ -100,8 +117,9 @@ def kafkal():
                 continue
 
 
-
-def add_files(user_id, kb_name, file_name, file_id, enable_knowledge_graph, graph_schema_objectname, graph_schema_filename, graph_model_id="", kb_id=""):
+def extrac_graph_data(user_id, kb_name, file_name, file_id, enable_knowledge_graph, graph_schema_objectname, graph_schema_filename, graph_model_id="", kb_id=""):
+    # 图谱解析开始执行
+    mq_rel_utils.update_doc_status(file_id, status=110)
 
     # -------------- 先将从数据库中获取 all_extrac_graph_chunks--------------
     try:
@@ -218,6 +236,80 @@ def add_files(user_id, kb_name, file_name, file_id, enable_knowledge_graph, grap
     master_control_logger.info("user_id=%s,kb_name=%s,file_name=%s,kb_id=%s" % (user_id, kb_name, file_name, kb_id) + '===== 文档grahp解析成功且完成')
     mq_rel_utils.update_doc_status(file_id, status=100)
 
+
+def generate_community_report(user_id, kb_name, file_id, enable_knowledge_graph, graph_model_id="", kb_id=""):
+    # 社区报告开始生成
+    mq_rel_utils.update_kb_status(file_id, status=130)
+
+    # 清理旧的社区报告
+    try:
+        clear_result = milvus_utils.del_community_reports(user_id, kb_name, clear_reports=True, kb_id=kb_id)
+        if clear_result['code'] != 0:
+            raise RuntimeError(clear_result["message"])
+        logger.info(f'清理社区报告成功'
+                    + "user_id=%s,kb_name=%s" % (user_id, kb_name) + str(clear_result))
+        master_control_logger.info(f"社区报告插入milvus成功, user_id=%s,kb_name=%s" % (user_id, kb_name))
+    except Exception as e:
+        logger.error(repr(e))
+        logger.error(f"清理社区报告失败, user_id=%s,kb_name=%s" % (user_id, kb_name))
+        master_control_logger.error(f"清理社区报告失败, user_id=%s,kb_name=%s" % (user_id, kb_name) + repr(e))
+        mq_rel_utils.update_kb_status(file_id, status=124)
+        return
+
+    # 提取社区报告
+    try:
+        reports_result = graph_utils.generate_community_reports(user_id, kb_name)
+        reports = reports_result['community_reports']
+        if len(reports) == 0:
+            raise ValueError("社区报告数量为0，生成失败")
+        logger.info(f"生成社区报告成功, user_id=%s,kb_name=%s % (user_id, kb_name)")
+        master_control_logger.info(f"生成社区报告成功, user_id=%s,kb_name=%s" % (user_id, kb_name))
+    except Exception as e:
+        logger.error(repr(e))
+        logger.error(f"生成社区报告失败, user_id=%s,kb_name=%s" % (user_id, kb_name))
+        master_control_logger.error(f"生成社区报告失败, user_id=%s,kb_name=%s" % (user_id, kb_name) + repr(e))
+        mq_rel_utils.update_kb_status(file_id, status=122)
+        return
+
+    # 存储社区报告
+    try:
+        chunk_current_num = 0
+        sub_chunks = []
+        chunk_total_num = len(reports)
+        file_name = "社区报告"
+        for report_data in reports:
+            sub_chunks.append({
+                "content": report_data["report"],
+                "embedding_content": report_data["report_title"],
+                "meta_data": {
+                    "file_name": file_name,
+                    "entities": report_data["entities"],
+                    "chunk_total_num": chunk_total_num,
+                    "chunk_current_num": chunk_current_num
+                },
+                "create_time":str(int(time.time() * 1000))
+            })
+            chunk_current_num += 1
+        logger.info('社区报告插入milvus开始' + "user_id=%s,kb_name=%s" % (user_id, kb_name))
+        master_control_logger.info(f"社区报告插入milvus开始, user_id=%s,kb_name=%s" % (user_id, kb_name))
+        insert_milvus_result = milvus_utils.add_milvus(user_id, kb_name, sub_chunks, file_name, "",
+                                                       milvus_url=milvus_utils.ADD_COMMUNItY_REPORT_URL)
+        if insert_milvus_result['code'] != 0:
+            raise RuntimeError(insert_milvus_result["message"])
+        logger.info(f'社区报告插入milvus成功'
+                    + "user_id=%s,kb_name=%s" % (user_id, kb_name) + str(insert_milvus_result))
+        master_control_logger.info(f"社区报告插入milvus成功, user_id=%s,kb_name=%s" % (user_id, kb_name))
+    except Exception as e:
+        logger.error(repr(e))
+        logger.error(f"社区报告插入milvus失败, user_id=%s,kb_name=%s" % (user_id, kb_name))
+        master_control_logger.error(f"社区报告插入milvus失败, user_id=%s,kb_name=%s" % (user_id, kb_name) + repr(e))
+        mq_rel_utils.update_kb_status(file_id, status=123)
+        return
+
+    # 最终完成
+    logger.info("user_id=%s,kb_name=%s" % (user_id, kb_name) + '===== 社区报告生成且存储完成')
+    master_control_logger.info("user_id=%s,kb_name=%s,kb_id=%s" % (user_id, kb_name, kb_id) + '===== 社区报告生成且存储完成')
+    mq_rel_utils.update_kb_status(file_id, status=120)
 
 if __name__ == "__main__":
     kafkal()

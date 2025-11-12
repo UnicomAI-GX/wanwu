@@ -15,6 +15,7 @@ from utils import redis_utils
 from utils import file_utils
 from utils import kafka_utils
 from utils import chunk_utils
+from utils import graph_utils
 import utils.knowledge_base_utils as kb_utils
 from utils.constant import CHUNK_SIZE
 import urllib.parse
@@ -1196,6 +1197,115 @@ def proper_noun():
 
     return response
 
+
+@app.route("/rag/batch-add-reports", methods=['POST'])
+def batchAddReports():
+    logger.info('---------------批量新增社区报告---------------')
+    try:
+        data = request.get_json()
+        user_id = data['userId']
+        kb_name = data.get("knowledgeBase", "")
+        kb_id = data.get("kb_id", "")
+        reports = data.get("reports", None)
+
+        if not reports or not isinstance(reports, list):
+            raise ValueError("reports must be a list and not empty")
+
+        response_info = graph_utils.batch_add_community_reports(user_id, kb_name, reports, kb_id=kb_id)
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    except Exception as e:
+        logger.info(repr(e))
+        response_info = {'code': 1, "message": repr(e), "data": {"success_count": 0}}
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    return response
+
+@app.route("/rag/update-report", methods=['POST'])
+def updateReport():
+    logger.info('---------------更新community report---------------')
+    try:
+        data = request.get_json()
+        user_id = data['userId']
+        kb_name = data.get("knowledgeBase", "")
+        kb_id = data.get("kb_id", "")
+        reports = data.get('reports', None)
+
+        if not reports or not isinstance(reports, dict):
+            raise ValueError("reports must be a dict and not empty")
+
+        response_info = graph_utils.update_community_reports(user_id, kb_name, reports=reports, kb_id=kb_id)
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    except Exception as e:
+        logger.info(repr(e))
+        response_info = {'code': 1, "message": repr(e), "data": {"success_count": 0}}
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    return response
+
+@app.route("/rag/batch-delete-reports", methods=['POST'])
+def batchDeleteReports():
+    logger.info('---------------批量删除community reports---------------')
+    try:
+        data = request.get_json()
+        user_id = data['userId']
+        kb_name = data.get("knowledgeBase", "")
+        kb_id = data.get("kb_id", "")
+        report_ids = data.get('report_ids', [])
+
+        if not report_ids or not isinstance(report_ids, list):
+            raise ValueError("report_ids must be a list and not empty")
+        response_info = graph_utils.batch_delete_community_reports(user_id, kb_name, report_ids, kb_id=kb_id)
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    except Exception as e:
+        logger.info(repr(e))
+        response_info = {'code': 1, "message": repr(e), "data": {"success_count": 0}}
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    return response
+
+
+@app.route("/rag/get-community-report-list", methods=['POST'])
+def getReportsList():
+    logger.info('---------------获取community reports列表---------------')
+    try:
+        data = request.get_json()
+        user_id = data['userId']
+        kb_name = data.get("knowledgeBase", "")
+        kb_id = data.get("kb_id", "")
+        page_size = data['page_size']
+        search_after = data['search_after']
+        # 获取分页文件内容列表
+        response_info = graph_utils.get_community_report_list(user_id, kb_name, page_size, search_after, kb_id=kb_id)
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    except Exception as e:
+        logger.info(repr(e))
+        response_info = {'code': 1, "message": repr(e)}
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    return response
+
+@app.route("/rag/knowledgeBase-graph", methods=['POST'])
+def knowledgeBaseGraph():
+    logger.info('---------------获取知识库知识图谱---------------')
+    try:
+        data = request.get_json()
+        user_id = data['userId']
+        kb_name = data.get("knowledgeBase", "")
+        kb_id = data.get("kb_id", "")
+
+        response_info = graph_utils.get_community_report_list(user_id, kb_name, page_size, search_after, kb_id=kb_id)
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    except Exception as e:
+        logger.info(repr(e))
+        response_info = {'code': 1, "message": repr(e)}
+        headers = {'Access-Control-Allow-Origin': '*'}
+        response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
+    return response
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

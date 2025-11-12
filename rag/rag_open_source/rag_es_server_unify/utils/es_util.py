@@ -1443,7 +1443,7 @@ def delete_index(index_name):
     return delete_status
 
 
-def get_cc_file_content_list(index_name: str, kb_name: str, file_name: str, page_size: int, search_after: int):
+def get_file_content_list(index_name: str, kb_name: str, file_name: str, page_size: int, search_after: int):
     """ 获取 主控表中 知识片段的分页展示 """
     # ======== 分页查询参数 =============
     query = {
@@ -1459,6 +1459,15 @@ def get_cc_file_content_list(index_name: str, kb_name: str, file_name: str, page
         "from": search_after,
         "size": page_size,
         "sort": {"meta_data.chunk_current_num": {"order": "asc"}},  # 确保按照文档ID升序排序
+        "_source": {
+            "excludes": [
+                "content_vector",
+                "q_768_content_vector",
+                "q_1024_content_vector",
+                "q_1536_content_vector",
+                "q_2048_content_vector"
+            ]
+        } #查询community report 索引时排除embedding数据
     }
     # 执行查询
     response = es.search(
@@ -2098,14 +2107,13 @@ def get_child_contents(index_name, kb_name, content_id):
     }
 
 
-def get_cc_contents(index_name, kb_name, content_id_list):
+def get_contents_by_ids(index_name, kb_name, content_id_list):
     """ 获取文本分块状态用于进行检索后过滤。"""
     query = {
         "query": {
             "bool": {
                 "must": [
                     {"term": {"kb_name": kb_name}},
-                    # {"match": {"kb_name": kb_name}},
                     {
                         "bool": {
                             "should": [
@@ -2118,7 +2126,16 @@ def get_cc_contents(index_name, kb_name, content_id_list):
                 ]
             }
         },
-        "size": 500  # 增加返回的条数
+        "size": 500,  # 增加返回的条数
+        "_source": {
+            "excludes": [
+                "content_vector",
+                "q_768_content_vector",
+                "q_1024_content_vector",
+                "q_1536_content_vector",
+                "q_2048_content_vector"
+            ]
+        }  # 查询community report 索引时排除embedding数据
     }
     response = es.search(index=index_name, body=query)
     # 遍历搜索结果，填充列表
@@ -2130,7 +2147,7 @@ def get_cc_contents(index_name, kb_name, content_id_list):
 
 def get_cc_content_status(index_name, kb_name, content_id_list):
     """ 获取文本分块状态用于进行检索后过滤。"""
-    response = get_cc_contents(index_name, kb_name, content_id_list)
+    response = get_contents_by_ids(index_name, kb_name, content_id_list)
     useful_content_id_list = []
     # 遍历搜索结果，填充列表
     for hit in response:
@@ -2205,7 +2222,8 @@ def get_uk_kb_info(userId, kb_name):
         }
     }
     response = es.search(index=KBNAME_MAPPING_INDEX, body=query)
-    assert len(response["hits"]["hits"]) == 1
+    if len(response["hits"]["hits"]) > 1:
+        raise ValueError("存在多条kb info 记录")
     for hit in response["hits"]["hits"]:
         kb_id = hit['_source']["kb_id"]
         if not kb_id:

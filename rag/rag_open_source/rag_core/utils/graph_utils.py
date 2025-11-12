@@ -1,17 +1,20 @@
 import os
 import json
 import time
+import copy
 
 import requests
 import pandas as pd
 from datetime import datetime
 
 from utils import milvus_utils
+from utils import es_utils
 from utils import redis_utils
 from utils import timing
 
 from logging_config import setup_logging
 from settings import GRAPH_SERVER_URL
+from utils.tools import generate_md5
 
 logger_name = 'rag_graph_utils'
 app_name = os.getenv("LOG_FILE")
@@ -118,7 +121,7 @@ def get_extrac_graph_data(user_id, kb_name, chunks, file_name, schema=None):
 
 
 @timing.timing_decorator(logger, include_args=False)
-def generate_community_reports(user_id, kb_name, file_name="", graph_data=[]):
+def generate_community_reports(user_id, kb_name):
     """获取知识图谱社区报告"""
     try:
         start_time = datetime.now()
@@ -127,9 +130,7 @@ def generate_community_reports(user_id, kb_name, file_name="", graph_data=[]):
         }
         data = {
             "user_id": user_id,
-            "graph_data": graph_data,
             "kb_name": kb_name,
-            "file_name": file_name
         }
         # 将JSON数据转换好格式
         json_data = json.dumps(data)
@@ -207,6 +208,35 @@ def delete_kb_graph(user_id, kb_name):
         raise Exception("graph delete_kb 发生异常：" + str(e))
 
 
+@timing.timing_decorator(logger, include_args=False)
+def get_kb_graph_data(user_id, kb_name):
+    """获取知识图谱数据"""
+    try:
+        start_time = datetime.now()
+        headers = {
+            "Content-Type": "application/json",
+        }
+        data = {
+            "user_id": user_id,
+            "kb_name": kb_name,
+        }
+        # 将JSON数据转换好格式
+        json_data = json.dumps(data)
+        graph_url = GRAPH_SERVER_URL + "/get_kb_graph_data"
+        response = requests.post(graph_url, headers=headers, data=json_data, timeout=600)
+        if response.status_code == 200:
+            result_data = json.loads(response.text)
+            finish_time1 = datetime.now()
+            time_difference1 = finish_time1 - start_time
+            logger.info(f"extrac_graph_data -{graph_url}: 请求成功 耗时：{time_difference1}")
+            return result_data
+        else:
+            # 如果不是200，则抛出一个自定义异常
+            raise Exception(f"{graph_url} 请求失败，错误信息：" + response.text)
+    except Exception as e:
+        raise Exception("get_kb_graph_data 发生异常：" + str(e))
+
+
 def get_graph_vocabulary_set(kb_ids: list):
     """处理获取知识图谱实体词表数据"""
     graph_redis_client = redis_utils.get_redis_connection()
@@ -258,3 +288,142 @@ def get_all_extrac_graph_chunks(user_id, kb_name, file_name, kb_id=""):
     except Exception as e:
         logger.info(f"get_all_extrac_graph_chunks Error: {e}")
         return []
+
+
+def update_community_reports(user_id: str, kb_name: str, report:dict, kb_id = ""):
+    """
+    更新community report
+    """
+    logger.info(f"========= update_community_reports start：user_id: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, report: {report}")
+
+    response_info = {
+        "code": 1,
+        "message": "",
+    }
+
+    old_content_id = report["report_id"]
+    chunk = {
+        "content": report["content"],
+        "embedding_content": report["title"],
+    }
+
+    report_response = milvus_utils.get_content_by_ids(user_id, kb_name, [old_content_id],
+                                                       content_type="community_report", kb_id=kb_id)
+    logger.info(f"content_id: {old_content_id}, 社区报告结果: {report_response}")
+    if report_response['code'] != 0:
+        logger.error(f"获取community report信息失败， user_id: {user_id},kb_name: {kb_name}, content_id: {old_content_id}")
+        response_info["message"] = report_response["message"]
+        return response_info
+
+    old_report = report_response["data"]["contents"][0]
+    chunk_current_num = old_report["meta_data"]["chunk_current_num"]
+    chunk["meta_data"] = copy.deepcopy(old_report["meta_data"])
+    chunk["create_time"] = old_report["create_time"]
+    if not kb_id:  # kb_id为空，则根据kb_name获取kb_id
+        kb_id = milvus_utils.get_milvus_kb_name_id(user_id, kb_name)  # 获取kb_id
+
+    file_name = "社区报告"
+    content_str = kb_id + chunk["content"] + file_name + str(chunk_current_num)
+    new_content_id = generate_md5(content_str)
+    if new_content_id != old_content_id:
+        chunks = [chunk]
+        logger.info('新增report插入milvus开始' + "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+        insert_report_result = milvus_utils.add_milvus(user_id, kb_name, chunks, file_name, "",
+                                                       kb_id=kb_id, milvus_url=milvus_utils.ADD_COMMUNItY_REPORT_URL)
+        if insert_report_result['code'] != 0:
+            logger.error(
+                '新增report插入milvus失败' + "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+            response_info["message"] = insert_report_result["message"]
+            #新增数据回滚
+            milvus_utils.del_community_reports(user_id, kb_name, content_ids=[new_content_id], kb_id=kb_id)
+            return response_info
+        else:
+            logger.info('新增report插入milvus完成' + "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+
+        #清理旧数据
+        milvus_utils.del_community_reports(user_id, kb_name, content_ids=[old_content_id], kb_id=kb_id)
+    logger.info(f"========= update_community_reports end：user_id: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, "
+                f"file_name: {file_name}, chunk: {chunk}")
+
+    response_info["code"] = 0
+    response_info["message"] = "success"
+    return response_info
+
+
+def batch_add_community_reports(user_id: str, kb_name: str, reports:list, kb_id: str = ""):
+    """
+    根据file name 新增reports
+    """
+    logger.info(f"========= batch_add_community_reports start：user_id: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, reports: {reports}")
+
+    chunks = []
+    for item in reports:
+        chunks.append({
+            "content": item["content"],
+            "embedding_content": item["title"],
+            "create_time": str(int(time.time() * 1000))
+        })
+
+    response_info = {
+        "code": 1,
+        "message": "",
+        "data": {
+            "success_count": 0
+        }
+    }
+    file_name = "社区报告"
+    allocate_report_result = es_utils.allocate_chunks(user_id, kb_name, file_name, len(chunks), chunk_type="community_report", kb_id=kb_id)
+    logger.info(repr(file_name) + '新增reports分配结果：' + repr(allocate_report_result))
+    if allocate_report_result['code'] != 0:
+        logger.error('新增reports分配chunk失败'+ "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+        response_info["message"] = allocate_report_result["message"]
+        return response_info
+    else:
+        chunk_total_num = allocate_report_result["data"]["chunk_total_num"]
+        meta_data = allocate_report_result["data"]["meta_data"]
+        current_chunk_num = chunk_total_num - len(chunks) + 1
+        if not kb_id:  # kb_id为空，则根据kb_name获取kb_id
+            kb_id = milvus_utils.get_milvus_kb_name_id(user_id, kb_name)  # 获取kb_id
+        for chunk in chunks:
+            chunk["meta_data"] = copy.deepcopy(meta_data)
+            chunk["meta_data"]["chunk_current_num"] = current_chunk_num
+            current_chunk_num += 1
+        logger.info('新增reports分配chunk完成'+ "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+
+    logger.info('新增reports插入milvus开始' + "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+    insert_reports_result = milvus_utils.add_milvus(user_id, kb_name, chunks, file_name, "",
+                                                   kb_id=kb_id, milvus_url=milvus_utils.ADD_COMMUNItY_REPORT_URL)
+    if insert_reports_result['code'] != 0:
+        logger.error(
+            '新增reports插入milvus失败' + "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+        response_info["message"] = insert_reports_result["message"]
+        return response_info
+    else:
+        logger.info('新增reports插入milvus完成' + "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
+
+    logger.info(f"========= batch_add_community_reports end：user_id: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, reports: {reports}")
+
+    return response_info
+
+def batch_delete_community_reports(user_id: str, kb_name: str, report_ids: list[str], kb_id=""):
+    """
+    根据report_ids 删除分片reports
+    """
+    logger.info(f"========= batch_delete_community_reports start：user_id: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, report_ids: {report_ids}")
+    response_info = milvus_utils.del_community_reports(user_id, kb_name, content_ids=report_ids, kb_id=kb_id)
+    logger.info(f"========= batch_delete_community_reports end：user_id: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, report_ids: {report_ids}")
+
+    return response_info
+
+def get_community_report_list(user_id: str, kb_name: str, page_size: int, search_after: int, kb_id=""):
+    """
+    获取知识库reports片段列表,用于分页展示
+    """
+    logger.info(f"get_community_report_list start: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, "
+                f"page_size:{page_size}, search_after:{search_after}")
+    file_name = "社区报告"
+    response_info = milvus_utils.get_milvus_file_content_list(user_id, kb_name, file_name, page_size, search_after,
+                                                              kb_id=kb_id, content_type="community_report")
+    logger.info(f"get_community_report_list end: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, "
+                f"page_size:{page_size}, search_after:{search_after}, response: {response_info}")
+    return response_info
