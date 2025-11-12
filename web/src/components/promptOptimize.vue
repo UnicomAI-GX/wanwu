@@ -159,7 +159,7 @@ export default {
             },{},(worldObj) => {
               endStr = endStr + worldObj.world
               this.optimizedPrompt = endStr
-              if (Boolean(data.finish)) this.loading = false
+              if (Boolean(worldObj.finish)) this.loading = false
             })
           }
         },
