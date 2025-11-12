@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"os"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -15,16 +15,12 @@ import (
 	"github.com/google/uuid"
 )
 
-var ISSUER = os.Getenv("WANWU_CALLBACK_LLM_BASE_URL") +
-	os.Getenv("WANWU_EXTERNAL_SCHEME") +
-	"://" + os.Getenv("WANWU_EXTERNAL_ENDPOINT")
-
-func Authorize(ctx *gin.Context, req *request.AuthRequest, userID string) (string, string, error) {
+func OAuthAuthorize(ctx *gin.Context, req *request.OAuthRequest, userID string) (string, string, error) {
 	oauthApp, err := iam.GetOauthApp(ctx, &iam_service.GetOauthAppReq{
 		ClientId: req.ClientID,
 	})
 	if err != nil {
-		return "", "", fmt.Errorf("%v get auth info err:%v", req.ClientID, err)
+		return "", "", err
 	}
 	if !oauthApp.Status {
 		return "", "", fmt.Errorf("client id: %v has been disabled", oauthApp.ClientId)
@@ -34,25 +30,27 @@ func Authorize(ctx *gin.Context, req *request.AuthRequest, userID string) (strin
 	}
 	//code save to redis
 	code := uuid.NewString()
-	oauth2_util.SaveCode(ctx, code, oauth2_util.CodePayload{
+	if err := oauth2_util.SaveCode(ctx, code, oauth2_util.CodePayload{
 		ClientID: req.ClientID,
 		UserID:   userID,
-	})
+	}); err != nil {
+		return "", "", fmt.Errorf("%v get auth info err:%v", req.ClientID, err)
+	}
 	return oauthApp.RedirectUri, code, nil
 }
 
-func Token(ctx *gin.Context, req *request.TokenRequest) (*response.TokenResponse, error) {
+func OAuthToken(ctx *gin.Context, req *request.OAuthTokenRequest) (*response.OAuthTokenResponse, error) {
 	codePayload, err := oauth2_util.ValidateCode(ctx, req.Code, req.ClientID)
 	if err != nil {
-		return nil, fmt.Errorf("validate code timeout err", err)
+		return nil, fmt.Errorf("validate code timeout err: %v", err)
 	}
 	oauthApp, err := iam.GetOauthApp(ctx, &iam_service.GetOauthAppReq{
 		ClientId: req.ClientID,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%v get auth info err:%v", req.ClientID, err)
+		return nil, fmt.Errorf("%v get auth info err: %v", req.ClientID, err)
 	}
-	err = validateCode(req.ClientID, req.ClientSecret, req.RedirectURI, codePayload, oauthApp)
+	err = oauthValidateCode(req.ClientID, req.ClientSecret, req.RedirectURI, codePayload, oauthApp)
 	if err != nil {
 		return nil, err
 	}
@@ -64,25 +62,24 @@ func Token(ctx *gin.Context, req *request.TokenRequest) (*response.TokenResponse
 		return nil, err
 	}
 	//access token
-	var scopes []string = []string{""} //预留scope处理
-	accessToken, err := jwt_util.GenerateAccessToken(user.UserId, req.ClientID, ISSUER, scopes, jwt_util.AccessTokenTimeout)
+	scopes := []string{} //预留scope处理
+	accessToken, err := oauth2_util.GenerateAccessToken(user.UserId, req.ClientID, scopes, oauth2_util.AccessTokenTimeout)
 	if err != nil {
 		return nil, err
 	}
-
 	//id token
-	idToken, err := jwt_util.GenerateIDToken(user.UserId, user.UserName, req.ClientID, ISSUER, jwt_util.IDTokenTimeout)
+	idToken, err := oauth2_util.GenerateIDToken(user.UserId, user.UserName, req.ClientID, oauth2_util.IDTokenTimeout)
 	if err != nil {
 		return nil, err
 	}
 	//refresh token
-	refreshToken, err := jwt_util.GenerateRefreshToken(ctx, user.UserId, req.ClientID, jwt_util.RefreshTokenTimeout)
+	refreshToken, err := oauth2_util.GenerateRefreshToken(ctx, user.UserId, req.ClientID, oauth2_util.RefreshTokenExpiration)
 	if err != nil {
 		return nil, err
 	}
-	return &response.TokenResponse{
+	return &response.OAuthTokenResponse{
 		AccessToken:  accessToken,
-		ExpiresIn:    jwt_util.AccessTokenTimeout,
+		ExpiresIn:    oauth2_util.AccessTokenTimeout,
 		TokenType:    "Bearer",
 		IDToken:      idToken,
 		RefreshToken: refreshToken,
@@ -90,7 +87,7 @@ func Token(ctx *gin.Context, req *request.TokenRequest) (*response.TokenResponse
 	}, nil
 }
 
-func Refresh(ctx *gin.Context, req *request.RefreshRequest) (*response.RefreshTokenResponse, error) {
+func OAuthRefresh(ctx *gin.Context, req *request.OAuthRefreshRequest) (*response.OAuthRefreshTokenResponse, error) {
 	refreshPayload, err := oauth2_util.ValidateRefreshToken(ctx, req.RefreshToken, req.ClientID)
 	if err != nil {
 		return nil, err
@@ -109,39 +106,45 @@ func Refresh(ctx *gin.Context, req *request.RefreshRequest) (*response.RefreshTo
 	}
 	scopes := []string{} //scopes处理预留
 	//new access token
-	accessToken, err := jwt_util.GenerateAccessToken(refreshPayload.UserID, req.ClientID, ISSUER, scopes, jwt_util.AccessTokenTimeout)
+	accessToken, err := oauth2_util.GenerateAccessToken(refreshPayload.UserID, req.ClientID, scopes, oauth2_util.AccessTokenTimeout)
 	if err != nil {
 		return nil, err
 	}
 	//new refresh token
-	refreshToken, err := jwt_util.GenerateRefreshToken(ctx, refreshPayload.UserID, refreshPayload.ClientID, jwt_util.RefreshTokenTimeout)
+	refreshToken, err := oauth2_util.GenerateRefreshToken(ctx, refreshPayload.UserID, refreshPayload.ClientID, oauth2_util.RefreshTokenExpiration)
 	if err != nil {
 		return nil, err
 	}
-	return &response.RefreshTokenResponse{
+	return &response.OAuthRefreshTokenResponse{
 		AccessToken:  accessToken,
 		ExpiresAt:    strconv.Itoa(int(time.Now().Add(time.Duration(jwt_util.UserTokenTimeout) * time.Second).UnixMilli())),
 		RefreshToken: refreshToken,
 	}, nil
 }
 
-func OauthConfig(ctx *gin.Context) (*response.OauthConfig, error) {
-
-	return &response.OauthConfig{
-		Issuer:           ISSUER,
-		AuthEndpoint:     ISSUER + "/user/api/v1" + "/oauth/code/authorize",
-		TokenEndpoint:    ISSUER + "/user/api/openapi/v1" + "/oauth/code/token",
-		JwksUri:          ISSUER + "/user/api/openapi/v1" + "/oauth/jwks",
-		UserInfoEndpoint: ISSUER + "/user/api/openapi/v1" + "/oauth/userinfo",
+func OAuthConfig(ctx *gin.Context) (*response.OAuthConfig, error) {
+	issuer, err := oauth2_util.GetIssuer()
+	if err != nil {
+		return nil, err
+	}
+	return &response.OAuthConfig{
+		Issuer:           issuer,
+		AuthEndpoint:     issuer + "/user/api/v1" + "/oauth/code/authorize",
+		TokenEndpoint:    issuer + "/user/api/openapi/v1" + "/oauth/code/token",
+		JwksUri:          issuer + "/user/api/openapi/v1" + "/oauth/jwks",
+		UserInfoEndpoint: issuer + "/user/api/openapi/v1" + "/oauth/userinfo",
 		ResponseTypes:    []string{"code"},
 		IDtokenSignAlg:   []string{"RS256"},
 		SubjectTypes:     []string{"public"},
 	}, nil
 }
 
-func JWKS(ctx *gin.Context) (*response.JWKS, error) {
-
-	return &response.JWKS{Keys: []jwt_util.JWK{*jwt_util.JWKInstance}}, nil
+func OAuthJWKS(ctx *gin.Context) (*response.OAuthJWKS, error) {
+	jwk, err := oauth2_util.GetJWK()
+	if err != nil {
+		return nil, err
+	}
+	return &response.OAuthJWKS{Keys: []oauth2_util.JWK{jwk}}, nil
 }
 
 func OAuthGetUserInfo(ctx *gin.Context, userID string) (*response.OAuthGetUserInfo, error) {
@@ -152,7 +155,15 @@ func OAuthGetUserInfo(ctx *gin.Context, userID string) (*response.OAuthGetUserIn
 	if err != nil {
 		return nil, err
 	}
-	avataUri := cacheUserAvatar(ctx, user.AvatarPath)
+	issuer, err := oauth2_util.GetIssuer()
+	if err != nil {
+		return nil, err
+	}
+	avatar := cacheUserAvatar(ctx, user.AvatarPath)
+	avatarUri, err := url.JoinPath(issuer, "/user/api", avatar.Path)
+	if err != nil {
+		return nil, err
+	}
 	return &response.OAuthGetUserInfo{
 		UserID:    user.UserId,
 		Username:  user.UserName,
@@ -160,14 +171,13 @@ func OAuthGetUserInfo(ctx *gin.Context, userID string) (*response.OAuthGetUserIn
 		Nickname:  user.NickName,
 		Phone:     user.Phone,
 		Gender:    user.Gender,
-		AvatarUri: ISSUER + "/user/api" + avataUri.Path,
+		AvatarUri: avatarUri,
 		Remark:    user.Remark,
 		Company:   user.Company,
 	}, nil
 }
 
-func validateCode(clientID, clientSecret, redirectUri string, codePayload oauth2_util.CodePayload, appInfo *iam_service.OauthApp) error {
-
+func oauthValidateCode(clientID, clientSecret, redirectUri string, codePayload oauth2_util.CodePayload, appInfo *iam_service.OauthApp) error {
 	if !appInfo.Status {
 		return fmt.Errorf("client id: %v has been disabled", codePayload.ClientID)
 	}
@@ -221,16 +231,16 @@ func UpdateOauthApp(ctx *gin.Context, req *request.UpdateOauthAppReq) error {
 	return nil
 }
 
-func GetOauthAppList(ctx *gin.Context, userId string) ([]*response.OauthAppInfo, error) {
+func GetOauthAppList(ctx *gin.Context, userId string) ([]*response.OAuthAppInfo, error) {
 	resp, err := iam.GetOauthAppList(ctx, &iam_service.GetOauthAppListReq{
 		UserId: userId,
 	})
 	if err != nil {
 		return nil, err
 	}
-	var retList []*response.OauthAppInfo
+	var retList []*response.OAuthAppInfo
 	for _, app := range resp.Apps {
-		retList = append(retList, &response.OauthAppInfo{
+		retList = append(retList, &response.OAuthAppInfo{
 			ClientID:     app.ClientId,
 			Name:         app.Name,
 			Desc:         app.Desc,

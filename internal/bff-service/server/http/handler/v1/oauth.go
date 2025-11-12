@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Authorize
+// OAuthAuthorize
 //
 //	@Summary		授权码方式
 //	@Description	授权码方式-获取授权码
@@ -25,14 +25,14 @@ import (
 //	@Param			state			query		string	true	"状态参数"
 //	@Success		302				{string}	string	"重定向到指定URI"
 //	@Router			/oauth/code/authorize [get]
-func Authorize(ctx *gin.Context) {
-	var req request.AuthRequest
+func OAuthAuthorize(ctx *gin.Context) {
+	var req request.OAuthRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		gin_util.Response(ctx, nil, err)
 		return
 	}
 	userID := getUserID(ctx)
-	callback, authCode, err := service.Authorize(ctx, &req, userID)
+	callback, authCode, err := service.OAuthAuthorize(ctx, &req, userID)
 	if err != nil {
 		gin_util.Response(ctx, nil, err)
 		return
@@ -111,7 +111,7 @@ func UpdateOauthApp(ctx *gin.Context) {
 //	@Security		JWT
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	response.Response{data=response.ListResult{list=[]response.OauthAppInfo}}
+//	@Success		200	{object}	response.Response{data=response.ListResult{list=[]response.OAuthAppInfo}}
 //	@Router			/oauth/app/list [get]
 func GetOauthAppList(ctx *gin.Context) {
 	resp, err := service.GetOauthAppList(ctx, getUserID(ctx))

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Token
+// OAuthToken
 //
 //	@Summary		授权码方式
 //	@Description	授权码方式-获取Token
@@ -21,72 +21,72 @@ import (
 //	@Param			client_id		formData	string	true	"Client ID"
 //	@Param			redirect_uri	formData	string	true	"回调地址"
 //	@Param			client_secret	formData	string	true	"备案密钥"
-//	@Success		200				{object}	response.TokenResponse
+//	@Success		200				{object}	response.OAuthTokenResponse
 //	@Router			/oauth/code/token [post]
-func Token(ctx *gin.Context) {
-	var req request.TokenRequest
+func OAuthToken(ctx *gin.Context) {
+	var req request.OAuthTokenRequest
 	if !gin_util.BindForm(ctx, &req) {
 		return
 	}
-	resp, err := service.Token(ctx, &req)
+	resp, err := service.OAuthToken(ctx, &req)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"err": err})
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// Refresh
+// OAuthRefresh
 //
 //	@Summary		刷新令牌
 //	@Description	刷新令牌
 //	@Tags			OIDC
 //	@Accept			json
 //	@Produce		json
-//	@Param			data	body		request.RefreshRequest	true	"RefreshToken"
-//	@Success		200		{object}	response.RefreshTokenResponse
+//	@Param			data	body		request.OAuthRefreshRequest	true	"RefreshToken"
+//	@Success		200		{object}	response.OAuthRefreshTokenResponse
 //	@Router			/oauth/code/token/refresh [post]
-func Refresh(ctx *gin.Context) {
-	var req request.RefreshRequest
+func OAuthRefresh(ctx *gin.Context) {
+	var req request.OAuthRefreshRequest
 	if !gin_util.Bind(ctx, &req) {
 		return
 	}
-	resp, err := service.Refresh(ctx, &req)
+	resp, err := service.OAuthRefresh(ctx, &req)
 	gin_util.Response(ctx, resp, err)
 }
 
-// OauthConfig
+// OAuthConfig
 //
 //	@Summary		动态客户端发现配置
 //	@Description	自动获取 OP 的配置信息
 //	@Tags			OIDC
 //	@Produce		json
-//	@Success		200	{object}	response.OauthConfig
+//	@Success		200	{object}	response.OAuthConfig
 //	@Router			/.well-known/openid-configuration [get]
-func OauthConfig(ctx *gin.Context) {
-	resp, err := service.OauthConfig(ctx)
+func OAuthConfig(ctx *gin.Context) {
+	resp, err := service.OAuthConfig(ctx)
 	if err != nil {
 		gin_util.Response(ctx, resp, err)
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// JWKS
+// OAuthJWKS
 //
 //	@Summary		公钥获取链接
-//	@Description	自动获取JWKS
+//	@Description	自动获取OAuthJWKS
 //	@Tags			OIDC
 //	@Produce		json
-//	@Success		200	{object}	response.JWKS
+//	@Success		200	{object}	response.OAuthJWKS
 //	@Router			/oauth/jwks [get]
-func JWKS(ctx *gin.Context) {
-	resp, err := service.JWKS(ctx)
+func OAuthJWKS(ctx *gin.Context) {
+	resp, err := service.OAuthJWKS(ctx)
 	if err != nil {
 		gin_util.Response(ctx, resp, err)
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// OauthGetUserInfo
+// OAuthGetUserInfo
 //
 //	@Summary		OAuth获取用户信息
 //	@Description	通过access token获取用户信息

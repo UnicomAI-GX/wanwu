@@ -1,6 +1,6 @@
 basePath: /openapi/v1
 definitions:
-  jwt_util.JWK:
+  oauth2_util.JWK:
     properties:
       alg:
         type: string
@@ -14,6 +14,28 @@ definitions:
         type: string
       use:
         type: string
+    type: object
+  request.History:
+    properties:
+      needHistory:
+        type: boolean
+      query:
+        type: string
+      response:
+        type: string
+    type: object
+  request.OAuthRefreshRequest:
+    properties:
+      client_id:
+        type: string
+      client_secret:
+        type: string
+      grant_type:
+        type: string
+      refresh_token:
+        type: string
+    required:
+    - grant_type
     type: object
   request.OpenAPIAgentChatRequest:
     properties:
@@ -34,6 +56,10 @@ definitions:
     type: object
   request.OpenAPIRagChatRequest:
     properties:
+      history:
+        items:
+          $ref: '#/definitions/request.History'
+        type: array
       query:
         type: string
       stream:
@@ -41,48 +67,7 @@ definitions:
     required:
     - query
     type: object
-  request.RefreshRequest:
-    properties:
-      client_id:
-        type: string
-      client_secret:
-        type: string
-      grant_type:
-        type: string
-      refresh_token:
-        type: string
-    required:
-    - grant_type
-    type: object
-  response.JWKS:
-    properties:
-      keys:
-        items:
-          $ref: '#/definitions/jwt_util.JWK'
-        type: array
-    type: object
-  response.OAuthGetUserInfo:
-    properties:
-      avatar:
-        type: string
-      company:
-        type: string
-      email:
-        type: string
-      gender:
-        type: string
-      nickname:
-        type: string
-      phone:
-        type: string
-      remark:
-        type: string
-      userId:
-        type: string
-      username:
-        type: string
-    type: object
-  response.OauthConfig:
+  response.OAuthConfig:
     properties:
       authorization_endpoint:
         description: 获取授权码接口
@@ -110,6 +95,72 @@ definitions:
         type: array
       token_endpoint:
         description: 获取token接口
+        type: string
+      userinfo_endpoint:
+        description: 获取用户信息接口
+        type: string
+    type: object
+  response.OAuthGetUserInfo:
+    properties:
+      avatar:
+        type: string
+      company:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      nickname:
+        type: string
+      phone:
+        type: string
+      remark:
+        type: string
+      userId:
+        type: string
+      username:
+        type: string
+    type: object
+  response.OAuthJWKS:
+    properties:
+      keys:
+        items:
+          $ref: '#/definitions/oauth2_util.JWK'
+        type: array
+    type: object
+  response.OAuthRefreshTokenResponse:
+    properties:
+      access_token:
+        description: 访问令牌
+        type: string
+      expires_at:
+        description: token过期时间(毫秒时间戳)
+        type: string
+      refresh_token:
+        description: 刷新令牌(可选)
+        type: string
+    type: object
+  response.OAuthTokenResponse:
+    properties:
+      access_token:
+        description: 访问令牌
+        type: string
+      expires_in:
+        description: token过期时间(毫秒时间戳)
+        type: integer
+      id_token:
+        description: ID令牌
+        type: string
+      refresh_token:
+        description: 刷新令牌
+        type: string
+      scope:
+        description: 权限范围
+        items:
+          type: string
+        type: array
+      token_type:
+        description: 令牌类型(bearer)
         type: string
     type: object
   response.OpenAIChatHistory:
@@ -198,47 +249,12 @@ definitions:
       msg_id:
         type: string
     type: object
-  response.RefreshTokenResponse:
-    properties:
-      access_token:
-        description: 访问令牌
-        type: string
-      expires_at:
-        description: token过期时间(毫秒时间戳)
-        type: string
-      refresh_token:
-        description: 刷新令牌(可选)
-        type: string
-    type: object
   response.Response:
     properties:
       code:
         type: integer
       data: {}
       msg:
-        type: string
-    type: object
-  response.TokenResponse:
-    properties:
-      access_token:
-        description: 访问令牌
-        type: string
-      expires_in:
-        description: token过期时间(毫秒时间戳)
-        type: integer
-      id_token:
-        description: ID令牌
-        type: string
-      refresh_token:
-        description: 刷新令牌
-        type: string
-      scope:
-        description: 权限范围
-        items:
-          type: string
-        type: array
-      token_type:
-        description: 令牌类型(bearer)
         type: string
     type: object
 info:
@@ -255,7 +271,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.OauthConfig'
+            $ref: '#/definitions/response.OAuthConfig'
       summary: 动态客户端发现配置
       tags:
       - OIDC
@@ -412,7 +428,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.TokenResponse'
+            $ref: '#/definitions/response.OAuthTokenResponse'
       summary: 授权码方式
       tags:
       - OIDC
@@ -427,27 +443,27 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.RefreshRequest'
+          $ref: '#/definitions/request.OAuthRefreshRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.RefreshTokenResponse'
+            $ref: '#/definitions/response.OAuthRefreshTokenResponse'
       summary: 刷新令牌
       tags:
       - OIDC
   /oauth/jwks:
     get:
-      description: 自动获取JWKS
+      description: 自动获取OAuthJWKS
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.JWKS'
+            $ref: '#/definitions/response.OAuthJWKS'
       summary: 公钥获取链接
       tags:
       - OIDC

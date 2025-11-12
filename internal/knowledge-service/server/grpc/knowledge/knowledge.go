@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
 	"time"
 
 	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
@@ -101,7 +102,9 @@ func (s *Service) CreateKnowledge(ctx context.Context, req *knowledgebase_servic
 		log.Errorf("CreateKnowledge error %v params %v", err, req)
 		return nil, util.ErrCode(errs.Code_KnowledgeBaseCreateFailed)
 	}
-	//3.返回结果
+	//3.异步存储知识图谱schema
+	storeKnowledgeStoreSchema(knowledgeModel.KnowledgeId, req.KnowledgeGraph)
+	//4.返回结果
 	return &knowledgebase_service.CreateKnowledgeResp{
 		KnowledgeId: knowledgeModel.KnowledgeId,
 	}, nil
@@ -235,6 +238,15 @@ func (s *Service) UpdateKnowledgeMetaValue(ctx context.Context, req *knowledgeba
 		return nil, util.ErrCode(errs.Code_KnowledgeMetaUpdateFailed)
 	}
 	return nil, nil
+}
+
+func (s *Service) UpdateKnowledgeStatus(ctx context.Context, req *knowledgebase_service.UpdateKnowledgeStatusReq) (*emptypb.Empty, error) {
+	err := orm.UpdateKnowledgeReportStatus(ctx, req.KnowledgeId, int(req.ReportStatus))
+	if err != nil {
+		log.Errorf("更新知识库状态失败(%v)  参数(%v)", err, req)
+		return nil, util.ErrCode(errs.Code_KnowledgeBaseUpdateFailed)
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func buildDocMetaMap(docMetaList []*model.KnowledgeDocMeta) map[string]map[string][]*model.KnowledgeDocMeta {
@@ -585,6 +597,7 @@ func buildKnowledgeInfo(knowledge *model.KnowledgeBase) *knowledgebase_service.K
 		CreateOrgId:        knowledge.OrgId,
 		CreateUserId:       knowledge.UserId,
 		RagName:            knowledge.RagName,
+		GraphSwitch:        int32(knowledge.KnowledgeGraphSwitch),
 	}
 }
 
@@ -607,17 +620,31 @@ func buildKnowledgeBaseModel(req *knowledgebase_service.CreateKnowledgeReq) (*mo
 	if err != nil {
 		return nil, err
 	}
+	knowledgeGraph, err := json.Marshal(req.KnowledgeGraph)
+	if err != nil {
+		return nil, err
+	}
 	return &model.KnowledgeBase{
-		KnowledgeId:    generator.GetGenerator().NewID(),
-		Name:           req.Name,
-		RagName:        generator.GetGenerator().NewID(), //重新生成的 不是knowledgeID
-		Description:    req.Description,
-		OrgId:          req.OrgId,
-		UserId:         req.UserId,
-		EmbeddingModel: string(embeddingModelInfo),
-		CreatedAt:      time.Now().UnixMilli(),
-		UpdatedAt:      time.Now().UnixMilli(),
+		KnowledgeId:          generator.GetGenerator().NewID(),
+		Name:                 req.Name,
+		RagName:              generator.GetGenerator().NewID(), //重新生成的 不是knowledgeID
+		Description:          req.Description,
+		OrgId:                req.OrgId,
+		UserId:               req.UserId,
+		EmbeddingModel:       string(embeddingModelInfo),
+		KnowledgeGraph:       string(knowledgeGraph),
+		KnowledgeGraphSwitch: buildKnowledgeGraphSwitch(req.KnowledgeGraph.Switch),
+		CreatedAt:            time.Now().UnixMilli(),
+		UpdatedAt:            time.Now().UnixMilli(),
 	}, nil
+}
+
+// buildKnowledgeGraphSwitch 构造知识图谱开关
+func buildKnowledgeGraphSwitch(graphSwitch bool) int {
+	if graphSwitch {
+		return 1
+	}
+	return 0
 }
 
 // buildKnowledgeList 构造知识库名称
@@ -739,5 +766,30 @@ func buildKnowledgeMetaValueListResp(metaList []*model.KnowledgeDocMeta) *knowle
 	}
 	return &knowledgebase_service.KnowledgeMetaValueListResp{
 		MetaList: retList,
+	}
+}
+
+// storeKnowledgeStoreSchema 存储知识库图谱Url
+func storeKnowledgeStoreSchema(knowledgeId string, knowledgeGraph *knowledgebase_service.KnowledgeGraph) {
+	if knowledgeGraph.Switch && knowledgeGraph.SchemaUrl != "" {
+		go func() {
+			defer pkg_util.PrintPanicStack()
+			copyFile, _, _, err := rag_service.CopyFile(context.Background(), knowledgeGraph.SchemaUrl, "")
+			if err != nil {
+				log.Errorf("store knowledge copy file (%v) err: %v", knowledgeGraph.SchemaUrl, err)
+				return
+			}
+			knowledgeGraph.SchemaUrl = copyFile
+			marshal, err := json.Marshal(knowledgeGraph)
+			if err != nil {
+				log.Errorf("store knowledge marshal err: %v", err)
+				return
+			}
+			err = orm.UpdateKnowledgeGraph(db.GetClient().DB, knowledgeId, string(marshal))
+			if err != nil {
+				log.Errorf("store knowledge update err: %v", err)
+				return
+			}
+		}()
 	}
 }

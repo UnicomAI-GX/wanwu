@@ -1,6 +1,6 @@
 package request
 
-type AuthRequest struct {
+type OAuthRequest struct {
 	ResponseType string   `form:"response_type" validate:"required,eq=code"`
 	RedirectURI  string   `form:"redirect_uri"`
 	ClientID     string   `form:"client_id" validate:"required"`
@@ -8,11 +8,11 @@ type AuthRequest struct {
 	State        string   `form:"state" validate:"required"`
 }
 
-func (t *AuthRequest) Check() error {
+func (t *OAuthRequest) Check() error {
 	return nil
 }
 
-type TokenRequest struct {
+type OAuthTokenRequest struct {
 	GrantType    string `form:"grant_type" validate:"required,eq=authorization_code"`
 	Code         string `form:"code" validate:"required"`
 	RedirectURI  string `form:"redirect_uri"`
@@ -20,18 +20,18 @@ type TokenRequest struct {
 	ClientSecret string `form:"client_secret" validate:"required"`
 }
 
-func (t *TokenRequest) Check() error {
+func (t *OAuthTokenRequest) Check() error {
 	return nil
 }
 
-type RefreshRequest struct {
+type OAuthRefreshRequest struct {
 	GrantType    string `json:"grant_type" validate:"required,eq=refresh_token"`
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 	RefreshToken string `json:"refresh_token"`
 }
 
-func (t *RefreshRequest) Check() error {
+func (t *OAuthRefreshRequest) Check() error {
 	return nil
 }
 

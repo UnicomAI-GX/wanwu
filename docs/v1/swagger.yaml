@@ -806,6 +806,19 @@ definitions:
         description: Title is a human-readable title for the tool, useful for UI display
         type: string
     type: object
+  request.AddReportReq:
+    properties:
+      content:
+        type: string
+      knowledgeId:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - knowledgeId
+    - title
+    type: object
   request.AnalysisUrlDocReq:
     properties:
       knowledgeId:
@@ -1256,6 +1269,16 @@ definitions:
         description: 前端请求地址，例如：/v1/static/avatar/abc/def.png (请求非必填)
         type: string
     type: object
+  request.BatchAddReportReq:
+    properties:
+      fileUploadId:
+        type: string
+      knowledgeId:
+        type: string
+    required:
+    - fileUploadId
+    - knowledgeId
+    type: object
   request.BatchCreateDocSegmentReq:
     properties:
       docId:
@@ -1483,10 +1506,13 @@ definitions:
         type: string
       embeddingModelInfo:
         $ref: '#/definitions/request.EmbeddingModel'
+      knowledgeGraph:
+        $ref: '#/definitions/request.KnowledgeGraph'
       name:
         type: string
     required:
     - embeddingModelInfo
+    - knowledgeGraph
     - name
     type: object
   request.CreateKnowledgeSplitterReq:
@@ -1824,6 +1850,16 @@ definitions:
     required:
     - clientId
     type: object
+  request.DeleteReportReq:
+    properties:
+      contentId:
+        type: string
+      knowledgeId:
+        type: string
+    required:
+    - contentId
+    - knowledgeId
+    type: object
   request.DeleteSensitiveVocabularyReq:
     properties:
       tableId:
@@ -2001,6 +2037,13 @@ definitions:
     - appId
     - appType
     type: object
+  request.GenerateReportReq:
+    properties:
+      knowledgeId:
+        type: string
+    required:
+    - knowledgeId
+    type: object
   request.GetModelRequest:
     properties:
       modelId:
@@ -2060,6 +2103,18 @@ definitions:
     - model
     - modelType
     - provider
+    type: object
+  request.KnowledgeGraph:
+    properties:
+      llmModelId:
+        description: 大模型id，开关为true必填
+        type: string
+      schemaUrl:
+        description: 模型schema文件地址，可以为空
+        type: string
+      switch:
+        description: 知识图谱开关
+        type: boolean
     type: object
   request.KnowledgeHitReq:
     properties:
@@ -2535,6 +2590,16 @@ definitions:
     required:
     - userId
     type: object
+  request.PromptOptimizeReq:
+    properties:
+      modelId:
+        type: string
+      prompt:
+        type: string
+    required:
+    - modelId
+    - prompt
+    type: object
   request.PublishAppRequest:
     properties:
       appId:
@@ -2906,6 +2971,22 @@ definitions:
         type: boolean
     required:
     - clientId
+    type: object
+  request.UpdateReportReq:
+    properties:
+      content:
+        type: string
+      contentId:
+        type: string
+      knowledgeId:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - contentId
+    - knowledgeId
+    - title
     type: object
   request.UpdateSensitiveWordTableReplyReq:
     properties:
@@ -3824,6 +3905,15 @@ definitions:
           $ref: '#/definitions/response.ChildSegmentInfo'
         type: array
     type: object
+  response.DocKnowledgeInfo:
+    properties:
+      graphSwitch:
+        type: integer
+      knowledgeId:
+        type: string
+      knowledgeName:
+        type: string
+    type: object
   response.DocMenu:
     properties:
       children:
@@ -3861,6 +3951,21 @@ definitions:
       metaValueType:
         description: number，time, string
         type: string
+    type: object
+  response.DocPageResult:
+    properties:
+      docKnowledgeInfo:
+        $ref: '#/definitions/response.DocKnowledgeInfo'
+      list:
+        items:
+          $ref: '#/definitions/response.ListDocResp'
+        type: array
+      pageNo:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
     type: object
   response.DocSearchContent:
     properties:
@@ -4083,6 +4188,9 @@ definitions:
         allOf:
         - $ref: '#/definitions/response.EmbeddingModelInfo'
         description: embedding模型信息
+      graphSwitch:
+        description: 图谱开关
+        type: integer
       knowledgeId:
         description: 知识库id
         type: string
@@ -4252,6 +4360,9 @@ definitions:
       fileSize:
         description: 文件大小，预留
         type: string
+      graphStatus:
+        description: 图谱状态 0:待处理，1.解析中，2.解析成功，3.解析失败
+        type: integer
       knowledgeId:
         description: 知识库id
         type: string
@@ -4692,7 +4803,7 @@ definitions:
     - modelType
     - provider
     type: object
-  response.OauthAppInfo:
+  response.OAuthAppInfo:
     properties:
       clientId:
         description: 客户端ID
@@ -4838,6 +4949,38 @@ definitions:
     - name
     - ragId
     - rerankConfig
+    type: object
+  response.ReportInfo:
+    properties:
+      content:
+        type: string
+      contentId:
+        type: string
+      title:
+        type: string
+    type: object
+  response.ReportPageResult:
+    properties:
+      createdAt:
+        description: 生成时间：unix时间戳，若为空串显示-
+        type: string
+      list:
+        description: 社区报告内容列表
+        items:
+          $ref: '#/definitions/response.ReportInfo'
+        type: array
+      pageNo:
+        description: 当前页码
+        type: integer
+      pageSize:
+        description: 每页数量
+        type: integer
+      status:
+        description: 状态：0.未生成(-) 1.生成中 2.已生成 3.生成失败
+        type: integer
+      total:
+        description: 社区报告数量：如果为0显示-
+        type: integer
     type: object
   response.RequestFile:
     properties:
@@ -7545,12 +7688,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/response.PageResult'
+            - $ref: '#/definitions/response.Response'
             - properties:
-                list:
-                  items:
-                    $ref: '#/definitions/response.ListDocResp'
-                  type: array
+                data:
+                  $ref: '#/definitions/response.DocPageResult'
               type: object
       security:
       - JWT: []
@@ -8168,6 +8309,160 @@ paths:
       security:
       - JWT: []
       summary: 知识库组织列表
+      tags:
+      - knowledge
+  /knowledge/report/add:
+    post:
+      consumes:
+      - application/json
+      description: 单条新增社区报告
+      parameters:
+      - description: 单条新增社区报告请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AddReportReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWT: []
+      summary: 单条新增社区报告
+      tags:
+      - knowledge
+  /knowledge/report/batch/add:
+    post:
+      consumes:
+      - application/json
+      description: 批量新增社区报告
+      parameters:
+      - description: 批量新增社区报告请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.BatchAddReportReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWT: []
+      summary: 批量新增社区报告
+      tags:
+      - knowledge
+  /knowledge/report/delete:
+    delete:
+      consumes:
+      - application/json
+      description: 删除社区报告
+      parameters:
+      - description: 删除社区报告请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteReportReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWT: []
+      summary: 删除社区报告
+      tags:
+      - knowledge
+  /knowledge/report/generate:
+    post:
+      consumes:
+      - application/json
+      description: 生成社区报告
+      parameters:
+      - description: 生成社区报告请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.GenerateReportReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWT: []
+      summary: 生成社区报告
+      tags:
+      - knowledge
+  /knowledge/report/list:
+    get:
+      consumes:
+      - application/json
+      description: 获取社区报告
+      parameters:
+      - in: query
+        name: knowledgeId
+        required: true
+        type: string
+      - in: query
+        name: pageNo
+        type: integer
+      - in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.ReportPageResult'
+              type: object
+      security:
+      - JWT: []
+      summary: 获取社区报告
+      tags:
+      - knowledge
+  /knowledge/report/update:
+    post:
+      consumes:
+      - application/json
+      description: 编辑社区报告
+      parameters:
+      - description: 编辑社区报告请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateReportReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWT: []
+      summary: 编辑社区报告
       tags:
       - knowledge
   /knowledge/select:
@@ -9549,7 +9844,7 @@ paths:
                   - properties:
                       list:
                         items:
-                          $ref: '#/definitions/response.OauthAppInfo'
+                          $ref: '#/definitions/response.OAuthAppInfo'
                         type: array
                     type: object
               type: object
@@ -10012,6 +10307,28 @@ paths:
                     type: object
               type: object
       summary: 获取自定义Prompt列表
+      tags:
+      - tool
+  /prompt/optimize:
+    post:
+      consumes:
+      - application/json
+      description: 获取提示词优化结果
+      parameters:
+      - description: 提示词优化请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.PromptOptimizeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取提示词优化结果
       tags:
       - tool
   /prompt/template:

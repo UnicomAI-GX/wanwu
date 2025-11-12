@@ -22,12 +22,11 @@ func Register(openAPI *gin.RouterGroup) {
 	mid.Sub("openapi").Reg(openAPI, "/mcp/server/streamable", http.MethodGet, openapi.GetMCPServerStreamable, "获取MCP服务streamable消息(GET)", middleware.AuthOpenAPIByQuery(constant.AppTypeMCPServer))
 	mid.Sub("openapi").Reg(openAPI, "/mcp/server/streamable", http.MethodPost, openapi.GetMCPServerStreamable, "获取MCP服务streamable消息(POST)", middleware.AuthOpenAPIByQuery(constant.AppTypeMCPServer))
 
-	//oauth
-	mid.Sub("openapi").Reg(openAPI, "/oauth/jwks", http.MethodGet, openapi.JWKS, "JWT公钥")
-	mid.Sub("openapi").Reg(openAPI, "/oauth/code/token", http.MethodPost, openapi.Token, "授权码获取token")
-	mid.Sub("openapi").Reg(openAPI, "/oauth/code/token/refresh", http.MethodPost, openapi.Refresh, "刷新Access Token")
-	mid.Sub("openapi").Reg(openAPI, "/.well-known/openid-configuration", http.MethodGet, openapi.OauthConfig, "返回Endpoint配置")
-	//oauth user
-	mid.Sub("openapi").Reg(openAPI, "/oauth/userinfo", http.MethodGet, openapi.OAuthGetUserInfo, "OAuth获取用户信息", middleware.JWTAccess)
-
+	// oauth
+	mid.Sub("openapi").Reg(openAPI, "/oauth/jwks", http.MethodGet, openapi.OAuthJWKS, "JWT公钥")
+	mid.Sub("openapi").Reg(openAPI, "/oauth/code/token", http.MethodPost, openapi.OAuthToken, "授权码获取token")
+	mid.Sub("openapi").Reg(openAPI, "/oauth/code/token/refresh", http.MethodPost, openapi.OAuthRefresh, "刷新Access Token")
+	mid.Sub("openapi").Reg(openAPI, "/.well-known/openid-configuration", http.MethodGet, openapi.OAuthConfig, "返回Endpoint配置")
+	// oauth user
+	mid.Sub("openapi").Reg(openAPI, "/oauth/userinfo", http.MethodGet, openapi.OAuthGetUserInfo, "OAuth获取用户信息", middleware.JWTOAuthAccess)
 }

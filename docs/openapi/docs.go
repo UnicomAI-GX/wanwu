@@ -29,7 +29,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.OauthConfig"
+                            "$ref": "#/definitions/response.OAuthConfig"
                         }
                     }
                 }
@@ -271,7 +271,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.TokenResponse"
+                            "$ref": "#/definitions/response.OAuthTokenResponse"
                         }
                     }
                 }
@@ -297,7 +297,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.RefreshRequest"
+                            "$ref": "#/definitions/request.OAuthRefreshRequest"
                         }
                     }
                 ],
@@ -305,7 +305,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.RefreshTokenResponse"
+                            "$ref": "#/definitions/response.OAuthRefreshTokenResponse"
                         }
                     }
                 }
@@ -313,7 +313,7 @@ const docTemplate = `{
         },
         "/oauth/jwks": {
             "get": {
-                "description": "自动获取JWKS",
+                "description": "自动获取OAuthJWKS",
                 "produces": [
                     "application/json"
                 ],
@@ -325,7 +325,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.JWKS"
+                            "$ref": "#/definitions/response.OAuthJWKS"
                         }
                     }
                 }
@@ -454,7 +454,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "jwt_util.JWK": {
+        "oauth2_util.JWK": {
             "type": "object",
             "properties": {
                 "alg": {
@@ -473,6 +473,40 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "use": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.History": {
+            "type": "object",
+            "properties": {
+                "needHistory": {
+                    "type": "boolean"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "response": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.OAuthRefreshRequest": {
+            "type": "object",
+            "required": [
+                "grant_type"
+            ],
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "client_secret": {
+                    "type": "string"
+                },
+                "grant_type": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 }
             }
@@ -509,6 +543,12 @@ const docTemplate = `{
                 "query"
             ],
             "properties": {
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.History"
+                    }
+                },
                 "query": {
                     "type": "string"
                 },
@@ -517,70 +557,7 @@ const docTemplate = `{
                 }
             }
         },
-        "request.RefreshRequest": {
-            "type": "object",
-            "required": [
-                "grant_type"
-            ],
-            "properties": {
-                "client_id": {
-                    "type": "string"
-                },
-                "client_secret": {
-                    "type": "string"
-                },
-                "grant_type": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.JWKS": {
-            "type": "object",
-            "properties": {
-                "keys": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/jwt_util.JWK"
-                    }
-                }
-            }
-        },
-        "response.OAuthGetUserInfo": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "company": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "string"
-                },
-                "nickname": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "remark": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.OauthConfig": {
+        "response.OAuthConfig": {
             "type": "object",
             "properties": {
                 "authorization_endpoint": {
@@ -618,6 +595,102 @@ const docTemplate = `{
                 },
                 "token_endpoint": {
                     "description": "获取token接口",
+                    "type": "string"
+                },
+                "userinfo_endpoint": {
+                    "description": "获取用户信息接口",
+                    "type": "string"
+                }
+            }
+        },
+        "response.OAuthGetUserInfo": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.OAuthJWKS": {
+            "type": "object",
+            "properties": {
+                "keys": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/oauth2_util.JWK"
+                    }
+                }
+            }
+        },
+        "response.OAuthRefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "访问令牌",
+                    "type": "string"
+                },
+                "expires_at": {
+                    "description": "token过期时间(毫秒时间戳)",
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "description": "刷新令牌(可选)",
+                    "type": "string"
+                }
+            }
+        },
+        "response.OAuthTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "访问令牌",
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "token过期时间(毫秒时间戳)",
+                    "type": "integer"
+                },
+                "id_token": {
+                    "description": "ID令牌",
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "description": "刷新令牌",
+                    "type": "string"
+                },
+                "scope": {
+                    "description": "权限范围",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "token_type": {
+                    "description": "令牌类型(bearer)",
                     "type": "string"
                 }
             }
@@ -755,23 +828,6 @@ const docTemplate = `{
                 }
             }
         },
-        "response.RefreshTokenResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "description": "访问令牌",
-                    "type": "string"
-                },
-                "expires_at": {
-                    "description": "token过期时间(毫秒时间戳)",
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "description": "刷新令牌(可选)",
-                    "type": "string"
-                }
-            }
-        },
         "response.Response": {
             "type": "object",
             "properties": {
@@ -780,38 +836,6 @@ const docTemplate = `{
                 },
                 "data": {},
                 "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.TokenResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "description": "访问令牌",
-                    "type": "string"
-                },
-                "expires_in": {
-                    "description": "token过期时间(毫秒时间戳)",
-                    "type": "integer"
-                },
-                "id_token": {
-                    "description": "ID令牌",
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "description": "刷新令牌",
-                    "type": "string"
-                },
-                "scope": {
-                    "description": "权限范围",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "token_type": {
-                    "description": "令牌类型(bearer)",
                     "type": "string"
                 }
             }

@@ -89,6 +89,11 @@ func GetDeployInfo(ctx *gin.Context) (interface{}, error) {
 
 // CreateKnowledge 创建知识库
 func CreateKnowledge(ctx *gin.Context, userId, orgId string, r *request.CreateKnowledgeReq) (*response.CreateKnowledgeResp, error) {
+	var llmModelId, schemaUrl string
+	if r.KnowledgeGraph.Switch {
+		llmModelId = r.KnowledgeGraph.LLMModelId
+		schemaUrl = r.KnowledgeGraph.SchemaUrl
+	}
 	resp, err := knowledgeBase.CreateKnowledge(ctx.Request.Context(), &knowledgebase_service.CreateKnowledgeReq{
 		Name:        r.Name,
 		Description: r.Description,
@@ -96,6 +101,11 @@ func CreateKnowledge(ctx *gin.Context, userId, orgId string, r *request.CreateKn
 		OrgId:       orgId,
 		EmbeddingModelInfo: &knowledgebase_service.EmbeddingModelInfo{
 			ModelId: r.EmbeddingModel.ModelId,
+		},
+		KnowledgeGraph: &knowledgebase_service.KnowledgeGraph{
+			Switch:     r.KnowledgeGraph.Switch,
+			LlmModelId: llmModelId,
+			SchemaUrl:  schemaUrl,
 		},
 	})
 	if err != nil {
@@ -195,6 +205,14 @@ func UpdateKnowledgeMetaValue(ctx *gin.Context, userId, orgId string, r *request
 	return nil
 }
 
+func UpdateKnowledgeStatus(ctx *gin.Context, r *request.CallbackUpdateKnowledgeStatusReq) error {
+	_, err := knowledgeBase.UpdateKnowledgeStatus(ctx.Request.Context(), &knowledgebase_service.UpdateKnowledgeStatusReq{
+		KnowledgeId:  r.KnowledgeId,
+		ReportStatus: r.ReportStatus,
+	})
+	return err
+}
+
 func buildUserKnowledgeList(knowledgeList *response.KnowledgeListResp) map[string][]*request.RagKnowledgeInfo {
 	retMap := make(map[string][]*request.RagKnowledgeInfo)
 	for _, knowledge := range knowledgeList.KnowledgeList {
@@ -277,6 +295,7 @@ func buildKnowledgeInfoList(ctx *gin.Context, knowledgeListResp *knowledgebase_s
 			CreateUserId:     knowledge.CreateUserId,
 			Share:            share, //数量大于1才是分享，因为权限记录中有一条是记录创建者权限
 			RagName:          knowledge.RagName,
+			GraphSwitch:      knowledge.GraphSwitch,
 		})
 	}
 	return &response.KnowledgeListResp{KnowledgeList: list}

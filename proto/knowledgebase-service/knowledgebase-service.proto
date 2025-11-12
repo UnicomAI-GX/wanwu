@@ -31,6 +31,8 @@ service KnowledgeBaseService {
   rpc GetKnowledgeMetaValueList(KnowledgeMetaValueListReq) returns (KnowledgeMetaValueListResp) {}
   // 更新知识库元数据值列表
   rpc UpdateKnowledgeMetaValue(UpdateKnowledgeMetaValueReq) returns (google.protobuf.Empty) {}
+  // 修改知识库状态
+  rpc UpdateKnowledgeStatus(UpdateKnowledgeStatusReq) returns (google.protobuf.Empty) {}
 }
 
 message DeleteKnowledgeReq{
@@ -45,6 +47,11 @@ message UpdateKnowledgeReq{
   string description = 3;
   string userId = 4;
   string orgId = 5;
+}
+
+message UpdateKnowledgeStatusReq{
+  string knowledgeId = 1;
+  int32 reportStatus = 2;
 }
 
 message KnowledgeHitReq{
@@ -92,10 +99,17 @@ message CreateKnowledgeReq{
   string name = 3;
   string description = 4;
   EmbeddingModelInfo embeddingModelInfo = 5;
+  KnowledgeGraph knowledgeGraph = 6; //知识图谱配置
 }
 
 message EmbeddingModelInfo{
   string modelId = 1;
+}
+
+message KnowledgeGraph {
+  bool switch = 1; //知识图谱开关
+  string llmModelId = 2;//大模型id
+  string schemaUrl = 3; //知识图谱schema文件地址
 }
 
 message CreateKnowledgeResp{
@@ -151,6 +165,7 @@ message KnowledgeInfo {
   string createOrgId = 10;//创建者组织id
   int32 shareCount = 11;//共享数量
   string ragName = 12;//传给rag的知识库名称
+  int32 graphSwitch = 13; //知识图谱开关
 }
 
 message KnowledgeTagInfo {

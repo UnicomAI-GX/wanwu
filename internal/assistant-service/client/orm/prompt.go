@@ -116,7 +116,7 @@ func (c *Client) GetCustomPromptList(ctx context.Context, userID, orgID string, 
 		sqlopt.WithUserId(userID),
 		sqlopt.WithOrgID(orgID),
 		sqlopt.WithCustomPromptLikeName(name),
-	).Apply(c.db.WithContext(ctx)).Find(&customPrompts).Error; err != nil {
+	).Apply(c.db.WithContext(ctx)).Order("updated_at DESC").Find(&customPrompts).Error; err != nil {
 		return nil, 0, toErrStatus("assistant_custom_prompt_get_list_err", err.Error())
 	}
 	return customPrompts, int64(len(customPrompts)), nil

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
+	oauth2_util "github.com/UnicomAI/wanwu/internal/bff-service/pkg/oauth2-util"
 	"github.com/UnicomAI/wanwu/pkg/i18n"
 	"github.com/UnicomAI/wanwu/pkg/log"
 	"github.com/UnicomAI/wanwu/pkg/minio"
@@ -19,8 +20,7 @@ type Config struct {
 	Server            ServerConfig               `json:"server" mapstructure:"server"`
 	Log               LogConfig                  `json:"log" mapstructure:"log"`
 	JWT               JWTConfig                  `json:"jwt" mapstructure:"jwt"`
-	OAuth             OAuthSwitch                `json:"oauth" mapstructure:"oauth"`
-	OAuthJWT          OAuthJWTConfig             `json:"oauth_rsa" mapstructure:"oauth_rsa"`
+	OAuth             OAuthConfig                `json:"oauth" mapstructure:"oauth"`
 	Decrypt           DecryptPasswd              `json:"decrypt-passwd" mapstructure:"decrypt-passwd"`
 	I18n              i18n.Config                `json:"i18n" mapstructure:"i18n"`
 	AssistantTemplate AssistantTemplateConfig    `json:"assistant-template" mapstructure:"assistant-template"`
@@ -31,6 +31,7 @@ type Config struct {
 	PromptTemplate    PromptTemplatePathConfig   `json:"prompt-template" mapstructure:"prompt-template"`
 	WorkflowTemplates []*WorkflowTemplateConfig  `json:"workflows" mapstructure:"workflows"`
 	PromptTemplates   []*PromptTempConfig        `json:"prompts" mapstructure:"prompts"`
+	PromptEngineering PromptEngineeringConfig    `json:"prompt-engineering" mapstructure:"prompt-engineering"`
 	// middleware
 	Minio minio.Config `json:"minio" mapstructure:"minio"`
 	Redis redis.Config `json:"redis" mapstructure:"redis"`
@@ -83,6 +84,11 @@ type OAuthJWTConfig struct {
 	RSAPublicKeyPath  string `json:"public_key_path" mapstructure:"public_key_path"`
 }
 
+type OAuthConfig struct {
+	Switch int                   `json:"switch" mapstructure:"switch"`
+	RSA    oauth2_util.RSAConfig `json:"rsa" mapstructure:"rsa"`
+}
+
 type DecryptPasswd struct {
 	IV  string `json:"iv" mapstructure:"iv"`
 	Key string `json:"key" mapstructure:"key"`
@@ -123,6 +129,10 @@ type PromptTempConfig struct {
 	Desc       string `json:"desc" mapstructure:"desc"`
 	Author     string `json:"author" mapstructure:"author"`
 	Prompt     string `json:"prompt" mapstructure:"prompt"`
+}
+
+type PromptEngineeringConfig struct {
+	Optimization string `json:"optimization" mapstructure:"optimization"`
 }
 
 type WorkflowServiceConfig struct {

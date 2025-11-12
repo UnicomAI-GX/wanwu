@@ -37,9 +37,16 @@ const (
 	MetaOptionUpdate                = "update"
 	MetaStatusFailed                = "failed"
 	MetaStatusPartial               = "partial"
+	RagDocSuccess                   = 10
 )
 
 func (s *Service) GetDocList(ctx context.Context, req *knowledgebase_doc_service.GetDocListReq) (*knowledgebase_doc_service.GetDocListResp, error) {
+	//查询知识库信息
+	knowledge, err := orm.SelectKnowledgeById(ctx, req.KnowledgeId, "", "")
+	if err != nil {
+		log.Errorf("没有操作该知识库的权限 错误(%v) 参数(%v)", err, req)
+		return nil, util.ErrCode(errs.Code_KnowledgeBaseSelectFailed)
+	}
 	//入口层已经校验过用户权限，此处无需校验
 	list, total, err := orm.GetDocList(ctx, "", "", req.KnowledgeId,
 		req.DocName, req.DocTag, util.BuildDocReqStatusList(int(req.Status)), req.PageSize, req.PageNum)
@@ -56,7 +63,7 @@ func (s *Service) GetDocList(ctx context.Context, req *knowledgebase_doc_service
 		}
 	}
 
-	return buildDocListResp(list, importTaskList, total, req.PageSize, req.PageNum), nil
+	return buildDocListResp(list, importTaskList, knowledge, total, req.PageSize, req.PageNum), nil
 }
 
 func (s *Service) GetDocDetail(ctx context.Context, req *knowledgebase_doc_service.GetDocDetailReq) (*knowledgebase_doc_service.DocInfo, error) {
@@ -87,6 +94,21 @@ func (s *Service) UpdateDocStatus(ctx context.Context, req *knowledgebase_doc_se
 	if err != nil {
 		log.Errorf("docId: %v update doc fail %v", req.DocId, err)
 		return nil, util.ErrCode(errs.Code_KnowledgeDocUpdateStatusFailed)
+	}
+	if req.Status == RagDocSuccess {
+		knowledge, doc, graph, err := buildKnowledgeInfo(ctx, req.DocId)
+		if err != nil {
+			log.Errorf("docId: %v build knowledge info fail %v", req.DocId, err)
+			return nil, util.ErrCode(errs.Code_KnowledgeDocUpdateStatusFailed)
+		}
+		//开启了知识图谱
+		if graph.KnowledgeGraphSwitch {
+			err = createKnowledgeGraph(ctx, knowledge, doc, graph)
+			if err != nil {
+				log.Errorf("docId: %v create knowledge graph fail %v", req.DocId, err)
+				return nil, util.ErrCode(errs.Code_KnowledgeDocUpdateStatusFailed)
+			}
+		}
 	}
 	return &emptypb.Empty{}, nil
 }
@@ -605,7 +627,7 @@ func checkDocStatus(docList []*model.KnowledgeDoc) ([]uint32, []*model.Knowledge
 }
 
 // buildDocListResp 构造知识库文档列表
-func buildDocListResp(list []*model.KnowledgeDoc, importTaskList []*model.KnowledgeImportTask, total int64, pageSize int32, pageNum int32) *knowledgebase_doc_service.GetDocListResp {
+func buildDocListResp(list []*model.KnowledgeDoc, importTaskList []*model.KnowledgeImportTask, knowledge *model.KnowledgeBase, total int64, pageSize int32, pageNum int32) *knowledgebase_doc_service.GetDocListResp {
 	segmentConfigMap := buildSegmentConfigMap(importTaskList)
 	var retList = make([]*knowledgebase_doc_service.DocInfo, 0)
 	if len(list) > 0 {
@@ -618,6 +640,11 @@ func buildDocListResp(list []*model.KnowledgeDoc, importTaskList []*model.Knowle
 		Docs:     retList,
 		PageSize: pageSize,
 		PageNum:  pageNum,
+		KnowledgeInfo: &knowledgebase_doc_service.KnowledgeInfo{
+			KnowledgeId:   knowledge.KnowledgeId,
+			KnowledgeName: knowledge.Name,
+			GraphSwitch:   int32(knowledge.KnowledgeGraphSwitch),
+		},
 	}
 }
 
@@ -633,6 +660,7 @@ func buildDocInfo(item *model.KnowledgeDoc, segmentConfigMap map[string]*model.S
 		ErrorMsg:      item.ErrorMsg,
 		SegmentMethod: buildSegmentMethod(item, segmentConfigMap),
 		UserId:        item.UserId,
+		GraphStatus:   int32(model.BuildGraphShowStatus(item.GraphStatus)),
 	}
 }
 
@@ -1015,4 +1043,73 @@ func buildOptionList(metaList []*model.KnowledgeDocMeta, req *knowledgebase_doc_
 	updateList := buildUpdateMetaMap(req.MetaDataList, metaMap)
 	addList := buildAddMetaList(req)
 	return deleteList, updateList, addList
+}
+
+func buildKnowledgeInfo(ctx context.Context, docId string) (*model.KnowledgeBase, *model.KnowledgeDoc, *orm.KnowledgeGraph, error) {
+	docList, err := orm.SelectDocByDocIdList(ctx, []string{docId}, "", "")
+	if err != nil || len(docList) == 0 {
+		log.Errorf("docId: %v select doc fail %v", docId, err)
+		return nil, nil, nil, util.ErrCode(errs.Code_KnowledgeDocUpdateStatusFailed)
+	}
+	doc := docList[0]
+	knowledge, err := orm.SelectKnowledgeById(ctx, doc.KnowledgeId, "", "")
+	if err != nil {
+		log.Errorf("docId: %v select knowledge fail %v", docId, err)
+		return nil, nil, nil, util.ErrCode(errs.Code_KnowledgeDocUpdateStatusFailed)
+	}
+
+	//构造知识库图谱
+	knowledgeGraph := orm.BuildKnowledgeGraph(knowledge.KnowledgeGraph)
+	return knowledge, doc, knowledgeGraph, nil
+}
+
+// 创建知识图谱
+func createKnowledgeGraph(ctx context.Context, knowledge *model.KnowledgeBase, doc *model.KnowledgeDoc, graph *orm.KnowledgeGraph) error {
+	importTask, err := orm.SelectKnowledgeImportTaskById(ctx, doc.ImportTaskId)
+	if err != nil {
+		log.Errorf("docId: %v select import task fail %v", doc.DocId, err)
+		return util.ErrCode(errs.Code_KnowledgeDocUpdateStatusFailed)
+	}
+	var config = &model.SegmentConfig{}
+	err = json.Unmarshal([]byte(importTask.SegmentConfig), config)
+	if err != nil {
+		log.Errorf("SegmentConfig process error %s", err.Error())
+		return err
+	}
+	var analyzer = &model.DocAnalyzer{}
+	err = json.Unmarshal([]byte(importTask.DocAnalyzer), analyzer)
+	if err != nil {
+		log.Errorf("DocAnalyzer process error %s", err.Error())
+		return err
+	}
+	var preProcess = &model.DocPreProcess{}
+	err = json.Unmarshal([]byte(importTask.DocPreProcess), preProcess)
+	if err != nil {
+		log.Errorf("DocPreprocess process error %s", err.Error())
+		return err
+	}
+	//3.rag 文档开始导入操作
+	var fileName = service.RebuildFileName(doc.DocId, doc.FileType, doc.Name)
+
+	return service.RagBuildKnowledgeGraph(ctx, &service.RagImportDocParams{
+		DocId:                 doc.DocId,
+		KnowledgeName:         knowledge.RagName,
+		CategoryId:            knowledge.KnowledgeId,
+		UserId:                knowledge.UserId,
+		Overlap:               config.Overlap,
+		SegmentSize:           config.MaxSplitter,
+		SegmentType:           service.RebuildSegmentType(config.SegmentType, config.SegmentMethod),
+		SplitType:             service.RebuildSplitType(config.SegmentMethod),
+		Separators:            config.Splitter,
+		ParserChoices:         analyzer.AnalyzerList,
+		ObjectName:            fileName,
+		OriginalName:          doc.Name,
+		IsEnhanced:            "false",
+		OcrModelId:            importTask.OcrModelId,
+		PreProcess:            preProcess.PreProcessList,
+		KnowledgeGraphSwitch:  graph.KnowledgeGraphSwitch,
+		GraphModelId:          graph.GraphModelId,
+		GraphSchemaObjectName: graph.GraphSchemaObjectName,
+		GraphSchemaFileName:   graph.GraphSchemaFileName,
+	})
 }
