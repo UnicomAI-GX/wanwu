@@ -47,16 +47,29 @@ func SuccessGraphStatus(status int) bool {
 }
 
 // BuildGraphShowStatus 报告展示状态 0:待处理，1.解析中，2.解析成功，3.解析失败
-func BuildGraphShowStatus(status GraphStatus) int {
+func BuildGraphShowStatus(status GraphStatus) (int, string) {
 	switch status {
 	case GraphInit:
-		return 0
+		return 0, ""
 	case GraphProcessing:
-		return 1
+		return 1, ""
 	case GraphSuccess:
-		return 2
+		return 2, ""
 	}
-	return 3
+	return 3, buildErrorMessage(status)
+}
+
+//todo 多语言没有处理
+func buildErrorMessage(status GraphStatus) string {
+	switch status {
+	case GraphChunkFail:
+		return "图谱生成chunk文本失败"
+	case GraphExtractFail:
+		return "图谱生成提取失败"
+	case GraphStoreFail:
+		return "图谱持久化存储失败"
+	}
+	return ""
 }
 
 func InGraphStatus(status int) bool {

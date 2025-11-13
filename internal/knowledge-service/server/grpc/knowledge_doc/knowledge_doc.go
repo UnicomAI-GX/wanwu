@@ -649,6 +649,7 @@ func buildDocListResp(list []*model.KnowledgeDoc, importTaskList []*model.Knowle
 }
 
 func buildDocInfo(item *model.KnowledgeDoc, segmentConfigMap map[string]*model.SegmentConfig) *knowledgebase_doc_service.DocInfo {
+	status, message := model.BuildGraphShowStatus(item.GraphStatus)
 	return &knowledgebase_doc_service.DocInfo{
 		DocId:         item.DocId,
 		DocName:       item.Name,
@@ -660,7 +661,8 @@ func buildDocInfo(item *model.KnowledgeDoc, segmentConfigMap map[string]*model.S
 		ErrorMsg:      item.ErrorMsg,
 		SegmentMethod: buildSegmentMethod(item, segmentConfigMap),
 		UserId:        item.UserId,
-		GraphStatus:   int32(model.BuildGraphShowStatus(item.GraphStatus)),
+		GraphStatus:   int32(status),
+		GraphErrMsg:   message,
 	}
 }
 

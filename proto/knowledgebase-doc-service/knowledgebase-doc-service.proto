@@ -214,6 +214,7 @@ message DocInfo{
   string segmentMethod = 9;//分段方式 0：通用分段，1：父子分段
   string userId = 10;
   int32 graphStatus = 11;//0:待处理，1.解析中，2.解析成功，3.解析失败
+  string graphErrMsg = 12;//错误信息
 }
 
 message DocSegmentListReq{

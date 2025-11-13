@@ -240,6 +240,7 @@ func buildDocRespList(ctx *gin.Context, dataList []*knowledgebase_doc_service.Do
 			SegmentMethod: data.SegmentMethod,
 			Author:        authorMap[data.UserId],
 			GraphStatus:   data.GraphStatus,
+			GraphErrMsg:   data.GraphErrMsg,
 		})
 	}
 	return retList

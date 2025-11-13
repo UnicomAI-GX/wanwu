@@ -26,6 +26,7 @@ type ListDocResp struct {
 	SegmentMethod string `json:"segmentMethod"` //分段模式 0:通用分段，1：父子分段
 	Author        string `json:"author"`        // 上传文档 作者
 	GraphStatus   int32  `json:"graphStatus"`   //图谱状态 0:待处理，1.解析中，2.解析成功，3.解析失败
+	GraphErrMsg   string `json:"graphErrMsg"`   //图谱错误信息
 }
 
 type DocImportTipResp struct {
