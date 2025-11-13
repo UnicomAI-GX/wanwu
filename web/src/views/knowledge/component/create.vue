@@ -239,7 +239,6 @@ import { selectModelList } from "@/api/modelAccess";
 import { KNOWLEDGE_GRAPH_TIPS } from "../config";
 import uploadChunk from "@/mixins/uploadChunk";
 import { delfile } from "@/api/chunkFile";
-import {USER_API} from "@/utils/requestConstants"
 export default {
   mixins: [uploadChunk],
   data() {
