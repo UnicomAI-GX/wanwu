@@ -10,7 +10,7 @@ var originalFetch = window.fetch;
 import {md} from './marksown-it'
 import $ from './jquery.min.js'
 import { file } from "jszip";
-import {USER_API} from "@/utils/requestConstants"
+import {OPENURL_API, USER_API} from "@/utils/requestConstants"
 
 export default {
     data() {
@@ -398,7 +398,7 @@ export default {
                     "x-org-id": userInfo.orgId
                 }
             }else{
-                this.sseApi = `/service/url/openurl/v1/agent/${this.sseParams.assistantId}/stream`;
+                this.sseApi = `${OPENURL_API}/agent/${this.sseParams.assistantId}/stream`;
                 data = {
                    conversationId:this.sseParams.conversationId, 
                    prompt

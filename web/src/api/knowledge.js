@@ -1,8 +1,9 @@
 import service from "@/utils/request";
+import {KNOWLEDGE_API} from "@/utils/requestConstants";
 //新增文档知识分类
 export const createDoc = (data) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doccategory",
+        url: `${KNOWLEDGE_API}/ux/doccategory`,
         method: "post",
         data: data,
     });
@@ -11,7 +12,7 @@ export const createDoc = (data) => {
 //修改文档知识分类
 export const editDoc = (data) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doccategory",
+        url: `${KNOWLEDGE_API}/ux/doccategory`,
         method: "put",
         data: data,
     });
@@ -20,7 +21,7 @@ export const editDoc = (data) => {
 //删除文档知识分类
 export const removeDoc = (data) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doccategory",
+        url: `${KNOWLEDGE_API}/ux/doccategory`,
         method: "delete",
         data: data,
     });
@@ -29,7 +30,7 @@ export const removeDoc = (data) => {
 //获取文档列表
 export const getList = (data) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doc/list",
+        url: `${KNOWLEDGE_API}/ux/doc/list`,
         method: "post",
         data: data,
     });
@@ -37,7 +38,7 @@ export const getList = (data) => {
 //编辑文档
 export const modifyDoc = (data) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doc",
+        url: `${KNOWLEDGE_API}/ux/doc`,
         method: "put",
         data: data,
     });
@@ -45,7 +46,7 @@ export const modifyDoc = (data) => {
 //删除文档
 export const deleteDoc = (data) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doc",
+        url: `${KNOWLEDGE_API}/ux/doc`,
         method: "delete",
         data: data,
     });
@@ -53,7 +54,7 @@ export const deleteDoc = (data) => {
 //上传文档
 export const importDoc = (data,source) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doc/import",
+        url: `${KNOWLEDGE_API}/ux/doc/import`,
         method: "post",
         cancleToken:source,
         data: data,
@@ -63,7 +64,7 @@ export const importDoc = (data,source) => {
 //保存上传文档
 export const saveImportDoc = (data) => {
     return service({
-        url: "/konwledgeServe/v1/ux/doc/save",
+        url: `${KNOWLEDGE_API}/ux/doc/save`,
         method: "put",
         data: data,
     });
@@ -71,14 +72,14 @@ export const saveImportDoc = (data) => {
 //获取文档下载链接
 export const getDocLink = (id) => {
     return service({
-        url: `/konwledgeServe/v1/ux/doc/download_url?id=${id}`,
+        url: `${KNOWLEDGE_API}/ux/doc/download_url?id=${id}`,
         method: "get"
     });
 };
 //下载文档
 export const downDoc = (url) => {
     return service({
-        url: `/konwledgeServe${url}`,
+        url: `${KNOWLEDGE_API}${url}`,
         method: "get",
         responseType: 'blob'
     });
@@ -86,7 +87,7 @@ export const downDoc = (url) => {
 //命中测试
 export const test = (data) => {
     return service({
-        url: `/konwledgeServe/v1/ux/chunk/evaluate`,
+        url: `${KNOWLEDGE_API}/ux/chunk/evaluate`,
         method: "post",
         data: data
     });
@@ -94,7 +95,7 @@ export const test = (data) => {
 //上传文件删除无效数据
 export const deleteInvalid = (data) => {
     return service({
-        url: `/konwledgeServe/v1/ux/doc/invalid`,
+        url: `${KNOWLEDGE_API}/ux/doc/invalid`,
         method: "delete",
         data: data
     });
@@ -102,7 +103,7 @@ export const deleteInvalid = (data) => {
 //从url上传
 export const setUploadURL = (data)=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/importUrl',
+        url: `${KNOWLEDGE_API}/ux/doc/importUrl`,
         method: 'post',
         data
     })
@@ -110,7 +111,7 @@ export const setUploadURL = (data)=>{
 // 解析url
 export const analyzeURL = (data)=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/analysisUrl',
+        url: `${KNOWLEDGE_API}/ux/doc/analysisUrl`,
         method: 'post',
         data
     })
@@ -119,7 +120,7 @@ export const analyzeURL = (data)=>{
 // 查看分段结果列表
 export const getContentList = (data,config)=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/fileSplit',
+        url: `${KNOWLEDGE_API}/ux/doc/fileSplit`,
         method: 'post',
         data: data,
         // config
@@ -129,7 +130,7 @@ export const getContentList = (data,config)=>{
 // 查看分段结果列表
 export const setStatus = (data,config)=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/updateFileStatus',
+        url: `${KNOWLEDGE_API}/ux/doc/updateFileStatus`,
         method: 'post',
         data: data,
         // config
@@ -139,7 +140,7 @@ export const setStatus = (data,config)=>{
 // url上传批量
 export const batchurl = (data,source)=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/analysisBatchUrl',
+        url: `${KNOWLEDGE_API}/ux/doc/analysisBatchUrl`,
         method: 'post',
         data: data,
         cancelToken: source,
@@ -148,21 +149,21 @@ export const batchurl = (data,source)=>{
 };
 export const batchUrlTaskStatus = (data)=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/batchUrlTaskStatus',
+        url: `${KNOWLEDGE_API}/ux/doc/batchUrlTaskStatus`,
         method: 'get',
         params: data
     })
 };
 export const importBatchUrl = (data)=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/importBatchUrl',
+        url: `${KNOWLEDGE_API}/ux/doc/importBatchUrl`,
         method: 'get',
         params: data
     })
 };
 export const BatchUrlDemo = ()=>{
     return service({
-        url: '/konwledgeServe/v1/ux/doc/downloadDemoFile',
+        url: `${KNOWLEDGE_API}/ux/doc/downloadDemoFile`,
         method: 'get'
     })
 };
