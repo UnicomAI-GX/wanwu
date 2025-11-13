@@ -141,11 +141,24 @@
                   </template>
                 </el-table-column>
                 <el-table-column
-                  prop="graphSwitch"
+                  prop="graphStatus"
                   label="图谱解析状态"
                 >
                    <template slot-scope="scope">
-                      <span>{{scope.row.graphSwitch === 1 ? '解析成功' : '解析失败'}}</span>
+                      <span>{{knowledgeGraphStatus[scope.row.graphStatus]}}</span>
+                      <el-tooltip
+                      class="item"
+                      effect="light"
+                      :content="scope.row.graphErrMsg?scope.row.graphErrMsg:''"
+                      placement="top"
+                      v-if="scope.row.graphStatus === 3"
+                      popper-class="custom-tooltip"
+                    >
+                      <span
+                        class="el-icon-warning"
+                        style="margin-left:5px;color:#E6A23C;"
+                      ></span>
+                    </el-tooltip>
                    </template>
                 </el-table-column>
                 <el-table-column
@@ -213,6 +226,7 @@ import batchMetaData from './meta/batchMetaData.vue'
 import BatchMetatButton from './meta/batchMetatButton.vue'
 import {getDocList,delDocItem,uploadFileTips,updateDocMeta} from "@/api/knowledge";
 import {mapGetters} from 'vuex';
+import { KNOWLEDGE_GRAPH_STATUS } from '../config';
 export default {
   components: { Pagination,SearchInput,mataData,batchMetaData,BatchMetatButton},
   data() {
@@ -241,7 +255,8 @@ export default {
       isDisabled:false,
       selectedTableData:[],
       selectedDocIds:[],
-      graphSwitch:false
+      graphSwitch:false,
+      knowledgeGraphStatus: KNOWLEDGE_GRAPH_STATUS
     };
   },
   watch:{

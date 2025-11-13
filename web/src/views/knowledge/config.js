@@ -101,3 +101,9 @@ export const COMMUNITY_REPORT_STATUS = {
     2: '已生成',
     3: '生成失败',
 }
+export const KNOWLEDGE_GRAPH_STATUS = {
+    0: '待处理',
+    1: '解析中',
+    2: '解析成功',
+    3: '解析失败',
+}

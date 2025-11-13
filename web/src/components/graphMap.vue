@@ -27,7 +27,7 @@
             @click="zoomIn"
           ></el-button>
         </el-tooltip>
-        <el-divider direction="vertical"></el-divider>
+        <span class="zoom-display">{{ zoomPercentage }}%</span>
         <el-tooltip :content="$t('knowledgeManage.graph.zoomOut')" placement="top">
           <el-button 
             icon="el-icon-zoom-out" 
@@ -138,6 +138,9 @@ export default {
       if (this.$route && this.$route.query && this.$route.query.name) {
         return this.$route.query.name
       }
+    },
+    zoomPercentage() {
+      return Math.round(this.zoom * 100)
     }
   },
   watch: {
@@ -295,6 +298,10 @@ export default {
         if (this.autoFit) {
           this.fitView()
         }
+        // 默认缩放为100%，以画布中心为缩放中心
+        const width = this.graph.getWidth()
+        const height = this.graph.getHeight()
+        this.graph.zoomTo(1, { x: width / 2, y: height / 2 })
       }
 
       window.addEventListener('resize', this.handleResize)
@@ -368,7 +375,30 @@ export default {
  
        this.graph.on('viewportchange', () => {
          if (this.graph) {
-           const zoom = this.graph.getZoom()
+           const hideLabelZoom = (this.performance && this.performance.hideLabelZoom) || 0.8
+           const minZoom = hideLabelZoom > 0 ? hideLabelZoom : 0.3
+           let zoom = this.graph.getZoom()
+           const maxZoom = 2
+           // 如果缩放小于最小限制，自动调整到最小缩放，以画布中心为缩放中心
+           if (zoom < minZoom) {
+             zoom = minZoom
+             const width = this.graph.getWidth()
+             const height = this.graph.getHeight()
+             const centerPoint = {
+               x: width / 2,
+               y: height / 2
+             }
+             this.graph.zoomTo(zoom, centerPoint)
+           } else if (zoom > maxZoom) {
+             zoom = maxZoom
+             const width = this.graph.getWidth()
+             const height = this.graph.getHeight()
+             const centerPoint = {
+               x: width / 2,
+               y: height / 2
+             }
+             this.graph.zoomTo(zoom, centerPoint)
+           }
           this.zoom = zoom
           this.$emit('zoom-change', zoom)
           this.toggleLabelsByZoom()
@@ -432,15 +462,32 @@ export default {
     zoomIn() {
       if (!this.graph) return
       const currentZoom = this.graph.getZoom()
-      const newZoom = Math.min(currentZoom * 1.2, 3)
+      const newZoom = Math.min(currentZoom * 1.2, 2)
       this.graph.zoomTo(newZoom)
     },
  
     zoomOut() {
       if (!this.graph) return
       const currentZoom = this.graph.getZoom()
-      const newZoom = Math.max(currentZoom * 0.8, 0.3)
-      this.graph.zoomTo(newZoom)
+      const hideLabelZoom = (this.performance && this.performance.hideLabelZoom) || 0.8
+      // 最小缩放限制为 hideLabelZoom，确保label能够显示
+      const minZoom = hideLabelZoom > 0 ? hideLabelZoom : 0.3
+      const calculatedZoom = currentZoom * 0.8
+      const newZoom = Math.max(calculatedZoom, minZoom)
+      
+      // 如果达到最小缩放限制（即计算出的缩放小于最小值），以画布中心为缩放中心
+      const isAtMinLimit = calculatedZoom < minZoom
+      if (isAtMinLimit) {
+        const width = this.graph.getWidth()
+        const height = this.graph.getHeight()
+        const centerPoint = {
+          x: width / 2,
+          y: height / 2
+        }
+        this.graph.zoomTo(newZoom, centerPoint)
+      } else {
+        this.graph.zoomTo(newZoom)
+      }
     },
  
     fitView() {
@@ -647,6 +694,14 @@ export default {
       margin: 0 15px;
       height: 15px;
       background-color: $color;
+    }
+    .zoom-display {
+      margin: 0 15px;
+      font-size: 14px;
+      color: $color;
+      font-weight: 500;
+      min-width: 45px;
+      text-align: center;
     }
   }
 

@@ -63,7 +63,6 @@ export function transformGraphData(backendData) {
 
   const transformedEdges = edges.map((edge, index) => {
     const edgeId = `e${index}`
-    const edgeLabel = edge.description || ''
 
     const source =
       nodeIdMap.get(edge && edge.source_entity) ||
@@ -91,7 +90,6 @@ export function transformGraphData(backendData) {
       id: edgeId,
       source,
       target,
-      label: edgeLabel,
       ...(edge.weight && {
         style: {
           lineWidth: Math.max(1, Math.min(5, edge.weight / 2))
