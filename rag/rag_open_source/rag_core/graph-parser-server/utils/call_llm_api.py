@@ -12,7 +12,8 @@ from utils.logger import logger
 load_dotenv()
 
 class LLMCompletionCall:
-    def __init__(self, llm_model="", llm_base_url="", llm_api_key=""):
+    def __init__(self, llm_model="", llm_base_url="", llm_api_key="", temperature=0.001):
+        self.temperature = temperature
         if not llm_model or not llm_base_url or not llm_api_key:
             self.llm_model = os.getenv("LLM_MODEL", "deepseek-chat")
             self.llm_base_url = os.getenv("LLM_BASE_URL", "https://api.deepseek.com")
@@ -47,6 +48,7 @@ class LLMCompletionCall:
             headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.llm_api_key}"}
             llm_data = {
                 "model": self.llm_model,
+                "temperature": self.temperature,
                 "stream": False,
                 "messages": [{"role": "user", "content": content}],
             }
