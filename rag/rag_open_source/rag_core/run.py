@@ -1230,12 +1230,12 @@ def updateReport():
         user_id = data['userId']
         kb_name = data.get("knowledgeBase", "")
         kb_id = data.get("kb_id", "")
-        reports = data.get('reports', None)
+        report = data.get('reports', None)
 
-        if not reports or not isinstance(reports, dict):
+        if not report or not isinstance(report, dict):
             raise ValueError("reports must be a dict and not empty")
 
-        response_info = graph_utils.update_community_reports(user_id, kb_name, reports=reports, kb_id=kb_id)
+        response_info = graph_utils.update_community_reports(user_id, kb_name, report, kb_id=kb_id)
         headers = {'Access-Control-Allow-Origin': '*'}
         response = make_response(json.dumps(response_info, ensure_ascii=False), headers)
     except Exception as e:

@@ -390,6 +390,7 @@ def batch_add_community_reports(user_id: str, kb_name: str, reports:list, kb_id:
         for chunk in chunks:
             chunk["meta_data"] = copy.deepcopy(meta_data)
             chunk["meta_data"]["chunk_current_num"] = current_chunk_num
+            chunk["meta_data"]["entities"] = []
             current_chunk_num += 1
         logger.info('新增reports分配chunk完成'+ "user_id=%s,kb_name=%s,file_name=%s" % (user_id, kb_name, file_name))
 
@@ -406,6 +407,8 @@ def batch_add_community_reports(user_id: str, kb_name: str, reports:list, kb_id:
 
     logger.info(f"========= batch_add_community_reports end：user_id: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, reports: {reports}")
 
+    response_info["code"] = 0
+    response_info["data"]["success_count"] = len(chunks)
     return response_info
 
 def batch_delete_community_reports(user_id: str, kb_name: str, report_ids: list[str], kb_id=""):
