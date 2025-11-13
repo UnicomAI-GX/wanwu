@@ -1672,18 +1672,19 @@ def del_community_reports():
 
         file_name = "社区报告"
         if clear_reports:
-            er_result = es_ops.delete_data_by_kbname_file_name(report_index_name, kb_name, file_name)
+            er_result = es_ops.delete_data_by_kbname_file_name(report_index_name, kb_id, file_name)
         else:
-            er_result = es_ops.delete_chunks_by_content_ids(report_index_name, kb_name, content_ids)
+            er_result = es_ops.delete_chunks_by_content_ids(report_index_name, kb_id, content_ids)
         if not er_result["success"]:
             logger.info(
                 f"当前用户:{user_id},知识库:{kb_name},community reports删除时发生错误：{er_result}")
             raise RuntimeError(er_result.get("error", ""))
-        es_file_result = es_ops.delete_data_by_kbname_file_name(file_index_name, kb_name, file_name)
-        if not es_file_result["success"]:
-            logger.info(
-                f"当前用户:{user_id},知识库:{kb_name},file index删除社区报告时发生错误：{es_file_result}")
-            raise RuntimeError(es_file_result.get("error", ""))
+        if clear_reports:
+            es_file_result = es_ops.delete_data_by_kbname_file_name(file_index_name, kb_id, file_name)
+            if not es_file_result["success"]:
+                logger.info(
+                    f"当前用户:{user_id},知识库:{kb_name},file index删除社区报告时发生错误：{es_file_result}")
+                raise RuntimeError(es_file_result.get("error", ""))
         result = {
             "code": 0,
             "message": "success"
