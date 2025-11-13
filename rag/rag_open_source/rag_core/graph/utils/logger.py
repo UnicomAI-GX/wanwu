@@ -28,7 +28,7 @@ class ColoredFormatter(logging.Formatter):
         return formatted
 
 
-def setup_logger(name: str = "graph-parser-server",
+def setup_logger(name: str = "graph",
                  level: int = logging.INFO,
                  log_file: Optional[str] = None) -> logging.Logger:
     """

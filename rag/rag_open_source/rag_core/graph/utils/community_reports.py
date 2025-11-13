@@ -82,7 +82,7 @@ class CommunityReportsExtractor:
         self._extraction_prompt = COMMUNITY_REPORT_PROMPT
         self._max_report_length = max_report_length or 1500
 
-    def __call__(self, graph: nx.MultiDiGraph, include_files: list):
+    def __call__(self, graph: nx.MultiDiGraph):
         for node_degree in graph.degree:
             graph.nodes[str(node_degree[0])]["rank"] = int(node_degree[1])
 
@@ -96,18 +96,6 @@ class CommunityReportsExtractor:
             ents = cm["nodes"]
             if len(ents) < 2:
                 return
-
-            # 判断include_files是否出现在ents的['properties']['file_names']中
-            # relevant_nodes = []
-            # for node_id in ents:
-            #     node_file_names = graph.nodes[node_id].get('properties', {}).get('file_names', [])
-            #     # 检查include_files与node_file_names是否有交集
-            #     if any(file_name in node_file_names for file_name in include_files):
-            #         relevant_nodes.append(node_id)
-            #
-            # # 如果没有相关节点，直接返回
-            # if not relevant_nodes:
-            #     return
 
             new_ents = copy.deepcopy(ents)
             for ent in ents:

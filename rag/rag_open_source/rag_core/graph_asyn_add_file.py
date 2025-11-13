@@ -260,7 +260,7 @@ def generate_community_report(user_id, kb_name, enable_knowledge_graph, graph_mo
 
     # 提取社区报告
     try:
-        reports_result = graph_utils.generate_community_reports(user_id, kb_name)
+        reports_result = graph_utils.generate_community_reports(user_id, kb_name, graph_model_id)
         reports = reports_result['community_reports']
         if len(reports) == 0:
             raise ValueError("社区报告数量为0，生成失败")

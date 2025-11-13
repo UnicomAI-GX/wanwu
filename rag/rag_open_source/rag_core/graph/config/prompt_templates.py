@@ -49,8 +49,7 @@ The report should include the following sections:
 - DETAILED FINDINGS: A list of 5-10 key insights about the community. Each insight should have a short summary followed by multiple paragraphs of explanatory text grounded according to the grounding rules below. Be comprehensive.
 
 
-Return output as a well-formed JSON-formatted string with the following format(in the same language as the 'Text' content),输出必须使用与输入文本相同的语言（例如输入为中文，则输出报告也必须为中文）:
-    {{
+Return output as a well-formed JSON-formatted string with the following format(in the same language as the 'Text' content),输出必须使用与输入文本相同的语言（例如输入为中文，则输出报告也必须为中文）:    {{
         "title": <report_title>,
         "summary": <executive_summary>,
         "rating": <impact_severity_rating>,
@@ -136,8 +135,7 @@ The report should include the following sections:
 - RATING EXPLANATION: Give a single sentence explanation of the IMPACT severity rating.
 - DETAILED FINDINGS: A list of 5-10 key insights about the community. Each insight should have a short summary followed by multiple paragraphs of explanatory text grounded according to the grounding rules below. Be comprehensive.
 
-Return output as a well-formed JSON-formatted string with the following format(in the same language as the 'Text' content),输出必须使用与输入文本相同的语言（例如输入为中文，则输出报告也必须为中文）:
-    {{
+Return output as a well-formed JSON-formatted string with the following format(in the same language as the 'Text' content),输出必须使用与输入文本相同的语言（例如输入为中文，则输出报告也必须为中文）:    {{
         "title": <report_title>,
         "summary": <executive_summary>,
         "rating": <impact_severity_rating>,

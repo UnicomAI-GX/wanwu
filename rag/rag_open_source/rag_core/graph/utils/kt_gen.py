@@ -409,26 +409,6 @@ class KTBuilder:
         except Exception as e:
             logger.error(f"Failed to update schema for dataset '{self.dataset_name}': {type(e).__name__}: {e}")
 
-    def process_level4(self):
-        """Process communities using Tree-Comm algorithm"""
-        level2_nodes = [n for n, d in self.graph.nodes(data=True) if d['level'] == 2]
-        start_comm = time.time()
-        _tree_comm = tree_comm.FastTreeComm(
-            self.graph,
-            # embedding_model=self.config.tree_comm.embedding_model,
-            embedding_model=self.embedding_model,
-            struct_weight=self.config.tree_comm.struct_weight,
-        )
-        comm_to_nodes = _tree_comm.detect_communities(level2_nodes)
-
-        # create super nodes (level 4 communities)
-        _tree_comm.create_super_nodes_with_keywords(comm_to_nodes, level=4)
-        # _tree_comm.add_keywords_to_level3(comm_to_nodes)
-        # connect keywords to communities (optional)
-        # self._connect_keywords_to_communities()
-        end_comm = time.time()
-        logger.info(f"Community Indexing Time: {end_comm - start_comm}s")
-
     def _connect_keywords_to_communities(self):
         """Connect relevant keywords to communities"""
         # comm_names = [self.graph.nodes[n]['properties']['name'] for n, d in self.graph.nodes(data=True) if d['level'] == 4]

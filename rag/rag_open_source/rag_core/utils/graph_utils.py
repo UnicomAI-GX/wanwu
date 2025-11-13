@@ -132,9 +132,16 @@ def get_extrac_graph_data(user_id, kb_name, chunks, file_name, graph_model_id, s
 
 
 @timing.timing_decorator(logger, include_args=False)
-def generate_community_reports(user_id, kb_name):
+def generate_community_reports(user_id, kb_name, graph_model_id):
     """获取知识图谱社区报告"""
     try:
+        llm_config = get_model_configure(graph_model_id)
+        llm_model = llm_config.model_name
+        llm_base_url = ""
+        llm_api_key = ""
+        if isinstance(llm_config, LlmModelConfig):
+            llm_base_url = llm_config.endpoint_url + "/chat/completions"
+            llm_api_key = llm_config.api_key
         start_time = datetime.now()
         headers = {
             "Content-Type": "application/json",
@@ -142,6 +149,9 @@ def generate_community_reports(user_id, kb_name):
         data = {
             "user_id": user_id,
             "kb_name": kb_name,
+            "llm_model": llm_model,
+            "llm_base_url": llm_base_url,
+            "llm_api_key": llm_api_key
         }
         # 将JSON数据转换好格式
         json_data = json.dumps(data)

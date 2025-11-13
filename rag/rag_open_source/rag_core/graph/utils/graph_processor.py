@@ -4,7 +4,7 @@ from pathlib import Path
 import networkx as nx
 
 from utils.logger import logger
-from utils.community_reports_extractor import CommunityReportsExtractor
+from utils.community_reports import CommunityReportsExtractor
 
 
 GRAPH_FIELD_SEP = "<SEP>"
@@ -351,9 +351,9 @@ def merge_subgraph(
     return new_graph
 
 
-def extract_community(graph, include_files):
-    ext = CommunityReportsExtractor()
-    cr = ext(graph, include_files)
+def extract_community(graph, config):
+    ext = CommunityReportsExtractor(config)
+    cr = ext(graph)
     community_structure = cr.structured_output
     community_reports = cr.output
 
