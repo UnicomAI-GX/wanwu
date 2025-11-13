@@ -373,7 +373,7 @@ def batch_add_community_reports(user_id: str, kb_name: str, reports:list, kb_id:
     chunks = []
     for item in reports:
         chunks.append({
-            "content": item["content"],
+            "content": f"# {item['title']} \n\n {item['content']}",
             "embedding_content": item["title"],
             "create_time": str(int(time.time() * 1000))
         })
@@ -449,3 +449,83 @@ def get_community_report_list(user_id: str, kb_name: str, page_size: int, search
     logger.info(f"get_community_report_list end: {user_id}, kb_name: {kb_name}, kb_id: {kb_id}, "
                 f"page_size:{page_size}, search_after:{search_after}, response: {response_info}")
     return response_info
+
+@timing.timing_decorator(logger, include_args=True)
+def get_graph_search_list(user_id, kb_names, question, top_k, kb_ids=[], filter_file_name_list=[]):
+    """ 根据问题召回知识图谱的 search列表"""
+    # 使用query去 es召回 图谱 SPO信息
+    try:
+        if not kb_ids:
+            for kb_n in kb_names:
+                kb_ids.append(milvus_utils.get_milvus_kb_name_id(user_id, kb_n))  # 获取kb_id
+        kb_graph_vocabulary_list = get_graph_vocabulary_set(kb_ids)
+        graph_node_query = ""
+        entities = []
+        for kb_vocabulary_list, kb_vocabulary_type_list in kb_graph_vocabulary_list:
+            kb_entities = []
+            for vocabulary in kb_vocabulary_list:
+                if vocabulary in question:
+                    if len(vocabulary) > 3:
+                        kb_entities.append(vocabulary)
+                    graph_node_query += vocabulary
+            entities.append(kb_entities)
+        if not graph_node_query:
+            graph_node_query = question
+        search_top_k = 100
+        es_graph_search_list = es_utils.search_graph_es(user_id, kb_names, graph_node_query, search_top_k, kb_ids=kb_ids,
+                                            filter_file_name_list=filter_file_name_list)
+        graph_list = []
+        report_topk = min(2, int(top_k*0.4))
+        community_report_result = milvus_utils.search_milvus(user_id, kb_names, report_topk, question, threshold=0,
+                                                   search_field="content", kb_ids=kb_ids, milvus_url=milvus_utils.KNN_COMMUNITY_SEARCH_URL)
+        logger.info(f"search report done, user_id:{user_id}, kb_names: {kb_names}, report_topk: {report_topk}, "
+                    f"entities: {entities}, reports: {community_report_result}")
+        if community_report_result["code"] == 0:
+            search_list = community_report_result['data']['search_list']
+            contents = []
+            for s in search_list:
+                contents.append(s["content"])
+            if contents:
+                report_texts = f"社区报告信息:({'|'.join(contents)}) "
+                graph_list.append({"snippet": report_texts, "meta_data": {},
+                                          "title": "社区报告", "content_type": "community_report"})
+        if not all([not(ent) for ent in entities]):  # 如果有图关键词，则进行优先社区报告检索
+            # ======= 构建 triple_text 生成一个chunk插入社区报告开头 =======
+            triple_text_list = []
+            for s in es_graph_search_list:
+                # ====== SPO 三元组前处理 =======
+                text = s["graph_data_text"]
+                # 检查字符串是否包含中文且包含has_attribute
+                if "has_attribute" in text and any('\u4e00' <= char <= '\u9fff' for char in text):
+                    s["graph_data_text"] = text.replace("has_attribute", "其具有属性")
+                for kb_entities in entities:  # 如果有图关键词，则进行SPO拉取
+                    for kb_entity in kb_entities:
+                        if kb_entity in s["graph_data_text"] and s["graph_data_text"] not in triple_text_list:
+                            triple_text_list.append(s["graph_data_text"])
+            if triple_text_list:
+                triple_text = f"知识图谱信息:({'|'.join(triple_text_list)}) "
+                graph_list.append({"snippet": triple_text, "meta_data": {},
+                                          "title": "知识图谱-实体属性关系", "content_type": "graph"})
+
+        logger.info(repr(user_id) + repr(kb_names) + repr(question)
+                    + f'问题 graph 查询结果 es_graph_search_list len：{len(es_graph_search_list)},graph_list len：{len(graph_list)}')
+        # ====== 去重 =======
+        tmp_content = []
+        graph_search_list = []
+        for i in es_graph_search_list:  # 去重
+            i["snippet"] = i["meta_data"]["reference_snippet"]
+            if i["snippet"] in tmp_content:
+                continue
+            graph_search_list.append(i)
+            tmp_content.append(i["snippet"])
+    except Exception as err:
+        import traceback
+        logger.error("====> get_graph_search_list error %s" % err)
+        logger.error(traceback.format_exc())
+        graph_search_list = []
+        graph_list = []
+    res_graph_search_list = graph_search_list[:top_k*2]
+    logger.info(repr(user_id) + repr(kb_names) + repr(question) + f'问题 graph 最终查询分段结果：'
+                + repr(res_graph_search_list) + f'graph_list:'+ repr(graph_list))
+    return res_graph_search_list, graph_list
+
