@@ -66,9 +66,15 @@
 {"code":110000,"key":"bff_workflow_import_file","langs":{"zh":"工作流导入文件错误: %v"}}
 {"code":110000,"key":"bff_workflow_export","langs":{"zh":"工作流导出错误: %v"}}
 {"code":110000,"key":"bff_workflow_tool_select","langs":{"zh":"获取工作流工具列表错误:%v"}}
+{"code":110000,"key":"bff_chatflow_apps_list","langs":{"en":"get chatflow app list err: %v","zh":"获取对话流应用列表错误：%v"}}
 {"code":0,"key":"------ doc ------","langs":{}}
 {"code":110000,"key":"bff_doc_center_file_unescape","langs":{"en":"path unescape error: %v","zh":"路径去除转义错误: %v"}}
 {"code":110000,"key":"bff_doc_center_file_md","langs":{"en":"no markdown files found: %v","zh":"未含有md文件: %v"}}
+{"code":0,"key":"------ oauth ------","langs":{}}
+{"code":110000,"key":"bff_oauth_status","langs":{"en":"client id (%v) has been disabled","zh":"客户端ID(%v)已被禁用"}}
+{"code":110000,"key":"bff_oauth_secret","langs":{"en":"client secret is incorrect.","zh":"客户端密钥输入错误"}}
+{"code":110000,"key":"bff_oauth_redirect_uri","langs":{"en":"redirect uri not registered","zh":"重定向地址未注册"}}
+{"code":110000,"key":"bff_oauth_client_id","langs":{"en":"the IDs of the two requests do not match.","zh":"两次请求的ID不匹配"}}
 {"code":0,"key":"------ assistant ------","langs":{}}
 {"code":0,"key":"bff_assistant_template_name","langs":{"en":"%v_copy%v","zh":"%v_副本%v"}}
 {"code":0,"key":"------ sensitive ------","langs":{}}
@@ -253,6 +259,11 @@
 {"code":146005,"key":"","langs":{"zh":"知识库删除权限失败，请稍后重试"}}
 {"code":146006,"key":"","langs":{"zh":"知识库的授权权限只有用户本人才能删除"}}
 {"code":146007,"key":"","langs":{"zh":"知识库转让失败"}}
+{"code":147001,"key":"","langs":{"zh":"获取社区报告失败，请稍后重试"}}
+{"code":147002,"key":"","langs":{"zh":"新增社区报告失败，请稍后重试"}}
+{"code":147003,"key":"","langs":{"zh":"删除社区报告失败，请稍后重试"}}
+{"code":147004,"key":"","langs":{"zh":"更新社区报告失败，请稍后重试"}}
+{"code":147005,"key":"","langs":{"zh":"生成社区报告失败，请稍后重试"}}
 {"code":310001,"key":"mcp_get_square_err","langs":{"zh":"广场MCP不存在"}}
 {"code":310001,"key":"mcp_check_exist_err","langs":{"zh":"检查MCP是否存在来自广场异常: %v"}}
 {"code":310002,"key":"mcp_create_duplicate_square","langs":{"zh":"创建MCP异常: 已存在来自广场"}}
@@ -283,6 +294,9 @@
 {"code":310022,"key":"mcp_get_mcp_server_tool_list_err","langs":{"zh":"获取MCP服务工具列表异常:%v"}}
 {"code":310022,"key":"mcp_get_mcp_server_tool_count_err","langs":{"zh":"获取MCP服务工具数量异常:%v"}}
 {"code":310023,"key":"mcp_update_err","langs":{"zh":"编辑MCP异常:%v"}}
+{"code":310024,"key":"mcp_update_builtin_tool_err","langs":{"zh":"更新内置工具异常:%v"}}
+{"code":310024,"key":"mcp_create_duplicate_builtin_tool","langs":{"zh":"创建内置工具异常: 已存在同名"}}
+{"code":310024,"key":"mcp_create_builtin_tool_err","langs":{"zh":"创建内置工具异常: %v"}}
 {"code":150001,"key":"rag_role_err","langs":{"zh":"角色权限错误：%v"}}
 {"code":150002,"key":"rag_info_not_exist","langs":{"zh":"文本问答信息不存在：%v"}}
 {"code":150003,"key":"rag_delete_err","langs":{"zh":"删除文本问答错误：%v"}}
