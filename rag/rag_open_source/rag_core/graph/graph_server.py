@@ -320,19 +320,21 @@ async def get_kb_graph_data(request: Request):
         if os.path.exists(file_path):
             graph = graph_processor.load_graph(file_path)
             for node in graph.nodes(data=True):
-                graph_data["graph"]["nodes"].append({
-                    "entity_name": node[0],
-                    "entity_type": node[1]["label"],
-                    "description": "",
-                    "source_id": node[1]["properties"]["file_names"]
-                })
+                if node[1]["label"] == "entity":
+                    graph_data["graph"]["nodes"].append({
+                        "entity_name": node[0],
+                        "entity_type": node[1]["label"],
+                        "description": "",
+                        "source_id": node[1]["properties"]["file_names"]
+                    })
             for edge in graph.edges(data=True):
-                graph_data["graph"]["edges"].append({
-                    "source_entity": edge[0],
-                    "target_entity": edge[1],
-                    "description": edge[2]["relation"],
-                    "weight": 1.0,
-                })
+                if edge[2]["relation"] != "has_attribute":
+                    graph_data["graph"]["edges"].append({
+                        "source_entity": edge[0],
+                        "target_entity": edge[1],
+                        "description": edge[2]["relation"],
+                        "weight": 1.0,
+                    })
 
         await send_progress_update(client_id, "delete_kb", 10, "get_kb_graph_data completed successfully!")
 
