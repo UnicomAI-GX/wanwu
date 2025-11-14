@@ -20,6 +20,6 @@ done
 #循环2次，启动graph_asyn_add
 for ADDID in $(seq -f "%03g" 1 2)
 do
-    LOG_FILE=BASE_GRAPH_LOG_FILE$ADDID nohup python -u graph_asyn_add_file.py >>logs/start_graph_asyn_add.out 2>&1 &
+    LOG_FILE=$BASE_GRAPH_LOG_FILE$ADDID nohup python -u graph_asyn_add_file.py >>logs/start_graph_asyn_add.out 2>&1 &
     echo "应用启动成功，日志文件为./logs/BASE_GRAPH_LOG_FILE$ADDID.log。"
 done
