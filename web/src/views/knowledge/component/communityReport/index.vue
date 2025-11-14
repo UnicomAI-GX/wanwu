@@ -95,7 +95,7 @@
           background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="page.pageNo"
+          :current-page.sync="page.pageNo"
           :page-sizes="page.pageSizeList"
           :page-size="page.pageSize"
           layout="total, prev, pager, next, jumper"
@@ -216,6 +216,10 @@ export default {
           this.loading.itemStatus = false;
           this.res = res.data;
           this.page.total = this.res.total;
+          if((!this.res.list || this.res.list.length === 0) && this.page.pageNo > 1){
+            this.page.pageNo = 1;
+            this.getList();
+          }
         })
         .catch(() => {
           this.loading.itemStatus = false;

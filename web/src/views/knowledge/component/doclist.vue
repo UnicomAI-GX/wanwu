@@ -34,15 +34,15 @@
 
               <div class="content_title">
                 <el-button size="mini" type="primary" icon="el-icon-refresh" @click="reload" >{{$t('common.gpuDialog.reload')}}</el-button>
-                <el-button size="mini" type="primary" @click="$router.push(`/knowledge/graphMap/${docQuery.knowledgeId}?name=${knowledgeName}`)" v-if="graphSwitch && tableData.length > 0">知识图谱</el-button>
-                <el-button size="mini" type="primary" @click="$router.push(`/knowledge/communityReport?knowledgeId=${docQuery.knowledgeId} &name=${knowledgeName}`)" v-if="graphSwitch && tableData.length > 0">
-                  <span>社区报告</span>
-                  <el-tooltip class="item" effect="dark" content="社区报告在上传文件或删除文件时不会自动触发构建,如需更新报告需要点击生成/重新生成构建" placement="top">
+                <el-button size="mini" type="primary" @click="$router.push(`/knowledge/graphMap/${docQuery.knowledgeId}?name=${knowledgeName}`)" v-if="showGraphReport">{{$t('knowledgeManage.hitTest.graph')}}</el-button>
+                <el-button size="mini" type="primary" @click="$router.push(`/knowledge/communityReport?knowledgeId=${docQuery.knowledgeId} &name=${knowledgeName}`)" v-if="showGraphReport">
+                  <span>{{$t('knowledgeManage.hitTest.communityReport')}}</span>
+                  <el-tooltip class="item" effect="dark" :content="$t('knowledgeManage.docList.communityReportTips')" placement="top">
                     <i class="el-icon-question" style="margin-left: 2px;"></i>
                   </el-tooltip>
                 </el-button>
-                <el-button size="mini" type="primary" @click="showMeta" v-if="[10,20,30].includes(permissionType)">元数据管理</el-button>
-                <el-button size="mini" type="primary" @click="$router.push(`/knowledge/hitTest?knowledgeId=${docQuery.knowledgeId}&graphSwitch=${graphSwitch}`)">命中测试</el-button>
+                <el-button size="mini" type="primary" @click="showMeta" v-if="[10,20,30].includes(permissionType)">{{$t('knowledgeManage.docList.metaDataManagement')}}</el-button>
+                <el-button size="mini" type="primary" @click="$router.push(`/knowledge/hitTest?knowledgeId=${docQuery.knowledgeId}&graphSwitch=${graphSwitch}`)">{{$t('knowledgeManage.hitTest.name')}}</el-button>
                 <el-button
                   size="mini"
                   type="primary"
@@ -100,7 +100,7 @@
                 </el-table-column>
                 <el-table-column
                   prop="segmentMethod"
-                  label="分段模式"
+                  :label="$t('knowledgeManage.docList.segmentMode')"
                 >
                 <template slot-scope="scope">
                   <span>{{ getSegmentMethodText(scope.row.segmentMethod) }}</span>
@@ -199,15 +199,15 @@
     </div>
     <!-- 元数据管理 -->
     <el-dialog
-      title="元数据管理"
+      :title="$t('knowledgeManage.docList.metaDataManagement')"
       :visible.sync="metaVisible"
       width="550px"
       :before-close="handleClose">
       <mataData ref="mataData" @updateMeata="updateMeata" type="create" :knowledgeId="docQuery.knowledgeId" class="mataData"/>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="handleClose">取 消</el-button>
-        <el-button type="primary" @click="createMeta">创 建</el-button>
-        <el-button type="primary" @click="submitMeta" :disabled="isDisabled">确 定</el-button>
+        <el-button @click="handleClose">{{$t('common.button.cancel')}}</el-button>
+        <el-button type="primary" @click="createMeta">{{$t('common.button.create')}}</el-button>
+        <el-button type="primary" @click="submitMeta" :disabled="isDisabled">{{$t('common.button.confirm')}}</el-button>
       </span>
     </el-dialog>
     
@@ -256,6 +256,7 @@ export default {
       selectedTableData:[],
       selectedDocIds:[],
       graphSwitch:false,
+      showGraphReport:false,
       knowledgeGraphStatus: KNOWLEDGE_GRAPH_STATUS
     };
   },
@@ -328,14 +329,14 @@ export default {
     },
     showBatchMeta(){
       if(!this.selectedTableData || this.selectedTableData.length === 0){
-        this.$message.warning('请先选中要编辑的文档');
+        this.$message.warning(this.$t('knowledgeManage.docList.pleaseSelectDocFirst'));
         return;
       }
       this.$refs.batchMetaData.showDialog();
     },
     handleSelectionChange(val){ 
       if (val.length > 100) {
-        this.$message.warning('最多只能选择100个文件');
+        this.$message.warning(this.$t('knowledgeManage.docList.maxSelect100Files'));
         return;
       }
       this.selectedTableData = val
@@ -344,11 +345,11 @@ export default {
     getSegmentMethodText(value){
       switch (value) {
         case '0':
-          return '通用分段';
+          return this.$t('knowledgeManage.config.commonSegment');
         case '1':
-          return '父子分段';
+          return this.$t('knowledgeManage.config.parentSonSegment');
         default:
-          return '未知';
+          return this.$t('knowledgeManage.docList.unknown');
       }
     },
     createMeta(){
@@ -378,7 +379,7 @@ export default {
       }
       updateDocMeta(data).then(res =>{
         if(res.code === 0){
-          this.$message.success('操作成功');
+          this.$message.success(this.$t('common.message.success'));
           this.$refs.mataData.getList();
           this.metaVisible = false;
           this.isDisabled = false;
@@ -496,7 +497,7 @@ export default {
           this.loading = true;
           let res = await delDocItem(jsondata);
           if (res.code === 0) {
-            this.$message.success('删除成功');
+            this.$message.success(this.$t('common.info.delInfo'));
             this.getTableData(this.docQuery)//获取知识分类数据
           }
           this.loading = false;
@@ -588,9 +589,11 @@ export default {
       this.tableData = data
       if(tableInfo && tableInfo.docKnowledgeInfo){
         this.graphSwitch = tableInfo.docKnowledgeInfo.graphSwitch === 1 ? true : false
+        this.showGraphReport = tableInfo.docKnowledgeInfo.showGraphReport
         this.knowledgeName = tableInfo.docKnowledgeInfo.knowledgeName
       }else{
         this.graphSwitch = false
+        this.showGraphReport = false
       }
     }
   }
