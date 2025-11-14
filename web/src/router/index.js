@@ -265,6 +265,10 @@ const constantRoutes = [
         component: () => import('@/views/auth/reset'),
     },
     {
+        path: '/oauth',
+        component: () => import('@/views/auth/oauth'),
+    },
+    {
         path: '/:catchAll(.*)',
         redirect: "/"
     }
