@@ -459,11 +459,11 @@ func InitDocStatus(ctx context.Context, userId, orgId string) error {
 		if err != nil {
 			return err
 		}
-		err = stopDocGraphProcess(tx)
+		_ = stopDocGraphProcess(tx)
 		if err != nil {
 			return err
 		}
-		err = stopKnowledgeReport(tx)
+		_ = stopKnowledgeReport(tx)
 		if err != nil {
 			return err
 		}
@@ -555,7 +555,7 @@ func stopDocGraphProcess(tx *gorm.DB) error {
 func stopKnowledgeReport(tx *gorm.DB) error {
 	// 获取所有分析中状态的文档并更新状态
 	updateKnowledgeMap := map[string]interface{}{
-		"graph_status": model.GraphInterruptFail,
+		"report_status": model.ReportInterruptFail,
 	}
 	//会锁表风险极高
 	return tx.Model(&model.KnowledgeBase{}).Where("report_status = ?", model.ReportProcessing).Updates(updateKnowledgeMap).Error

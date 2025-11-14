@@ -51,7 +51,7 @@ func (s *Service) GetKnowledgeReport(ctx context.Context, req *knowledgebase_rep
 		return handleSuccessReport(ctx, knowledge, req)
 
 	default: // 生成失败状态
-		if knowledge.ReportStatus > model.ReportSuccess && knowledge.ReportStatus < model.ReportProcessing {
+		if model.ErrorReportStatus(knowledge.ReportStatus) {
 			return &knowledgebase_report_service.GetReportResp{
 				Status:        ReportFailed,
 				CanGenerate:   true,

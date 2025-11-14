@@ -357,7 +357,7 @@ func checkMetaKeyType(addList []*model.KnowledgeDocMeta, updateList []*model.Kno
 func (s *Service) InitDocStatus(ctx context.Context, req *knowledgebase_doc_service.InitDocStatusReq) (*emptypb.Empty, error) {
 	err := orm.InitDocStatus(ctx, req.UserId, req.OrgId)
 	if err != nil {
-		log.Errorf("init doc fail %v", err, req)
+		log.Errorf("init doc fail %v, req %v", err, req)
 		return nil, util.ErrCode(errs.Code_KnowledgeGeneral)
 	}
 	return &emptypb.Empty{}, nil

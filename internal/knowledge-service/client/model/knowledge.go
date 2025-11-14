@@ -3,13 +3,13 @@ package model
 type ReportStatus int
 
 const (
-	ReportInit        ReportStatus = 0   //社区报告未处理
-	ReportSuccess     ReportStatus = 120 //社区报告生成成功
-	ReportLoadFail    ReportStatus = 121 //社区报告加载失败
-	ReportExtractFail ReportStatus = 122 //社区报告生成失败
-	ReportStoreFail   ReportStatus = 123 //社区报告持久化存储失败
-	ReportProcessing  ReportStatus = 130 //社区报告生成中
-	ReportEnd         ReportStatus = 139
+	ReportInit          ReportStatus = 0   //社区报告未处理
+	ReportSuccess       ReportStatus = 120 //社区报告生成成功
+	ReportLoadFail      ReportStatus = 121 //社区报告加载失败
+	ReportExtractFail   ReportStatus = 122 //社区报告生成失败
+	ReportStoreFail     ReportStatus = 123 //社区报告持久化存储失败
+	ReportProcessing    ReportStatus = 130 //社区报告生成中
+	ReportInterruptFail ReportStatus = 139 //社区报告处理中断
 )
 
 type KnowledgeBase struct {
@@ -37,11 +37,11 @@ func (KnowledgeBase) TableName() string {
 	return "knowledge_base"
 }
 
-func SuccessReportStatus(status int) bool {
-	return ReportStatus(status) == ReportSuccess
+func ErrorReportStatus(status ReportStatus) bool {
+	return status != ReportSuccess && status != ReportInit && status != ReportProcessing
 }
 
 func InReportStatus(status int) bool {
 	reportStatus := ReportStatus(status)
-	return reportStatus >= ReportSuccess && reportStatus <= ReportEnd
+	return reportStatus >= ReportSuccess && reportStatus <= ReportInterruptFail
 }
