@@ -868,6 +868,14 @@ export default {
             selectSearchType:'请选择检索方式',
             selectRerankModel:'请选择Rerank模型',
             fillInMissingInfo:'存在未填信息,请补充',
+        },
+        docList:{
+            metaDataManagement:'元数据管理',
+            segmentMode:'分段模式',
+            unknown:'未知',
+            pleaseSelectDocFirst:'请先选中要编辑的文档',
+            maxSelect100Files:'最多只能选择100个文件',
+            communityReportTips:'社区报告在上传文件或删除文件时不会自动触发构建,如需更新报告需要点击生成/重新生成构建'
         }
     },
     knowledgeSelect:{
