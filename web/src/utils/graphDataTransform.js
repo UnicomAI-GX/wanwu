@@ -1,18 +1,3 @@
-function generateColorFromString(str) {
-  if (!str) return '#C6E5FF'
-  
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  
-  const hue = Math.abs(hash % 360)
-  const saturation = 60 + (Math.abs(hash) % 20)
-  const lightness = 50 + (Math.abs(hash) % 20)
-  
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`
-}
-
 export function transformGraphData(backendData, options = {}) {
   if (!backendData) {
     return { nodes: [], edges: [] }
@@ -21,22 +6,11 @@ export function transformGraphData(backendData, options = {}) {
   const nodes = backendData.nodes || []
   const edges = backendData.edges || []
   
-  const typeColorMap = {}
-  nodes.forEach(node => {
-    const entityType = node.entity_type || ''
-    if (entityType && !typeColorMap[entityType]) {
-      typeColorMap[entityType] = generateColorFromString(entityType)
-    }
-  })
-  
   const {
-    getNodeId = (node, index) => node.entity_name `,
-    getNodeLabel = (node, index) => node.entity_name `,
+    getNodeId = (node, index) => node.entity_name || `n${index}`,
+    getNodeLabel = (node, index) => node.entity_name || '',
     getNodeSize = (node, index) => node.pagerank ? Math.max(15, Math.min(30, node.pagerank * 100)) : 20,
-    getNodeColor = (node, index) => {
-      const entityType = node.entity_type || ''
-      return typeColorMap[entityType] || '#C6E5FF'
-    },
+    getNodeColor = (node, index) => undefined,
     getEdgeId = (edge, index) => `e${index}`,
     getEdgeLabel = (edge, index) => edge.description || ''
   } = options
@@ -47,14 +21,17 @@ export function transformGraphData(backendData, options = {}) {
     const nodeSize = getNodeSize(node, index)
     const nodeColor = getNodeColor(node, index)
 
+    const nodeStyle = {}
+    if (nodeColor !== undefined) {
+      nodeStyle.fill = nodeColor
+    }
+
     return {
       id: nodeId,
       label: nodeLabel,
       type: 'circle',
       size: nodeSize,
-      style: {
-        fill: nodeColor
-      },
+      ...(Object.keys(nodeStyle).length > 0 && { style: nodeStyle }),
       ...node
     }
   })

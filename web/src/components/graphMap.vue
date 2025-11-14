@@ -257,12 +257,12 @@ export default {
           hover: {
             fill: '#bebefe',
             stroke: '#d4d0e9',
-            lineWidth: 3
+            lineWidth: 2
           },
           selected: {
             fill: '#bebefe',
             stroke: '#c7cad9',
-            lineWidth: 3
+            lineWidth: 2
           }
         },
         edgeStateStyles: {
