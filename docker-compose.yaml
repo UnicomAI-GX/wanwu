@@ -628,6 +628,8 @@ services:
     #   - 15000:15000
     volumes:
       - ${WANWU_PROJECT_DIR}/rag-wanwu/rag_core/logs:/model_extend/rag_core/logs
+      - ${WANWU_PROJECT_DIR}/rag-wanwu/rag_core/graph/logs:/model_extend/rag_core/graph/logs
+      - ${WANWU_PROJECT_DIR}/rag-wanwu/rag_core/graph/data:/model_extend/rag_core/graph/data
       - ${WANWU_PROJECT_DIR}/rag-wanwu/rag_es_server_unify/logs:/model_extend/rag_es_server_unify/logs
     environment:
       MINIO_ADDRESS: ${WANWU_MINIO_ENDPOINT}
