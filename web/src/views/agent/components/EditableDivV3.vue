@@ -33,7 +33,7 @@
                      <!-- <i  class="el-icon-upload2 upload-icon" @click="preUpload"></i> -->
                      <img class="upload-icon" :src="require('@/assets/imgs/uploadIcon.png')" @click="preUpload" v-if="type !== 'webChat'"/>
                 </div>
-                <div class="editable-wp-right rl">
+                <div class="editable-wp-right rl" draggable="true">
                     <div class="aibase-textarea editable--input" ref="editor"  @blur="onBlur" v-on:input="getPrompt"  @keydown="textareaKeydown($event)" @dragenter.prevent @dragover.prevent @drop.prevent.stop="handleDrop" contenteditable="true"></div>
                     <span class="editable--placeholder" v-if="!promptValue">{{placeholder}}</span>
                     <i v-if="promptValue" class="el-icon-close editable--close" @click.stop="clearInput"></i>
@@ -515,12 +515,12 @@
                 color: #fff;
             }
         }
-        .is-dropping {
-            border-color: $color;
-            box-shadow: 0 0 0 1px $color;
-            border-radius:12px;
-            transition: border-color .2s, box-shadow .2s;
-        }
+        // .is-dropping {
+        //     border-color: $color;
+        //     box-shadow: 0 0 0 1px $color;
+        //     border-radius:12px;
+        //     transition: border-color .2s, box-shadow .2s;
+        // }
         .editable-wp{
             position:relative;
             .overlay{

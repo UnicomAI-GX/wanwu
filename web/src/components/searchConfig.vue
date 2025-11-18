@@ -12,8 +12,9 @@
         <span v-if="!setType" class="vertical-form-title">检索方式配置</span>
     </template>
       <div
-        v-for="item in searchTypeData"
+        v-for="(item,index) in searchTypeData"
         :class="['searchType-list',{ 'active': item.showContent }]"
+        :key="'searchType-list-'+index"
       >
         <div
           class="searchType-title"
@@ -37,9 +38,10 @@
             class="weightType-box"
           >
             <div
-              v-for="mixItem in item.mixType"
+              v-for="(mixItem,index) in item.mixType"
               :class="['weightType',{ 'active': mixItem.value === item.mixTypeValue }]"
               @click.stop="mixTypeClick(item,mixItem)"
+              :key="'weightType-'+index"
             >
               <p class="weightType-name">{{mixItem.name}}</p>
               <p class="weightType-desc">{{mixItem.desc}}</p>
