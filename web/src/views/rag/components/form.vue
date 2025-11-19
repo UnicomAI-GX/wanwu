@@ -349,7 +349,6 @@ export default {
       const originalIds = new Set(this.editForm.knowledgebases.map(item => item.id));
       const newItems = data.filter(item => !originalIds.has(item.id));
       this.editForm.knowledgebases.push(...newItems);
-      console.log(this.editForm.knowledgebases)
     },
     showMetaSet(e,index){
       this.currentKnowledgeId = e.id;

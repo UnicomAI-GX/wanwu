@@ -5,6 +5,10 @@
       <span class="page-title-name">{{$t('knowledgeManage.knowledge')}}</span>
     </div>
     <div style="padding: 20px">
+      <div class="knowledge-tabs">
+        <div :class="['knowledge-tab',{ 'active': category === 0 }]" @click="tabClick(0)">{{$t('menu.knowledge')}}</div>
+        <div :class="['knowledge-tab',{ 'active': category === 1 }]" @click="tabClick(1)">{{$t('menu.qaDatabase')}}</div>
+      </div>
       <div class="search-box">
         <div class="no-border-input">
           <search-input class="cover-input-icon" :placeholder="$t('knowledgeManage.searchPlaceholder')" ref="searchInput" @handleSearch="getTableData" />
@@ -24,7 +28,7 @@
           </el-button>
         </div>
       </div>
-      <knowledgeList :appData="knowledgeData" @editItem="editItem" @reloadData="getTableData" ref="knowledgeList" v-loading="tableLoading" />
+      <knowledgeList :appData="knowledgeData" @editItem="editItem" @reloadData="getTableData" ref="knowledgeList" v-loading="tableLoading" :category="category"/>
       <createKnowledge ref="createKnowledge" @reloadData="getTableData" />
     </div>
   </div>
@@ -46,7 +50,8 @@ export default {
         knowledgeData:[],
         tableLoading:false,
         tagOptions:[],
-        tagIds:[]
+        tagIds:[],
+        category:0
        } 
     },
     mounted(){
@@ -54,6 +59,10 @@ export default {
       this.getList();
     },
     methods:{
+      tabClick(status){
+        this.category = status;
+        this.getTableData()
+      },
       getList(){
         tagList({knowledgeId:'',tagName:''}).then(res => {
             if(res.code === 0){
@@ -74,7 +83,7 @@ export default {
         getTableData(){
             const searchInput = this.$refs.searchInput.value
             this.tableLoading = true
-            getKnowledgeList({name:searchInput,tagId:this.tagIds}).then(res => {
+            getKnowledgeList({name:searchInput,tagId:this.tagIds,category:this.tabActive}).then(res => {
                 this.knowledgeData = res.data.knowledgeList || [];
                 this.tableLoading = false
             }).catch((error) =>{
@@ -105,5 +114,22 @@ export default {
     background: none !important;
   }
 }
-
+.active{
+  background: #333;
+  color: #fff;
+  font-weight: bold;
+}
+.knowledge-tabs{
+  margin-bottom:20px;
+  .knowledge-tab{
+    display: inline-block;
+    vertical-align: middle;
+    width: 160px;
+    height: 40px;
+    border-bottom: 1px solid #333;
+    line-height: 40px;
+    text-align: center;
+    cursor: pointer;
+  }
+}
 </style>

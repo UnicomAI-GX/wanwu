@@ -82,6 +82,11 @@ export default {
       type:Array,
       required:true,
       default:[]
+    },
+    category:{
+      type:Number,
+      required:true,
+      default:0
     }
   },
   watch:{
