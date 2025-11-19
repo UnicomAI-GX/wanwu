@@ -248,6 +248,7 @@ workflow:
   test_run_uri: /v1/workflow/%v/run_by_wanwu
   upload_action_uri: /api/common/upload/apply_upload_action
   upload_common_uri: /api/common/upload
+  upload_file_uri: /api/bot/upload_file_by_wanwu
   sign_img_uri: /api/workflow_api/sign_image_url
 
   model_params:

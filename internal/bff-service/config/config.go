@@ -148,6 +148,7 @@ type WorkflowServiceConfig struct {
 	TestRunUri         string               `json:"test_run_uri" mapstructure:"test_run_uri"`
 	UploadActionUri    string               `json:"upload_action_uri" mapstructure:"upload_action_uri"`
 	UploadCommonUri    string               `json:"upload_common_uri" mapstructure:"upload_common_uri"`
+	UploadFileUri      string               `json:"upload_file_uri" mapstructure:"upload_file_uri"`
 	SignImgUri         string               `json:"sign_img_uri" mapstructure:"sign_img_uri"`
 	ModelParams        []WorkflowModelParam `json:"model_params" mapstructure:"model_params"`
 }

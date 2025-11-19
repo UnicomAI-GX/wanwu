@@ -1,5 +1,7 @@
 package request
 
+import "mime/multipart"
+
 type WorkflowIDReq struct {
 	WorkflowID string `json:"workflow_id" validate:"required"`
 }
@@ -23,5 +25,31 @@ type CreateWorkflowByTemplateReq struct {
 }
 
 func (r *CreateWorkflowByTemplateReq) Check() error {
+	return nil
+}
+
+type WorkflowUploadFileReq struct {
+	File     *multipart.FileHeader `form:"file" json:"file" validate:"required"` // 二进制格式
+	FileName string                `form:"fileName" json:"fileName" validate:"required"`
+}
+
+func (u *WorkflowUploadFileReq) Check() error {
+	return nil
+}
+
+type WorkflowUploadFileByBase64Req struct {
+	File     string `form:"file" json:"file" validate:"required"` // base64格式
+	FileName string `form:"fileName" json:"fileName" validate:"required"`
+}
+
+func (u *WorkflowUploadFileByBase64Req) Check() error {
+	return nil
+}
+
+type FileUrlConvertBase64Req struct {
+	FileUrl string `form:"fileUrl" json:"fileUrl" validate:"required"` // 文件URL
+}
+
+func (f *FileUrlConvertBase64Req) Check() error {
 	return nil
 }

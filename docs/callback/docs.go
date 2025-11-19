@@ -163,6 +163,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/file/url/base64": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "callback"
+                ],
+                "summary": "文件Url转换为base64",
+                "parameters": [
+                    {
+                        "description": "文件Url转换base64请求参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.FileUrlConvertBase64Req"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/model/{modelId}": {
             "get": {
                 "consumes": [
@@ -649,6 +694,101 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/response.ToolSquareDetail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/upload/file": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "callback"
+                ],
+                "summary": "通过二进制上传文件",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文件名",
+                        "name": "fileName",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.UploadFileByWorkflowResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/upload/file/base64": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "callback"
+                ],
+                "summary": "通过base64上传文件",
+                "parameters": [
+                    {
+                        "description": "通过base64格式上传文件参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.WorkflowUploadFileByBase64Req"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.UploadFileByWorkflowResp"
                                         }
                                     }
                                 }
@@ -2265,6 +2405,18 @@ const docTemplate = `{
                 }
             }
         },
+        "request.FileUrlConvertBase64Req": {
+            "type": "object",
+            "required": [
+                "fileUrl"
+            ],
+            "properties": {
+                "fileUrl": {
+                    "description": "文件URL",
+                    "type": "string"
+                }
+            }
+        },
         "request.HistoryItem": {
             "type": "object",
             "properties": {
@@ -2548,6 +2700,22 @@ const docTemplate = `{
                 }
             }
         },
+        "request.WorkflowUploadFileByBase64Req": {
+            "type": "object",
+            "required": [
+                "file",
+                "fileName"
+            ],
+            "properties": {
+                "file": {
+                    "description": "base64格式",
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                }
+            }
+        },
         "response.CustomToolActionInfo": {
             "type": "object",
             "properties": {
@@ -2771,6 +2939,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/protocol.Tool"
                     }
+                }
+            }
+        },
+        "response.UploadFileByWorkflowResp": {
+            "type": "object",
+            "properties": {
+                "uri": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

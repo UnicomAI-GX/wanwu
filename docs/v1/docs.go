@@ -18120,6 +18120,10 @@ const docTemplate = `{
                     "description": "描述",
                     "type": "string"
                 },
+                "id": {
+                    "description": "应用或工具id",
+                    "type": "string"
+                },
                 "mcpServerToolId": {
                     "description": "mcpServerToolId",
                     "type": "string"

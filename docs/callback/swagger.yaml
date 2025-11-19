@@ -1097,6 +1097,14 @@ definitions:
       llm_model_id:
         type: string
     type: object
+  request.FileUrlConvertBase64Req:
+    properties:
+      fileUrl:
+        description: 文件URL
+        type: string
+    required:
+    - fileUrl
+    type: object
   request.HistoryItem:
     properties:
       needHistory:
@@ -1290,6 +1298,17 @@ definitions:
         description: 语义权重
         type: number
     type: object
+  request.WorkflowUploadFileByBase64Req:
+    properties:
+      file:
+        description: base64格式
+        type: string
+      fileName:
+        type: string
+    required:
+    - file
+    - fileName
+    type: object
   response.CustomToolActionInfo:
     properties:
       desc:
@@ -1440,6 +1459,13 @@ definitions:
           $ref: '#/definitions/protocol.Tool'
         type: array
     type: object
+  response.UploadFileByWorkflowResp:
+    properties:
+      uri:
+        type: string
+      url:
+        type: string
+    type: object
   util.ApiAuthWebRequest:
     properties:
       apiKeyHeader:
@@ -1567,6 +1593,32 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: 更新知识库状态
+      tags:
+      - callback
+  /file/url/base64:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 文件Url转换base64请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FileUrlConvertBase64Req'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 文件Url转换为base64
       tags:
       - callback
   /model/{modelId}:
@@ -1883,6 +1935,62 @@ paths:
                   $ref: '#/definitions/response.ToolSquareDetail'
               type: object
       summary: 获取内置工具详情
+      tags:
+      - callback
+  /workflow/upload/file:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 文件名
+        in: formData
+        name: fileName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UploadFileByWorkflowResp'
+              type: object
+      summary: 通过二进制上传文件
+      tags:
+      - callback
+  /workflow/upload/file/base64:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通过base64格式上传文件参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.WorkflowUploadFileByBase64Req'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UploadFileByWorkflowResp'
+              type: object
+      summary: 通过base64上传文件
       tags:
       - callback
 swagger: "2.0"

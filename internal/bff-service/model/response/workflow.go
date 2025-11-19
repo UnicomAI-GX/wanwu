@@ -108,3 +108,8 @@ type ToolActionParamInTypeList4Workflow struct {
 	Type     string        `json:"type"`
 	Children []interface{} `json:"schema"`
 }
+
+type UploadFileByWorkflowResp struct {
+	Url string `json:"url"`
+	Uri string `json:"uri"`
+}

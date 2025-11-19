@@ -308,6 +308,61 @@ func GetWorkflowSquareTool(ctx *gin.Context) {
 	gin_util.Response(ctx, resp, err)
 }
 
+// WorkflowUploadFileByBase64
+//
+//	@Tags		callback
+//	@Summary	通过base64上传文件
+//	@Accept		json
+//	@Produce	json
+//	@Param		data	body		request.WorkflowUploadFileByBase64Req	true	"通过base64格式上传文件参数"
+//	@Success	200		{object}	response.Response{data=response.UploadFileByWorkflowResp}
+//	@Router		/workflow/upload/file/base64 [post]
+func WorkflowUploadFileByBase64(ctx *gin.Context) {
+	var req request.WorkflowUploadFileByBase64Req
+	if !gin_util.Bind(ctx, &req) {
+		return
+	}
+	resp, err := service.UploadFileByWorkflow(ctx, req.FileName, req.File)
+	gin_util.Response(ctx, resp, err)
+}
+
+// WorkflowUploadFile
+//
+//	@Tags		callback
+//	@Summary	通过二进制上传文件
+//	@Accept		multipart/form-data
+//	@Produce	json
+//	@Param		file		formData	file	true	"文件"
+//	@Param		fileName	formData	string	true	"文件名"
+//	@Success	200			{object}	response.Response{data=response.UploadFileByWorkflowResp}
+//	@Router		/workflow/upload/file [post]
+func WorkflowUploadFile(ctx *gin.Context) {
+	var req request.WorkflowUploadFileReq
+	if !gin_util.BindForm(ctx, &req) {
+		return
+	}
+	resp, err := service.UploadFileToWorkflow(ctx, &req)
+	gin_util.Response(ctx, resp, err)
+}
+
+// FileUrlConvertBase64
+//
+//	@Tags		callback
+//	@Summary	文件Url转换为base64
+//	@Accept		json
+//	@Produce	json
+//	@Param		data	body		request.FileUrlConvertBase64Req	true	"文件Url转换base64请求参数"
+//	@Success	200		{object}	response.Response{data=string}
+//	@Router		/file/url/base64 [post]
+func FileUrlConvertBase64(ctx *gin.Context) {
+	var req request.FileUrlConvertBase64Req
+	if !gin_util.Bind(ctx, &req) {
+		return
+	}
+	resp, err := service.FileUrlConvertBase64(ctx, req.FileUrl)
+	gin_util.Response(ctx, resp, err)
+}
+
 // SearchKnowledgeBase
 //
 //	@Tags			callback
