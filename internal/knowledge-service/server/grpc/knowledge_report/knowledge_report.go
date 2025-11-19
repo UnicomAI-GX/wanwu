@@ -36,6 +36,7 @@ func (s *Service) GetKnowledgeReport(ctx context.Context, req *knowledgebase_rep
 	if !graphSuccess {
 		return &knowledgebase_report_service.GetReportResp{}, nil
 	}
+	//id, err := orm.SelectReportLatestImportTaskByKnowledgeID(ctx, req.KnowledgeInfo.KnowledgeId)
 	// 判断报告状态
 	switch knowledge.ReportStatus {
 	case model.ReportInit:
@@ -135,6 +136,20 @@ func (s *Service) AddKnowledgeReport(ctx context.Context, req *knowledgebase_rep
 }
 
 func (s *Service) BatchAddKnowledgeReport(ctx context.Context, req *knowledgebase_report_service.BatchAddKnowledgeReportReq) (*emptypb.Empty, error) {
+	//查询知识库信息
+	knowledge, err := orm.SelectKnowledgeById(ctx, req.KnowledgeInfo.KnowledgeId, "", "")
+	if err != nil {
+		log.Errorf("没有操作该知识库的权限 错误(%v) 参数(%v)", err, req)
+		return nil, util.ErrCode(errs.Code_KnowledgeBaseSelectFailed)
+	}
+	task, err := orm.BuildReportImportTask(req, knowledge)
+	if err != nil {
+		return nil, util.ErrCode(errs.Code_KnowledgeAddReportFailed)
+	}
+	err = orm.BatchCreateKnowledgeReport(ctx, task)
+	if err != nil {
+		return nil, util.ErrCode(errs.Code_KnowledgeAddReportFailed)
+	}
 	return &emptypb.Empty{}, nil
 }
 
