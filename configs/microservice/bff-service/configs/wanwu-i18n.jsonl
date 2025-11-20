@@ -67,6 +67,8 @@
 {"code":110000,"key":"bff_workflow_export","langs":{"zh":"工作流导出错误: %v"}}
 {"code":110000,"key":"bff_workflow_tool_select","langs":{"zh":"获取工作流工具列表错误:%v"}}
 {"code":110000,"key":"bff_chatflow_apps_list","langs":{"en":"get chatflow app list err: %v","zh":"获取对话流应用列表错误：%v"}}
+{"code":110000,"key":"bff_chatflow_conversation_create","langs":{"zh":"创建对话流会话错误: %v"}}
+{"code":110000,"key":"bff_chatflow_chat","langs":{"zh":"对话流运行错误: %v"}}
 {"code":0,"key":"------ doc ------","langs":{}}
 {"code":110000,"key":"bff_doc_center_file_unescape","langs":{"en":"path unescape error: %v","zh":"路径去除转义错误: %v"}}
 {"code":110000,"key":"bff_doc_center_file_md","langs":{"en":"no markdown files found: %v","zh":"未含有md文件: %v"}}
@@ -204,15 +206,15 @@
 {"code":140001,"key":"know_doc_split_error","langs":{"zh":"文档切分失败（通用错误）"}}
 {"code":140001,"key":"know_doc_embedding_error","langs":{"zh":"向量导入失败"}}
 {"code":140001,"key":"know_doc_text_error","langs":{"zh":"文本导入失败"}}
-{"code":141001,"key":"","langs":{"zh":"新建知识库失败，请稍后重试"}}
-{"code":141002,"key":"","langs":{"zh":"删除知识库失败，请稍后重试"}}
-{"code":141003,"key":"","langs":{"zh":"修改知识库失败，请稍后重试"}}
-{"code":141004,"key":"","langs":{"zh":"获取知识库失败，请稍后重试"}}
-{"code":141005,"key":"","langs":{"zh":"没有操作该知识库的权限"}}
-{"code":141006,"key":"","langs":{"zh":"知识库正在上传文档，不可删除"}}
-{"code":141007,"key":"","langs":{"zh":"知识库正在解析文档，不可删除"}}
-{"code":141008,"key":"","langs":{"zh":"已存在同名知识库"}}
-{"code":141009,"key":"","langs":{"zh":"查询知识库列表失败，请稍后重试"}}
+{"code":141001,"key":"","langs":{"zh":"新建失败，请稍后重试"}}
+{"code":141002,"key":"","langs":{"zh":"删除失败，请稍后重试"}}
+{"code":141003,"key":"","langs":{"zh":"修改信息失败，请稍后重试"}}
+{"code":141004,"key":"","langs":{"zh":"获取信息失败，请稍后重试"}}
+{"code":141005,"key":"","langs":{"zh":"无操作权限"}}
+{"code":141006,"key":"","langs":{"zh":"正在上传文档，不可删除"}}
+{"code":141007,"key":"","langs":{"zh":"正在解析文档，不可删除"}}
+{"code":141008,"key":"","langs":{"zh":"该名称已存在，请重新命名"}}
+{"code":141009,"key":"","langs":{"zh":"查询列表失败，请稍后重试"}}
 {"code":141010,"key":"","langs":{"zh":"命中测试失败，请稍后重试"}}
 {"code":141011,"key":"","langs":{"zh":"查询知识图谱失败，请稍后重试"}}
 {"code":142001,"key":"","langs":{"zh":"文档正在解析文档，不可删除"}}
@@ -226,14 +228,14 @@
 {"code":142009,"key":"","langs":{"zh":"非处理完成文档无法更新元数据，请稍后重试"}}
 {"code":142010,"key":"","langs":{"zh":"上传文档必须是csv，请修改后重试"}}
 {"code":142011,"key":"","langs":{"zh":"更新文档元数据失败，已存在重复key，请稍后重试"}}
-{"code":143001,"key":"","langs":{"zh":"新建知识库标签失败，请稍后重试"}}
-{"code":143002,"key":"","langs":{"zh":"删除知识库标签失败，请稍后重试"}}
-{"code":143003,"key":"","langs":{"zh":"修改知识库标签失败，请稍后重试"}}
-{"code":143004,"key":"","langs":{"zh":"已存在同名知识库标签"}}
-{"code":143005,"key":"","langs":{"zh":"查询知识库标签列表失败，请稍后重试"}}
-{"code":143006,"key":"","langs":{"zh":"知识库标签设置失败，请稍后重试"}}
-{"code":143007,"key":"","langs":{"zh":"知识库标签取消失败，请稍后重试"}}
-{"code":143008,"key":"","langs":{"zh":"没有操作该知识库标签的权限"}}
+{"code":143001,"key":"","langs":{"zh":"新建标签失败，请稍后重试"}}
+{"code":143002,"key":"","langs":{"zh":"删除标签失败，请稍后重试"}}
+{"code":143003,"key":"","langs":{"zh":"修改标签失败，请稍后重试"}}
+{"code":143004,"key":"","langs":{"zh":"已存在同名标签"}}
+{"code":143005,"key":"","langs":{"zh":"查询标签列表失败，请稍后重试"}}
+{"code":143006,"key":"","langs":{"zh":"标签设置失败，请稍后重试"}}
+{"code":143007,"key":"","langs":{"zh":"标签取消失败，请稍后重试"}}
+{"code":143008,"key":"","langs":{"zh":"没有操作标签的权限"}}
 {"code":144001,"key":"","langs":{"zh":"新建关键词失败，请稍后重试"}}
 {"code":144002,"key":"","langs":{"zh":"删除关键词失败，请稍后重试"}}
 {"code":144003,"key":"","langs":{"zh":"修改关键词失败，请稍后重试"}}
@@ -251,21 +253,21 @@
 {"code":145011,"key":"","langs":{"zh":"分段长度超过最大值"}}
 {"code":145012,"key":"","langs":{"zh":"更新文档分段失败，请稍后重试"}}
 {"code":145013,"key":"","langs":{"zh":"删除文档分段失败，请稍后重试"}}
-{"code":145014,"key":"","langs":{"zh":"查询知识库元数据失败，请稍后重试"}}
-{"code":145015,"key":"","langs":{"zh":"新增知识库元数据失败，请稍后重试"}}
-{"code":145016,"key":"","langs":{"zh":"更新知识库元数据失败，请稍后重试"}}
-{"code":145017,"key":"","langs":{"zh":"删除知识库元数据失败，请稍后重试"}}
+{"code":145014,"key":"","langs":{"zh":"查询元数据失败，请稍后重试"}}
+{"code":145015,"key":"","langs":{"zh":"新增元数据失败，请稍后重试"}}
+{"code":145016,"key":"","langs":{"zh":"更新元数据失败，请稍后重试"}}
+{"code":145017,"key":"","langs":{"zh":"删除元数据失败，请稍后重试"}}
 {"code":145018,"key":"","langs":{"zh":"已存在同名元数据key"}}
 {"code":145019,"key":"","langs":{"zh":"非法参数"}}
 {"code":145020,"key":"","langs":{"zh":"文档分段内容为空"}}
 {"code":145021,"key":"","langs":{"zh":"部分元数据更新成功"}}
-{"code":146001,"key":"","langs":{"zh":"获取知识库权限列表失败，请稍后重试"}}
-{"code":146002,"key":"","langs":{"zh":"知识库操作权限不足，请联系管理员添加后重试"}}
-{"code":146003,"key":"","langs":{"zh":"知识库添加权限失败，请稍后重试"}}
-{"code":146004,"key":"","langs":{"zh":"知识库修改权限失败，请稍后重试"}}
-{"code":146005,"key":"","langs":{"zh":"知识库删除权限失败，请稍后重试"}}
-{"code":146006,"key":"","langs":{"zh":"知识库的授权权限只有用户本人才能删除"}}
-{"code":146007,"key":"","langs":{"zh":"知识库转让失败"}}
+{"code":146001,"key":"","langs":{"zh":"获取权限列表失败，请稍后重试"}}
+{"code":146002,"key":"","langs":{"zh":"操作权限不足，请联系管理员添加后重试"}}
+{"code":146003,"key":"","langs":{"zh":"添加权限失败，请稍后重试"}}
+{"code":146004,"key":"","langs":{"zh":"修改权限失败，请稍后重试"}}
+{"code":146005,"key":"","langs":{"zh":"删除权限失败，请稍后重试"}}
+{"code":146006,"key":"","langs":{"zh":"授权权限只有用户本人才能删除"}}
+{"code":146007,"key":"","langs":{"zh":"转让失败"}}
 {"code":147001,"key":"","langs":{"zh":"获取社区报告失败，请稍后重试"}}
 {"code":147002,"key":"","langs":{"zh":"新增社区报告失败，请稍后重试"}}
 {"code":147003,"key":"","langs":{"zh":"删除社区报告失败，请稍后重试"}}
@@ -412,6 +414,10 @@
 {"code":300009,"key":"app_url_update_switch","langs":{"zh":"URL(%v)状态修改失败: %v"}}
 {"code":300010,"key":"","langs":{"zh":"URL已被禁用"}}
 {"code":300011,"key":"","langs":{"zh":"URL已过期"}}
+{"code":300012,"key":"app_conversation_not_found","langs":{"zh":"会话(%v)不存在"}}
+{"code":300012,"key":"app_conversation_get","langs":{"zh":"获取会话(%v)记录错误: %v"}}
+{"code":300012,"key":"app_conversation_exist","langs":{"zh":"会话记录已存在"}}
+{"code":300012,"key":"app_conversation_create","langs":{"zh":"创建会话(%v)记录错误: %v"}}
 {"code":320001,"key":"ope_system_custom_query","langs":{"zh":"查询自定义配置(%v)错误: %v"}}
 {"code":320001,"key":"ope_system_custom_create","langs":{"zh":"创建自定义配置(%v)错误: %v"}}
 {"code":320001,"key":"ope_system_custom_update","langs":{"zh":"更新自定义配置(%v)错误: %v"}}

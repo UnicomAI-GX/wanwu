@@ -202,6 +202,60 @@ func WorkflowRun(ctx *gin.Context) {
 	ctx.Writer.Flush()
 }
 
+// CreateChatflowConversation
+//
+//	@Tags			openapi
+//	@Summary		对话流创建对话OpenAPI
+//	@Description	对话流创建对话OpenAPI
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		request.OpenAPIChatflowCreateConversationRequest	true	"请求参数"
+//	@Success		200		{object}	response.Response{data=response.OpenAPIChatflowCreateConversationResponse}
+//	@Router			/chatflow/conversation [post]
+func CreateChatflowConversation(ctx *gin.Context) {
+	var req request.OpenAPIChatflowCreateConversationRequest
+	if !gin_util.Bind(ctx, &req) {
+		return
+	}
+	userID := getUserID(ctx)
+	orgID := getOrgID(ctx)
+	appID := getAppID(ctx)
+
+	resp, err := service.CreateChatflowConversation(ctx, userID, orgID, appID, req.ConversationName)
+	if err != nil {
+		gin_util.Response(ctx, nil, err)
+		return
+	}
+	gin_util.Response(ctx, resp, nil)
+}
+
+// ChatflowChat
+//
+//	@Tags			openapi
+//	@Summary		对话流OpenAPI
+//	@Description	对话流OpenAPI
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		request.OpenAPIChatflowChatRequest	true	"请求参数"
+//	@Success		200		{object}	response.Response
+//	@Router			/chatflow/chat [post]
+func ChatflowChat(ctx *gin.Context) {
+	var req request.OpenAPIChatflowChatRequest
+	if !gin_util.Bind(ctx, &req) {
+		return
+	}
+	userID := getUserID(ctx)
+	orgID := getOrgID(ctx)
+	appID := getAppID(ctx)
+
+	// 流式处理 - 直接操作响应流
+	err := service.ChatflowChat(ctx, userID, orgID, appID, req.ConversationId, req.Query)
+	if err != nil {
+		gin_util.Response(ctx, nil, err)
+		return
+	}
+}
+
 // WorkflowFileUpload
 //
 //	@Tags			openapi

@@ -17563,6 +17563,9 @@ const docTemplate = `{
                     "description": "生成社区报告按钮文案: 生成/重新生成",
                     "type": "string"
                 },
+                "lastImportStatus": {
+                    "type": "integer"
+                },
                 "list": {
                     "description": "社区报告内容列表",
                     "type": "array",

@@ -30,6 +30,10 @@ service AppService {
   rpc GetAppUrlList(GetAppUrlListReq) returns (GetAppUrlListResp) {}
   rpc GetAppUrlInfoBySuffix(GetAppUrlInfoBySuffixReq) returns (AppUrlInfo) {}
   rpc AppUrlStatusSwitch(AppUrlStatusSwitchReq) returns (google.protobuf.Empty) {}
+
+   // --- conversation ---
+  rpc GetConversationByID(GetConversationByIDReq) returns (ConversationInfo) {}
+  rpc CreateConversation(CreateConversationReq) returns (google.protobuf.Empty) {}
 }
 
 message GenApiKeyReq {
@@ -198,3 +202,26 @@ message AppUrlStatusSwitchReq {
   bool status = 2;
 }
 
+message GetConversationByIDReq {
+  string conversionId = 1;
+}
+
+message ConversationInfo {
+  string conversationId = 1;
+  string appId = 2;
+  string appType = 3;
+  string userId = 4;
+  string orgId = 5;
+  string conversationName = 6;
+  int64 createdAt = 7;
+  int64 updatedAt = 8;
+}
+
+message CreateConversationReq {
+  string appId = 1;
+  string appType = 2;
+  string userId = 3;
+  string orgId = 4;
+  string conversationName = 5;
+  string conversationId = 6;
+}

@@ -165,6 +165,7 @@ enum Code {
   AppUrl = 300009; // App WebUrl错误
   AppUrlStatus = 300010; // App WebUrl状态错误
   AppUrlExpired = 300011; // App WebUrl过期错误
+  AppConversation = 300012; // 对话流相关错误
 
   // --- mcp-service ---
   // [310000, 319999]

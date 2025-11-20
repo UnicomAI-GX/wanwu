@@ -13,6 +13,7 @@ type Client struct {
 func NewClient(db *gorm.DB) (*Client, error) {
 	// auto migrate
 	if err := db.AutoMigrate(
+		model.AppConversation{},
 		model.ApiKey{},
 		model.AppHistory{},
 		model.App{},

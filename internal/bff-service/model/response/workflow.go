@@ -109,6 +109,22 @@ type ToolActionParamInTypeList4Workflow struct {
 	Children []interface{} `json:"schema"`
 }
 
+type CozeCreateConversationResponse struct {
+	Code             int64                 `thrift:"code,1" form:"code" json:"code" query:"code"`
+	Msg              string                `thrift:"msg,2" form:"msg" json:"msg" query:"msg"`
+	ConversationData *CozeConversationData `thrift:"ConversationData,3,optional" form:"data" json:"data,omitempty"`
+}
+
+type CozeConversationData struct {
+	Id            int64             `thrift:"Id,1" form:"id" json:"id,string"`
+	CreatedAt     int64             `thrift:"CreatedAt,2" form:"created_at" json:"created_at"`
+	MetaData      map[string]string `thrift:"MetaData,3" form:"meta_data" json:"meta_data"`
+	CreatorID     *int64            `thrift:"CreatorID,4,optional" form:"creator_d" json:"creator_d,string,omitempty"`
+	ConnectorID   *int64            `thrift:"ConnectorID,5,optional" form:"connector_id" json:"connector_id,string,omitempty"`
+	LastSectionID *int64            `thrift:"LastSectionID,6,optional" form:"last_section_id" json:"last_section_id,string,omitempty"`
+	AccountID     *int64            `thrift:"AccountID,7,optional" form:"account_id" json:"account_id,omitempty"`
+}
+
 type UploadFileByWorkflowResp struct {
 	Url string `json:"url"`
 	Uri string `json:"uri"`

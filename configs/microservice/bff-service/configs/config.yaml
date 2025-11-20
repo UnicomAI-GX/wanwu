@@ -241,6 +241,8 @@ workflow:
   minio_proxy_prefix: /workflow/minio/presign
   list_uri: /api/workflow_api/workflow_list_by_wanwu
   create_uri: /api/workflow_api/create
+  create_chatflow_conversation_uri: /v1/workflow/conversation/create_by_wanwu
+  chatflow_run_uri: /v1/workflow/chat_by_wanwu
   delete_uri: /api/workflow_api/delete
   copy_uri: /api/workflow_api/copy
   export_uri: /api/workflow_api/export

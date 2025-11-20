@@ -47,4 +47,8 @@ type IClient interface {
 	GetAppUrlList(ctx context.Context, appID, appType string) ([]*model.AppUrl, *err_code.Status)
 	GetAppUrlInfoBySuffix(ctx context.Context, suffix string) (*model.AppUrl, *err_code.Status)
 	AppUrlStatusSwitch(ctx context.Context, urlID uint32, status bool) *err_code.Status
+
+	// --- conversation ---
+	GetConversationByID(ctx context.Context, ConversationId string) (*model.AppConversation, *err_code.Status)
+	CreateConversation(ctx context.Context, userId, orgId, appId, appType, conversationId, conversationName string) *err_code.Status
 }

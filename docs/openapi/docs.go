@@ -121,6 +121,86 @@ const docTemplate = `{
                 }
             }
         },
+        "/chatflow/chat": {
+            "post": {
+                "description": "对话流OpenAPI",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "openapi"
+                ],
+                "summary": "对话流OpenAPI",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.OpenAPIChatflowChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/chatflow/conversation": {
+            "post": {
+                "description": "对话流创建对话OpenAPI",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "openapi"
+                ],
+                "summary": "对话流创建对话OpenAPI",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.OpenAPIChatflowCreateConversationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.OpenAPIChatflowCreateConversationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/mcp/server/message": {
             "post": {
                 "description": "获取MCPServer Message",
@@ -596,6 +676,25 @@ const docTemplate = `{
                 }
             }
         },
+        "request.OpenAPIChatflowChatRequest": {
+            "type": "object",
+            "properties": {
+                "conversation_id": {
+                    "type": "string"
+                },
+                "query": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.OpenAPIChatflowCreateConversationRequest": {
+            "type": "object",
+            "properties": {
+                "conversation_name": {
+                    "type": "string"
+                }
+            }
+        },
         "request.OpenAPIRagChatRequest": {
             "type": "object",
             "required": [
@@ -840,6 +939,14 @@ const docTemplate = `{
             }
         },
         "response.OpenAPIAgentCreateConversationResponse": {
+            "type": "object",
+            "properties": {
+                "conversation_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.OpenAPIChatflowCreateConversationResponse": {
             "type": "object",
             "properties": {
                 "conversation_id": {

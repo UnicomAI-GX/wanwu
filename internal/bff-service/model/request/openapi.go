@@ -27,3 +27,20 @@ type OpenAPIRagChatRequest struct {
 func (req *OpenAPIRagChatRequest) Check() error {
 	return nil
 }
+
+type OpenAPIChatflowCreateConversationRequest struct {
+	ConversationName string `json:"conversation_name"`
+}
+
+func (req *OpenAPIChatflowCreateConversationRequest) Check() error {
+	return nil
+}
+
+type OpenAPIChatflowChatRequest struct {
+	ConversationId string `json:"conversation_id"`
+	Query          string `json:"query"`
+}
+
+func (req *OpenAPIChatflowChatRequest) Check() error {
+	return nil
+}

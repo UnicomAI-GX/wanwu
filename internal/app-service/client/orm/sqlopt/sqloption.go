@@ -217,3 +217,9 @@ func WithContents(contents []string) SQLOption {
 		return db.Where("content IN ?", contents)
 	})
 }
+
+func WithConversationID(id string) SQLOption {
+	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
+		return db.Where("conversation_id = ?", id)
+	})
+}
