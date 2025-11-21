@@ -94,9 +94,16 @@ func ragKBConfigToProto(knowledgeConfig request.AppKnowledgebaseConfig) *rag_ser
 
 // 构建单个知识库的元数据过滤条件
 func buildRagMetaFilter(params *request.MetaDataFilterParams) *rag_service.RagMetaFilter {
-	// 检查过滤参数是否有效（未启用或无具体条件则返回nil）
-	if params == nil || params.MetaFilterParams == nil || len(params.MetaFilterParams) == 0 {
+	// 检查过滤参数是否有效（未启用则返回nil）
+	if params == nil {
 		return nil
+	}
+	if params.MetaFilterParams == nil {
+		return &rag_service.RagMetaFilter{
+			FilterEnable:    params.FilterEnable,
+			FilterLogicType: params.FilterLogicType,
+			FilterItems:     make([]*rag_service.RagMetaFilterItem, 0),
+		}
 	}
 	// 转换过滤条件项
 	filterItems := make([]*rag_service.RagMetaFilterItem, 0, len(params.MetaFilterParams))
