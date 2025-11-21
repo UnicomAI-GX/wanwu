@@ -116,7 +116,7 @@ doc-center:
     - key: knowledge-keywords
       val: 2.知识库/关键词管理.md
     - key: mcp
-      val: 3.MCP广场.md
+      val: 3.资源库.md
     - key: safety
       val: 4.安全护栏.md
     - key: rag
