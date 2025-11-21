@@ -1,9 +1,9 @@
 "use strict";
 
 const path = require("path");
-const { name } = require('./package.json')
+const {name} = require('./package.json')
 const webpack = require('webpack')
-const VersionInfoPlugin = require('./build/version-plugin');
+
 function resolve(dir) {
   return path.join(__dirname, dir);
 }
@@ -24,8 +24,7 @@ module.exports = {
     '@antv/g6',
     '@antv/graphlib'
   ],
-  parallel: false,
-  chainWebpack(config){
+  chainWebpack(config) {
     config.module
       .rule('md')
       .test(/\.md$/)
@@ -49,17 +48,17 @@ module.exports = {
 
     config.module
       .rule('svg')
-      .exclude.add(resolve('src/assets/icons'))	//svg文件位置
+      .exclude.add(resolve('src/assets/icons'))  //svg文件位置
       .end()
     config.module
       .rule('icons')
       .test(/\.svg$/)
-      .include.add(resolve('src/assets/icons'))	//svg文件位置
+      .include.add(resolve('src/assets/icons'))  //svg文件位置
       .end()
       .use('svg-sprite-loader')
       .loader('svg-sprite-loader')
       .options({
-          symbolId: 'icon-[name]'
+        symbolId: 'icon-[name]'
       })
       .end()
 
@@ -75,16 +74,18 @@ module.exports = {
   devServer: {
     port: 8080,
     open: false,
-    hot:true,
-    overlay: {
-      warnings: false,
-      errors: true,
+    hot: true,
+    client: {
+      overlay: {
+        warnings: false,
+        errors: true,
+      },
     },
     headers: {
       'Access-Control-Allow-Origin': '*',
     },
     proxy: {
-      "/openAi":{
+      "/openAi": {
         target: "http://192.168.0.21:8081",
         changeOrigin: true,
         secure: false,
@@ -94,7 +95,7 @@ module.exports = {
         changeOrigin: true,
         secure: false,
       },
-      "/workflow/api":{
+      "/workflow/api": {
         target: "http://192.168.0.21:8081",
         changeOrigin: true,
         secure: false,
@@ -104,7 +105,7 @@ module.exports = {
         changeOrigin: true,
         secure: false,
       },
-      "/service/url/openurl/v1":{
+      "/service/url/openurl/v1": {
         target: "http://192.168.0.21:8081",
         changeOrigin: true,
         secure: false,
@@ -180,6 +181,13 @@ module.exports = {
     }
   },
   configureWebpack: {
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename]
+      },
+      cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/webpack')
+    },
     // @路径走src文件夹
     module: {
       rules: [
@@ -205,7 +213,7 @@ module.exports = {
       // 把子应用打包成 umd 库格式(必须)
       library: `${name}-[name]`,
       libraryTarget: 'umd',
-      jsonpFunction: `webpackJsonp_${name}`,
+      chunkLoadingGlobal: `webpackJsonp_${name}`,
     },
     plugins: [
       new webpack.optimize.LimitChunkCountPlugin({
@@ -214,7 +222,6 @@ module.exports = {
       new webpack.optimize.MinChunkSizePlugin({
         minChunkSize: 50000 // Minimum number of characters
       }),
-      new VersionInfoPlugin()
     ]
   },
 };

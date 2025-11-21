@@ -2,7 +2,7 @@
   <div class="session rl">
     <div
       class="history-box showScroll"
-      id="timeScroll"
+      :id="scrollContainerId"
       v-loading="loading"
       ref="timeScroll"
     >
@@ -22,10 +22,10 @@
             />
             <div class="answer-content">
               <div class="answer-content-query">
-                <span
+                <!-- <span
                   class="session-setting-id"
                   v-if="$route.params && $route.params.id && (type && type !=='webChat')"
-                >智能体ID: {{$route.params.id}}</span>
+                >智能体ID: {{$route.params.id}}</span> -->
                 <el-popover
                   placement="bottom-start"
                   trigger="hover"
@@ -259,6 +259,10 @@
               <img :src="require('@/assets/imgs/copy-icon.png')" />
               <!-- <i class="el-icon-copy-document copy-icon" style="padding: 0 6px;margin: 0;" :title="$t('agent.clickCopy')" @click="()=>{copy(n.oriResponse) && copycb()}"></i> -->
             </div>
+            <!--提示话术-->
+            <div class="answer-operation-tip">
+              {{$t('agent.answerOperationTip')}}
+            </div>
           </div>
         </div>
 
@@ -373,6 +377,7 @@ export default {
       audioConfig: ["mp3", "wav"],
       fileScrollStateMap: {},
       resizeTimer: null,
+      scrollContainerId:`timeScroll-${this._uid}`
     };
   },
   computed: {
@@ -408,7 +413,7 @@ export default {
     if(this.handleCitationClick) {
       document.removeEventListener('click', this.handleCitationClick);
     }
-    const container = document.getElementById("timeScroll");
+    const container = document.getElementById(this.scrollContainerId);
     if (container) {
       container.removeEventListener("scroll", this.handleScroll);
     }
@@ -500,7 +505,7 @@ export default {
         sessionStatus: this.sessionStatus,
         sessionData: this.session_data,
         citationSelector: '.citation',
-        scrollElementId: 'timeScroll',
+        scrollElementId: this.scrollContainerId,
         onToggleCollapse: (item, collapse) => {
           this.$set(item, 'collapse', collapse);
         }
@@ -569,11 +574,11 @@ export default {
       }
     },
     setupScrollListener() {
-      const container = document.getElementById("timeScroll");
+      const container = document.getElementById(this.scrollContainerId);
       container.addEventListener("scroll", this.handleScroll);
     },
     handleScroll(e) {
-      const container = document.getElementById("timeScroll");
+      const container = document.getElementById(this.scrollContainerId);
       const { scrollTop, clientHeight, scrollHeight } = container;
       // 检测是否接近底部（5px容差）
       const nearBottom = scrollHeight - (scrollTop + clientHeight) < 5;
@@ -691,8 +696,8 @@ export default {
       this.loading = false;
       if (!this.autoScroll) return;
       this.$nextTick(() => {
-        document.getElementById("timeScroll").scrollTop =
-          document.getElementById("timeScroll").scrollHeight;
+        document.getElementById(this.scrollContainerId).scrollTop =
+          document.getElementById(this.scrollContainerId).scrollHeight;
       });
     },
     codeScrollBottom() {
@@ -1114,11 +1119,13 @@ export default {
             border-radius:6px;
           }
           .docInfo {
+            margin-left: 5px;
             .docInfo_name {
               color: #333;
             }
             .docInfo_size {
               color: #bbbbbb;
+              text-align: left !important;
             }
           }
         }
@@ -1221,6 +1228,11 @@ export default {
         .copy-icon:hover {
           color: #33a4df;
         }
+      }
+      .answer-operation-tip{
+        padding:0 0 4px 10px;
+        font-size: 12px;
+        color: #999;
       }
     }
   }

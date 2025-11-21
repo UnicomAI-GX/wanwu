@@ -99,18 +99,6 @@
             ...mapGetters('menu', ['basicInfo']),
             ...mapGetters('user', ['commonInfo']),
         },
-        watch: {
-            // 'editForm.visionsupport': {
-            //     handler(newVal) {
-            //         if ( newVal === 'support') {
-            //             this.fileTypeArr = ['doc/*','image/*'];
-            //         } else {
-            //             this.fileTypeArr = ['doc/*'];
-            //         }
-            //     },
-            //     immediate: true
-            // }
-        },
         data() {
             return {
                 amswerNum:0,
@@ -120,6 +108,7 @@
                 fileTypeArr: ['doc/*','image/*'],
                 hasDrawer: false,
                 drawer: true,
+                fileId:[]
             }
         },
 
@@ -266,7 +255,8 @@
                 if(this.amswerNum > 0){
                     this.isModelDisable = true
                 }
-                let fileId = this.$refs['editable'].getFileIdList() || this.fileId;
+                const fileInfo = this.$refs['editable'].getFileIdList();
+                let fileId = !fileInfo.length ? this.fileId : fileInfo;
                 this.useSearch = this.$refs['editable'].sendUseSearch();
                 this.setSseParams({conversationId: this.conversationId, fileInfo:fileId,assistantId:this.editForm.assistantId})
                 this.doSend()
@@ -284,7 +274,6 @@
                 if (res.code === 0) {
                     this.reminderList = res.data.list||[]
                     cb && cb()
-                    console.log(new Date().getTime())
                 }
             },
             reminderClick(n) {

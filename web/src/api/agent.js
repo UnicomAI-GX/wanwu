@@ -347,3 +347,11 @@ export const updateRerank = (data)=>{
         data
     })
 }
+//智能体工具-工作流列表
+export const getWorkflowList = (data)=>{
+    return service({
+        url: `${USER_API}/workflow/select`,
+        method: 'get',
+        params:data
+    })
+}

@@ -12,7 +12,6 @@ import 'element-ui/lib/theme-chalk/index.css';
 import  '@/style/index.scss'
 import { config, basePath } from './utils/config'
 import {guid} from '@/utils/util'
-require('./utils/rem.js')
 
 Vue.use(ElementUi, {
     i18n: (key, value) => i18n.t(key, value), // 根据选的语言切换 Element-ui 的语言

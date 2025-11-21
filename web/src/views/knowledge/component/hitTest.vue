@@ -25,7 +25,7 @@
               type="primary"
               size="small"
               @click="startTest"
-            >{{$t('knowledgeManage.hitTest.hitTestBtn')}}<span class="el-icon-caret-right"></span></el-button>
+            >{{$t('knowledgeManage.startTest')}}<span class="el-icon-caret-right"></span></el-button>
           </div>
         </div>
          <div class="hitTest_input meta_box">
@@ -33,15 +33,12 @@
           <metaSet ref="metaSet" class="metaSet" :knowledgeId="knowledgeId" />
         </div>
         <div class="test_form">
-          <searchConfig ref="searchConfig" @sendConfigInfo="sendConfigInfo" />
-        </div>
-        <div class="hitTest_input graph_box" v-if="graphSwitch">
-          <graphSwitch ref="graphSwitch" @graphSwitchchange="graphSwitchchange" :label="$t('knowledgeManage.hitTest.graph')"/>
+          <searchConfig ref="searchConfig" @sendConfigInfo="sendConfigInfo" :showGraphSwitch="graphSwitch"/>
         </div>
       </div>
       <div class="test-right test-box">
         <div class="result_title">
-          <h3>{{$t('knowledgeManage.hitTest.hitTestResult')}}</h3>
+          <h3>{{$t('knowledgeManage.hitResult')}}</h3>
           <img
             src="@/assets/imgs/nodata_2x.png"
             v-if="searchList.length >0"
@@ -64,14 +61,22 @@
                 <span>
                   <span class="tag"  @click="showSectionDetail(index)">{{$t('knowledgeManage.section')}}#{{index+1}}</span>
                   <span v-if="['graph','community_report'].includes(item.contentType)" class="segment-type">
-                    {{item.contentType === 'graph' ? '#' + $t('knowledgeManage.hitTest.graph') : '#' + $t('knowledgeManage.hitTest.communityReport')}}
+                    {{ item.contentType === 'graph' ? '#' + $t('knowledgeManage.graphTag') : '#' + $t('knowledgeManage.communityReportTag') }}
                   </span>
                   <span v-else>
-                    <span class="segment-type">{{item.childContentList && item.childContentList.length > 0 ? '#' + $t('knowledgeManage.hitTest.parentSonSegment') : '#' + $t('knowledgeManage.hitTest.commonSegment')}}</span>
-                    <span class="segment-length" v-if="item.childContentList && item.childContentList.length > 0" @click="showSectionDetail(index)">#{{item.childContentList.length || 0}}{{$t('knowledgeManage.hitTest.childSegmentCount')}}</span>
+                    <span class="segment-type">
+                      {{ item.childContentList && item.childContentList.length > 0 ? '#' + $t('knowledgeManage.config.parentSonSegment') : '#' + $t('knowledgeManage.config.commonSegment') }}
+                    </span>
+                    <span
+                      class="segment-length"
+                      v-if="item.childContentList && item.childContentList.length > 0"
+                      @click="showSectionDetail(index)"
+                    >
+                      {{$t('knowledgeManage.childSegmentCount',{count: item.childContentList.length || 0})}}
+                    </span>
                   </span>
                 </span>
-                <span class="score">{{$t('knowledgeManage.hitTest.hitScore')}}: {{(formatScore(score[index]))}}</span>
+                <span class="score">{{$t('knowledgeManage.hitScore')}}: {{(formatScore(score[index]))}}</span>
               </div>
               <div>
                 <div class="resultContent">
@@ -88,7 +93,7 @@
                       class="segment-collapse-item"
                     >
                       <template slot="title">
-                        <span class="sub-badge">{{$t('knowledgeManage.hitTest.hitChildSegment', {count: item.childContentList.length})}}</span>
+                        <span class="sub-badge">{{$t('knowledgeManage.hitChildSegments',{count:item.childContentList.length})}}</span>
                       </template>
                       <div class="segment-content">
                         <div 
@@ -102,7 +107,7 @@
                               <span class="segment-content">{{child.childSnippet}}</span>
                             </span>
                             <span class="segment-score">
-                              <span class="score-value">{{$t('knowledgeManage.hitTest.hitScore')}}: {{ formatScore(item.childScore[childIndex]) }}</span>
+                              <span class="score-value">{{$t('knowledgeManage.hitScore')}}: {{ formatScore(item.childScore[childIndex]) }}</span>
                             </span>
                           </div>
                         </div>
@@ -110,7 +115,7 @@
                     </el-collapse-item>
                   </el-collapse>
                 </div>
-                <div class="file_name">{{$t('knowledgeManage.hitTest.fileName')}}：{{item.title}}</div>
+                <div class="file_name">{{$t('knowledgeManage.fileName')}}：{{item.title}}</div>
               </div>
             </div>
           </div>
@@ -119,7 +124,7 @@
             class="nodata"
           >
             <img src="@/assets/imgs/nodata_2x.png" />
-            <p class="nodata_tip">{{$t('knowledgeManage.hitTest.noData')}}</p>
+            <p class="nodata_tip">{{$t('knowledgeManage.noData')}}</p>
           </div>
         </div>
         <!-- 分段详情区域 -->
@@ -135,10 +140,9 @@ import { formatScore } from "@/utils/util";
 import searchConfig from '@/components/searchConfig.vue';
 import LinkIcon from "@/components/linkIcon.vue";
 import metaSet from "@/components/metaSet";
-import graphSwitch from "@/components/graphSwitch.vue"
 import sectionShow from "./sectionShow.vue";
 export default {
-  components:{LinkIcon, searchConfig, metaSet, sectionShow,graphSwitch}, 
+  components:{LinkIcon, searchConfig, metaSet, sectionShow}, 
   data() {
     return {
       md: md,
@@ -151,17 +155,13 @@ export default {
       knowledgeId:this.$route.query.knowledgeId,
       name:this.$route.query.name,
       graphSwitch:this.$route.query.graphSwitch || false,
-      activeNames: [],
-      useGraph:false
+      activeNames: []
     };
   },
   methods: {
     formatScore,
     goBack() {
       this.$router.go(-1);
-    },
-    graphSwitchchange(val){
-      this.useGraph = val
     },
     sendConfigInfo(data){
       this.formInline = data;
@@ -175,27 +175,25 @@ export default {
       }
 
       if (this.question === "") {
-        this.$message.warning(this.$t('knowledgeManage.hitTest.inputQuestion'));
+        this.$message.warning(this.$t('knowledgeManage.inputTestContent'));
         return;
       }
       if(this.formInline === null){
-        this.$message.warning(this.$t('knowledgeManage.hitTest.selectSearchType'));
+        this.$message.warning(this.$t('knowledgeManage.selectSearchType'));
         return;
       }
       const { matchType, priorityMatch, rerankModelId } = this.formInline.knowledgeMatchParams;
       if ((matchType !== 'mix' || priorityMatch !== 1) && !rerankModelId) {
-        this.$message.warning(this.$t('knowledgeManage.hitTest.selectRerankModel'));
+        this.$message.warning(this.$t('knowledgeManage.selectRerankModel'));
         return;
       }
       if(matchType === 'mix' && priorityMatch === 1){
         this.formInline.knowledgeMatchParams.rerankModelId = '';
       }
       if(this.$refs.metaSet.validateRequiredFields(this.knowledgeIdList['metaDataFilterParams']['metaFilterParams'])){
-        this.$message.warning(this.$t('knowledgeManage.hitTest.fillInMissingInfo'))
+        this.$message.warning(this.$t('knowledgeManage.metaInfoIncomplete'))
         return
       }
-      const { knowledgeMatchParams } = this.formInline;
-      this.$set(knowledgeMatchParams, 'useGraph', this.useGraph);
       const data = {
         ...this.formInline,
         knowledgeList:[this.knowledgeIdList],

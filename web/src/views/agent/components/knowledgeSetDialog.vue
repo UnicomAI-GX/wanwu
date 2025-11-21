@@ -6,7 +6,7 @@
         width="50%"
         :before-close="handleClose">
         <span v-if="dialogVisible">
-           <searchConfig ref='searchConfig' @sendConfigInfo="sendConfigInfo" :setType="'agent'" :config="knowledgeConfig"/>
+           <searchConfig ref='searchConfig' @sendConfigInfo="sendConfigInfo" :setType="'agent'" :config="knowledgeConfig" :showGraphSwitch="showGraphSwitch"/>
         </span>
         <span slot="footer" class="dialog-footer">
             <el-button @click="dialogVisible = false">取 消</el-button>
@@ -18,6 +18,7 @@
 <script>
 import searchConfig from '@/components/searchConfig.vue';
 export default {
+    props:['showGraphSwitch'],
     components:{
         searchConfig
     },

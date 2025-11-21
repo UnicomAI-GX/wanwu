@@ -68,9 +68,7 @@
     </div>
 </template>
 <script>
-import { getList } from '@/api/workflow.js';
-import { addWorkFlowInfo, addMcp,addCustomBuiltIn,toolList,toolActionList,mcptoolList,mcpActionList } from "@/api/agent";
-import { getExplorationFlowList} from "@/api/workflow";
+import { addWorkFlowInfo, addMcp,addCustomBuiltIn,toolList,toolActionList,mcptoolList,mcpActionList,getWorkflowList } from "@/api/agent";
 export default {
     props:['assistantId'],
     data(){
@@ -274,7 +272,7 @@ export default {
             })
         },
         getWorkflowList(name) {
-                getExplorationFlowList({name,appType:'workflow',searchType:'all'}).then(res =>{
+                getWorkflowList({name}).then(res =>{
                     if (res.code === 0) {
                         this.workFlowInfos = (res.data.list || []).map(m => ({
                             ...m,
@@ -285,9 +283,7 @@ export default {
         },
         showDialog(row){
             this.dialogVisible = true;
-            //this.setMcp(row.mcpInfos);
             this.setWorkflow(row.workFlowInfos);
-            //this.setCustom(row.customInfos)
             this.mcpList = row.mcpInfos || [];
             this.workFlowList = row.workFlowInfos || [];
             this.customList  = row.customInfos || [];

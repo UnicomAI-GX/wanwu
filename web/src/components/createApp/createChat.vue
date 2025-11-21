@@ -1,14 +1,14 @@
 <template>
   <div>
     <el-dialog
-      :title="titleMap[type]"
+      :title="$t('list.chatCreate')"
       :visible.sync="dialogVisible"
       width="750"
       append-to-body
       :close-on-click-modal="false"
     >
       <el-form ref="form" :model="form" label-width="120px" :rules="rules">
-        <el-form-item :label="$t('list.pluginPic') + ':'" prop="avatar">
+        <el-form-item :label="$t('list.chatPic') + ':'" prop="avatar">
           <el-upload
             class="avatar-uploader"
             action=""
@@ -26,53 +26,37 @@
             </p>
           </el-upload>
         </el-form-item>
-        <el-form-item :label="$t('list.pluginName')+':'" prop="name">
+        <el-form-item :label="$t('list.chatName')+':'" prop="name">
           <el-input
-            :placeholder="$t('list.nameplaceholder')"
+            :placeholder="$t('list.chatNamePlaceholder')"
             v-model="form.name"
             maxlength="30"
             show-word-limit
           ></el-input>
         </el-form-item>
-        <el-form-item :label="$t('list.pluginDesc')+':'" prop="desc">
+        <el-form-item :label="$t('list.chatDesc')+':'" prop="desc">
           <el-input
             type="textarea"
-            :placeholder="$t('list.descplaceholder')"
+            :placeholder="$t('list.noChatDesc')"
             v-model="form.desc"
             show-word-limit
             maxlength="600"
           ></el-input>
         </el-form-item>
-        <!--v-if="type === 'create'"-->
-        <el-form-item v-if="false" :label="$t('list.mapTypeLabel')+':'">
-          <el-radio-group v-model="form.isStream">
-            <el-radio :label="false">{{$t('list.normalMap')}}</el-radio>
-            <!-- <el-radio :label="true">{{$t('list.streamMap')}}</el-radio> -->
-          </el-radio-group>
-        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">{{$t('list.cancel')}}</el-button>
-        <el-button type="primary" @click="doPublish">{{$t('list.confirm')}}</el-button>
+        <el-button type="primary" @click="doSubmit">{{$t('list.confirm')}}</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { createWorkFlow, uploadFile } from "@/api/workflow"
-import { copyWorkflowTemplate } from "@/api/templateSquare"
+import { createWorkFlow, uploadFile } from "@/api/workflow";
+import { CHAT } from "@/utils/commonSet";
 
 export default {
-  props: {
-    type: {
-      type: String,
-      default: "create",
-    },
-    editForm: {
-      type: Object,
-    },
-  },
   data() {
     return {
       dialogVisible: false,
@@ -86,17 +70,10 @@ export default {
           path: ''
         },
       },
-      titleMap: {
-        edit: this.$t('list.editplugin'),
-        create:this.$t('list.createplugin'),
-        clone: this.$t('list.copy_Demo'),
-      },
-      workflowID: "",
-      templateId: '',
       rules: {
         name: [
-          { required: true, message: this.$t('list.nameRules'), trigger: "change" },
-          { max:30, message:this.$t('list.pluginNameRules'), trigger: "change" },
+          { required: true, message: this.$t('list.noChatName'), trigger: "change" },
+          { max:30, message: this.$t('list.chatNameLimit'), trigger: "change" },
           {
             validator: (rule, value, callback) => {
               // 对其新版工作流名称规则
@@ -104,9 +81,7 @@ export default {
                 callback();
               } else {
                 callback(
-                  new Error(
-                    this.$t('list.nameplaceholder')
-                  )
+                  new Error(this.$t('list.chatNamePlaceholder'))
                 );
               }
             },
@@ -114,15 +89,15 @@ export default {
           },
         ],
         desc: [
-          { required: true, message: this.$t('list.pluginDescRules'), trigger: "blur" },
-          { max: 600, message:this.$t('list.pluginLimitRules'),trigger: "blur"}
+          { required: true, message: this.$t('list.noChatDesc'), trigger: "blur" },
+          { max: 600, message: this.$t('list.chatDescLimit'),trigger: "blur"}
         ],
       },
     };
   },
   created() {
     const { defaultIcon = {} } = this.$store.state.user.commonInfo.data || {}
-    this.defaultIcon = defaultIcon.workflowIcon ? this.$basePath + '/user/api/' + defaultIcon.workflowIcon :  ''
+    this.defaultIcon = defaultIcon.chatflowIcon ? this.$basePath + '/user/api/' + defaultIcon.chatflowIcon :  ''
   },
   methods: {
     getBase64(file) {
@@ -165,19 +140,10 @@ export default {
     handleUploadError() {
       this.$message.error(this.$t('common.message.uploadError'))
     },
-    openDialog(row) {
-      if (this.type === "edit" && this.editForm) {
-        this.form = this.editForm;
-      } else {
-        this.clearForm();
-      }
-      if(row) {
-        const {templateId, desc, avatar} = row
-        this.templateId = templateId
-        this.form = {name: templateId, desc, avatar}
-      }
-      this.dialogVisible = true;
-      this.$nextTick(()=>{
+    openDialog() {
+      this.clearForm()
+      this.dialogVisible = true
+      this.$nextTick(() => {
         this.$refs['form'].clearValidate()
       })
     },
@@ -189,34 +155,21 @@ export default {
           key: '',
           path: ''
         },
-        isStream:false
-      };
+      }
     },
-    async doPublish() {
-      let valid = false;
-      await this.$refs.form.validate((vv) => {
-        if (vv) {
-          valid = true;
+    async doSubmit() {
+      this.$refs.form.validate(async (valid) => {
+        if (valid) {
+          const res = await createWorkFlow({...this.form}, CHAT);
+          if (res.code === 0) {
+            this.$message.success(this.$t('list.createSuccess'))
+            this.dialogVisible = false;
+            const { workflow_id } = res.data;
+            const query = { id: workflow_id };
+            this.$router.push({ path: "/workflow", query: query })
+          }
         }
       });
-      if (!valid) return
-      if (this.type === "clone") {
-        let res = await copyWorkflowTemplate({...this.form, templateId: this.templateId})
-        if (res.code === 0) {
-          this.$message.success(this.$t('list.copySuccess'))
-          this.dialogVisible = false
-          this.$router.push({ path: "/appSpace/workflow" })
-        }
-        return
-      }
-      const res = await createWorkFlow(this.form)
-      if (res.code === 0) {
-        this.$message.success(this.$t('list.createSuccess'))
-        this.dialogVisible = false
-        const { workflow_id } = res.data || {}
-        const querys = { id: workflow_id }
-        this.$router.push({ path: "/workflow", query: querys })
-      }
     },
   },
 };

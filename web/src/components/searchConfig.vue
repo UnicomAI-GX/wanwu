@@ -9,11 +9,12 @@
       class="vertical-form-item"
     >
     <template #label>
-        <span v-if="!setType" class="vertical-form-title">检索方式配置</span>
+        <span v-if="!setType" class="vertical-form-title">{{ $t('searchConfig.title') }}</span>
     </template>
       <div
-        v-for="item in searchTypeData"
+        v-for="(item,index) in searchTypeData"
         :class="['searchType-list',{ 'active': item.showContent }]"
+        :key="index"
       >
         <div
           class="searchType-title"
@@ -40,6 +41,7 @@
               v-for="mixItem in item.mixType"
               :class="['weightType',{ 'active': mixItem.value === item.mixTypeValue }]"
               @click.stop="mixTypeClick(item,mixItem)"
+              :key="mixItem.name"
             >
               <p class="weightType-name">{{mixItem.name}}</p>
               <p class="weightType-desc">{{mixItem.desc}}</p>
@@ -50,8 +52,8 @@
             @click.stop
           >
             <el-col class="mixTypeRange-title">
-              <span>语义[{{item.mixTypeRange}}]</span>
-              <span>关键词[{{(1 - (item.mixTypeRange || 0)).toFixed(1)}}]</span>
+              <span>{{ $t('searchConfig.semantics') }}[{{item.mixTypeRange}}]</span>
+              <span>{{ $t('searchConfig.keyword') }}[{{(1 - (item.mixTypeRange || 0)).toFixed(1)}}]</span>
             </el-col>
             <el-col>
               <el-slider
@@ -66,11 +68,11 @@
           </el-row>
           <el-row v-if="showRerank(item)">
             <el-col>
-              <span class="content-name">Rerank模型</span>
+              <span class="content-name">{{ $t('searchConfig.rerank') }}</span>
               <el-tooltip
                 class="item"
                 effect="dark"
-                content="重排序模型会根据候选文档与用户问题的语义匹配度，对初步检索结果进行重新排序从而进一步提升最终返回结果的相关性和准确性。"
+                :content="$t('searchConfig.rerankHint')"
                 placement="right"
               >
                 <span class="el-icon-question tips"></span>
@@ -81,11 +83,11 @@
                 clearable
                 filterable
                 style="width:100%;"
-                loading-text="模型加载中..."
+                :loading-text="$t('searchConfig.loading')"
                 v-model="formInline.knowledgeMatchParams.rerankModelId"
                 @visible-change="visibleChange($event)"
                 @change="handleRerankChange"
-                placeholder="请选择"
+                :placeholder="$t('common.input.placeholder')"
                 :loading="rerankLoading"
               >
                 <el-option
@@ -104,7 +106,7 @@
               <el-tooltip
                 class="item"
                 effect="dark"
-                content="用于控制检索阶段返回的最相关的文档片段的数量。这些文档片段将被送入生成模型中，用于 生成最终的回答。"
+                :content="$t('searchConfig.topKHint')"
                 placement="right"
               >
                 <span class="el-icon-question tips"></span>
@@ -123,11 +125,11 @@
           </el-row>
           <el-row v-if=showHistory(item)>
             <el-col>
-              <span class="content-name">最长上下文</span>
+              <span class="content-name">{{ $t('searchConfig.max') }}</span>
               <el-tooltip
                 class="item"
                 effect="dark"
-                content="保存的最长的上下文对话轮数。"
+                :content="$t('searchConfig.maxHint')"
                 placement="right"
               >
                 <span class="el-icon-question tips"></span>
@@ -146,11 +148,11 @@
           </el-row>
           <el-row>
             <el-col>
-              <span class="content-name">Score阈值</span>
+              <span class="content-name">{{ $t('searchConfig.score') }}</span>
               <el-tooltip
                 class="item"
                 effect="dark"
-                content="检索结果的相似度阈值，低于该值的结果将被过滤。"
+                :content="$t('searchConfig.scoreHint')"
                 placement="right"
               >
                 <span class="el-icon-question tips"></span>
@@ -170,12 +172,21 @@
         </div>
       </div>
     </el-form-item>
+    <el-form-item  class="searchType-list graph-switch" v-if="showGraphSwitch">
+      <template #label>
+        <span class="graph-switch-title">{{ $t('knowledgeManage.graph.useGraph') }}</span>
+      </template>
+      <el-switch
+        v-model="formInline.knowledgeMatchParams.useGraph"
+      >
+      </el-switch>
+    </el-form-item>
   </el-form>
 </template>
 <script>
 import { getRerankList } from "@/api/modelAccess";
 export default {
-  props:['setType','config'],
+  props:['setType','config','showGraphSwitch'],
   data() {
     return {
       debounceTimer:null,
@@ -191,31 +202,32 @@ export default {
           threshold: 0.4, //过滤分数阈值
           semanticsPriority: 0.2, //语义权重
           topK:5, //topK 获取最高的几行
-          maxHistory:0//最长上下文
+          maxHistory:0,//最长上下文
+          useGraph:false//是否使用图谱
         },
       },
       initialEditForm:null,
       searchTypeData: [
         {
-          name: "向量检索",
+          name: this.$t('searchConfig.vector'),
           value: "vector",
-          desc: "通过向量相似度找到语义相近、表达多样的文本片段，适用于理解和召回语义相关信息。",
+          desc: this.$t('searchConfig.vectorHint'),
           icon: "el-icon-menu",
           isWeight: false,
           showContent: false,
         },
         {
-          name: "全文检索",
+          name: this.$t('searchConfig.fullText'),
           value: "text",
-          desc: "基于关键词匹配，能够高效查询包含指定词汇的文本片段，适用于精确查找",
+          desc: this.$t('searchConfig.fullTextHint'),
           icon: "el-icon-document",
           isWeight: false,
           showContent: false,
         },
         {
-          name: "混合检索",
+          name: this.$t('searchConfig.mixed'),
           value: "mix",
-          desc: "结合向量和关键词检索，融合语义理解与关键词匹配，兼顾相关性和准确性，提升检索效果。",
+          desc: this.$t('searchConfig.mixedHint'),
           icon: "el-icon-s-grid",
           isWeight: true,
           Weight: "",
@@ -224,14 +236,14 @@ export default {
           mixTypeRange: 0.2,
           mixType: [
             {
-              name: "权重设置",
+              name: this.$t('searchConfig.weight'),
               value: "weight",
-              desc: "权重设置功能用于调整不同检索方式的影响力。通过设置权重，可以控制语义相似度和关键词匹配在最终排序中的占比。",
+              desc: this.$t('searchConfig.weightHint'),
             },
             {
-              name: "Rerank模型",
+              name: this.$t('searchConfig.rerank'),
               value: "rerank",
-              desc: "重排序模型会根据候选文档与用户问题的语义匹配度，对初步检索结果进行重新排序从而进一步提升最终返回结果的相关性和准确性。",
+              desc: this.$t('searchConfig.rerankHint'),
             },
           ],
         },
@@ -388,7 +400,7 @@ export default {
     }
   }
   .vertical-form-item .el-form-item__label {
-    line-height: unset;
+    // line-height: unset;
     font-size: 14px;
     font-weight: bold;
   }
@@ -398,6 +410,9 @@ export default {
   .el-input-number--small{
     line-height: 28px!important;
   }
+  .el-form-item{
+    margin-bottom:0!important;
+  }
 }
 .active {
   border: 1px solid $color !important;
@@ -406,12 +421,18 @@ export default {
   .searchType-list:hover {
     border: 1px solid $color;
   }
+
   .searchType-list {
     border: 1px solid #c0c4cc;
     border-radius: 4px;
-    margin: 20px 0;
+    margin-bottom: 20px;
     padding: 0 10px;
     cursor: pointer;
+    .graph-switch-title{
+      font-size: 14px;
+      font-weight: bold;
+      width: 150px!important;
+    }
     .searchType-title {
       display: flex;
       align-items: center;
@@ -482,6 +503,19 @@ export default {
         margin-top: 20px;
         line-height: 1;
       }
+    }
+  }
+  .graph-switch{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /deep/ .el-form-item__content {
+      display: flex;
+      justify-content: flex-end;
+    }
+    /deep/ .el-form-item__label{
+      width: 120px!important;
+      color:#000;
     }
   }
 }

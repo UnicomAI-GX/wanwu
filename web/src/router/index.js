@@ -142,6 +142,11 @@ const constantRoutes = [
                 meta:{perm: [PERMS.AGENT]},
             },
             {
+                path: '/agent/promptCompare/:id',
+                component:resolve =>require(['@/views/agent/components/prompt/compare'],resolve),
+                meta:{perm: [PERMS.AGENT]},
+            },
+            {
                 path: '/agent/templateDetail',
                 name:'templateDetail',
                 component:resolve =>require(['@/components/agentDetail'],resolve),
@@ -219,7 +224,7 @@ const constantRoutes = [
             },
             {
                 path:'/workflow/publishSet',
-                component:resolve =>require(['@/views/agent/web-URL'],resolve),
+                component:resolve => require(['@/views/agent/web-URL'],resolve),
                 meta:{perm: [PERMS.WORKFLOW]},
             },
             {

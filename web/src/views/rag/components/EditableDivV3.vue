@@ -16,10 +16,10 @@
                 <i class="el-icon-close echo-close" @click="clearFile"></i>
             </div>
             <div v-if="fileType === 'doc/*'" class="echo-img-box echo-doc-box">
-                <img :src='require('@/assets/imgs/docFile.png')' class="docIcon">
+                <img :src="require('@/assets/imgs/docFile.png')" class="docIcon">
                 <div class="docInfo">
-                    <p class="docInfo_name">文件名称：{{fileList[0]['name']}}</p>
-                    <p class="docInfo_size">文件大小：{{fileList[0]['size'] > 1024 ?(fileList[0]['size'] / (1024 * 1024 )).toFixed(2) + ' MB' : fileList[0]['size'] + ' bytes'}}</p>
+                    <p class="docInfo_name">{{$t('knowledgeManage.fileName')}}：{{fileList[0]['name']}}</p>
+                    <p class="docInfo_size">{{$t('knowledgeManage.fileSize')}}：{{fileList[0]['size'] > 1024 ?(fileList[0]['size'] / (1024 * 1024 )).toFixed(2) + ' MB' : fileList[0]['size'] + ' bytes'}}</p>
                 </div>
                 <i class="el-icon-close echo-close" @click="clearFile"></i>
             </div>
@@ -35,7 +35,7 @@
                     <div class="edtable--wrap">
                         <el-button size="mini" :class="{'btnActive':isActive,'btnAnactive':!isActive}" @click="linkSearch" v-if="showModelSelect && !isPower && isLink">{{$t('editavleDiv.connectInternect')}}</el-button>
                         <!-- <img class="editable--send" :src="require('@/assets/imgs/send.png')" @click="preSend" /> -->
-                        <el-button type="primary" class="editable--send" @click="preSend"><span>发送</span> <img :src="require('@/assets/imgs/sendIcon.png')" /></el-button>
+                        <el-button type="primary" class="editable--send" @click="preSend"><span>{{$t('agent.send')}}</span> <img :src="require('@/assets/imgs/sendIcon.png')" /></el-button>
                     </div>
                 </div>
                 <!-- 覆盖层，模型下线禁止点击 -->
@@ -44,7 +44,7 @@
         </div>
         <transition name="el-zoom-in-bottom">
             <div class="perfectReminder-item-box" v-show="randomReminderShow">
-                <div class="perfectReminder-item" v-for="(n,i) in randomReminderList" :key='n.id'  :style="`background-color:${colorArr[n.random]}`">
+                <div class="perfectReminder-item" v-for="n in randomReminderList" :key='n.id'  :style="`background-color:${colorArr[n.random]}`">
                     <el-popover
                             placement="top-start"
                             width="300"

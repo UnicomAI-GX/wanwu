@@ -24,7 +24,7 @@
           </el-button>
         </div>
       </div>
-      <knowledgeList :appData="knowledgeData" @editItem="showCreate" @reloadData="getTableData" ref="knowledgeList" v-loading="tableLoading" />
+      <knowledgeList :appData="knowledgeData" @editItem="editItem" @reloadData="getTableData" ref="knowledgeList" v-loading="tableLoading" />
       <createKnowledge ref="createKnowledge" @reloadData="getTableData" />
     </div>
   </div>
@@ -85,8 +85,11 @@ export default {
         clearIptValue(){
           this.$refs.searchInput.clearValue()
         },
+        editItem(row){
+          this.$refs.createKnowledge.showDialog(row)
+        },
         showCreate(row){
-            this.$refs.createKnowledge.showDialog(row)
+          this.$refs.createKnowledge.showDialog(row)
         }
     }
 }

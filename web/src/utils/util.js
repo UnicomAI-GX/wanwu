@@ -75,11 +75,20 @@ export const redirectUrl = () => {
     jumpPermUrl()
 }
 
+export const redirectUserInfoPage = (isUpdatePassword, callback, isRedirectUrl) => {
+    if (isUpdatePassword !== undefined && !isUpdatePassword) {
+        router.push('/userInfo?showPwd=1')
+        callback && callback()
+    } else {
+        if (isRedirectUrl) jumpPermUrl()
+    }
+}
+
 export const replaceIcon = (logoPath) => {
     let link = document.querySelector("link[rel*='icon']") || document.createElement("link")
     link.type = "image/x-icon"
     link.rel = "shortcut icon"
-    link.href = logoPath ? basePath + '/user/api' + logoPath : basePath + '/aibase/favicon.ico'
+    link.href = logoPath ? avatarSrc(logoPath) : basePath + '/aibase/favicon.ico'
     document.getElementsByTagName("head")[0].appendChild(link)
 }
 

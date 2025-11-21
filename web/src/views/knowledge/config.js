@@ -107,3 +107,9 @@ export const KNOWLEDGE_GRAPH_STATUS = {
     2: i18n.t('knowledgeManage.config.finished'),
     3: i18n.t('knowledgeManage.config.failed'),
 }
+export const COMMUNITY_IMPORT_STATUS = {
+    0: i18n.t('knowledgeManage.communityReport.taskPending'),
+    1: i18n.t('knowledgeManage.communityReport.taskProcessing'),
+    2: i18n.t('knowledgeManage.communityReport.taskFinished'),
+    3: i18n.t('knowledgeManage.communityReport.taskFailed'),
+}
