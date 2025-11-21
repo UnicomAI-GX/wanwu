@@ -142,6 +142,11 @@ const constantRoutes = [
                 meta:{perm: [PERMS.AGENT]},
             },
             {
+                path: '/agent/promptCompare/:id',
+                component:resolve =>require(['@/views/agent/components/prompt/compare'],resolve),
+                meta:{perm: [PERMS.AGENT]},
+            },
+            {
                 path: '/agent/templateDetail',
                 name:'templateDetail',
                 component:resolve =>require(['@/components/agentDetail'],resolve),

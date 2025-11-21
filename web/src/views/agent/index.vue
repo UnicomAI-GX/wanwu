@@ -57,12 +57,6 @@
           @reloadList="reloadList"
           @setHistoryStatus="setHistoryStatus"
         />
-        <!-- <ApiKeyDialog
-          ref="apiKeyDialog"
-          :appId="editForm.assistantId"
-          :appType="'agent'"
-          :type="'webChat'"
-        /> -->
       </div>
     </template>
   </CommonLayout>
@@ -72,7 +66,6 @@
 import CommonLayout from "@/components/exploreContainer.vue";
 import Chat from "./components/chat.vue";
 import { mapGetters,mapActions } from "vuex";
-// import ApiKeyDialog from "./components/ApiKeyDialog.vue";
 import {
   getAgentInfo,
   getOpenurlInfo,

@@ -534,7 +534,14 @@ export default {
         promptOptimize: '提示词优化',
         promptOptimizeHint: '请填写提示词后，再进行提示词优化',
         optimize: '优化',
-        replace: '替换'
+        replace: '替换',
+        promptCompare: '提示词对比',
+        addPrompt: '增加提示词',
+        closePrompt: '关闭提示词',
+        selected:'已选择',
+        select:'选这个',
+        promptCompareLimit: '最多可添加4个提示词',
+        comparePrompt:'对比提示词'
     },
 
     // 工作流/对话流
@@ -832,6 +839,7 @@ export default {
             finished: '已完成',
             failed: '处理失败',
             graphStatus: '图谱解析状态',
+            useGraph: '是否使用图谱',
         },
         communityReport: {
             name: "名称",
@@ -843,7 +851,12 @@ export default {
             addCommunityReport: "新增社区报告",
             deleteSuccess: "删除成功",
             generateSuccess: "已开始生成",
-            viewDetail: "详情查看"
+            viewDetail: "详情查看",
+            taskPending: '任务待处理',
+            taskProcessing: '任务导入中',
+            taskFinished: '处理完成',
+            taskFailed: '处理失败',
+            lastImportStatus:'批量新增状态'
         },
         meta: {
             batchEdit: '批量编辑元数据值',
@@ -1135,6 +1148,7 @@ export default {
         },
     },
     agent: {
+        send:'发送',
         addComponent: '添加组件',
         addComponentTips: '为保证应用效果，建议添加组件不超过2个',
         add: '添加',
@@ -1157,6 +1171,7 @@ export default {
         fileTypeNotSupportedTips: '非图片类型文件只能上传一个，已自动忽略多余文件',
         fileTypeNotSupportedTips1: '部分文件类型不支持或超出数量限制，已自动忽略',
         fileTypeNotSupportedTips2: '部分文件类型不支持或体积过大，已自动忽略',
+        answerOperationTip:'该内容由A1生成，内容仅供参考，请仔细甄别',
         toolDetail: {
             modelLoadingText: '模型加载中...',
             selectRerank: '请选择rerank模型',

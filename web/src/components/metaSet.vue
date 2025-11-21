@@ -13,6 +13,7 @@
         <div
           v-for="(item,index) in metaDataFilterParams.metaFilterParams"
           class="docItem"
+          :key="`metaItem-${index}`"
         >
           <div class="docItem_data">
             <el-select
@@ -90,10 +91,10 @@
           </div>
           <el-divider direction="vertical"></el-divider>
           <div class="docItem_data docItem_data_btn">
-                        <span
-                          class="el-icon-delete setBtn"
-                          @click="delMetaItem(index)"
-                        ></span>
+            <span
+              class="el-icon-delete setBtn"
+              @click="delMetaItem(index)"
+            ></span>
           </div>
         </div>
         <el-select
@@ -189,11 +190,11 @@ export default {
           },
           {
             value: 'start with',
-            label: this.$t('metaSet.startWith')
+            label: this.$t('metaSet.startsWith')
           },
           {
             value: 'end with',
-            label: this.$t('metaSet.endWith')
+            label: this.$t('metaSet.endsWith')
           },
           {
             value: 'empty',
@@ -215,11 +216,11 @@ export default {
           },
           {
             value: '>',
-            label: this.$t('metaSet.greaterThan')
+            label: this.$t('metaSet.moreThan')
           },
           {
             value: '≥',
-            label: this.$t('metaSet.greaterThanOrEqual')
+            label: this.$t('metaSet.moreThanOrEqual')
           },
           {
             value: '<',

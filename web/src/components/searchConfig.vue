@@ -12,8 +12,9 @@
         <span v-if="!setType" class="vertical-form-title">{{ $t('searchConfig.title') }}</span>
     </template>
       <div
-        v-for="item in searchTypeData"
+        v-for="(item,index) in searchTypeData"
         :class="['searchType-list',{ 'active': item.showContent }]"
+        :key="index"
       >
         <div
           class="searchType-title"
@@ -40,6 +41,7 @@
               v-for="mixItem in item.mixType"
               :class="['weightType',{ 'active': mixItem.value === item.mixTypeValue }]"
               @click.stop="mixTypeClick(item,mixItem)"
+              :key="mixItem.name"
             >
               <p class="weightType-name">{{mixItem.name}}</p>
               <p class="weightType-desc">{{mixItem.desc}}</p>
@@ -170,12 +172,21 @@
         </div>
       </div>
     </el-form-item>
+    <el-form-item  class="searchType-list graph-switch" v-if="showGraphSwitch">
+      <template #label>
+        <span class="graph-switch-title">{{ $t('knowledgeManage.graph.useGraph') }}</span>
+      </template>
+      <el-switch
+        v-model="formInline.knowledgeMatchParams.useGraph"
+      >
+      </el-switch>
+    </el-form-item>
   </el-form>
 </template>
 <script>
 import { getRerankList } from "@/api/modelAccess";
 export default {
-  props:['setType','config'],
+  props:['setType','config','showGraphSwitch'],
   data() {
     return {
       debounceTimer:null,
@@ -191,7 +202,8 @@ export default {
           threshold: 0.4, //过滤分数阈值
           semanticsPriority: 0.2, //语义权重
           topK:5, //topK 获取最高的几行
-          maxHistory:0//最长上下文
+          maxHistory:0,//最长上下文
+          useGraph:false//是否使用图谱
         },
       },
       initialEditForm:null,
@@ -388,7 +400,7 @@ export default {
     }
   }
   .vertical-form-item .el-form-item__label {
-    line-height: unset;
+    // line-height: unset;
     font-size: 14px;
     font-weight: bold;
   }
@@ -398,6 +410,9 @@ export default {
   .el-input-number--small{
     line-height: 28px!important;
   }
+  .el-form-item{
+    margin-bottom:0!important;
+  }
 }
 .active {
   border: 1px solid $color !important;
@@ -406,12 +421,18 @@ export default {
   .searchType-list:hover {
     border: 1px solid $color;
   }
+
   .searchType-list {
     border: 1px solid #c0c4cc;
     border-radius: 4px;
-    margin: 20px 0;
+    margin-bottom: 20px;
     padding: 0 10px;
     cursor: pointer;
+    .graph-switch-title{
+      font-size: 14px;
+      font-weight: bold;
+      width: 150px!important;
+    }
     .searchType-title {
       display: flex;
       align-items: center;
@@ -482,6 +503,19 @@ export default {
         margin-top: 20px;
         line-height: 1;
       }
+    }
+  }
+  .graph-switch{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /deep/ .el-form-item__content {
+      display: flex;
+      justify-content: flex-end;
+    }
+    /deep/ .el-form-item__label{
+      width: 120px!important;
+      color:#000;
     }
   }
 }

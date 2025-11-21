@@ -28,6 +28,9 @@
         <el-descriptions-item :label="$t('knowledgeManage.communityReport.segmentType')">{{
          communityReportStatus[res.status]
         }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('knowledgeManage.communityReport.lastImportStatus')" v-if="res.status === 2">{{
+         communityImportStatus[res.lastImportStatus]
+        }}</el-descriptions-item>
       </el-descriptions>
 
       <div class="btn">
@@ -109,7 +112,7 @@
 </template>
 <script>
 import { getCommunityReportList,delCommunityReport,generateCommunityReport} from "@/api/knowledge";
-import { COMMUNITY_REPORT_STATUS } from "@/views/knowledge/config";
+import { COMMUNITY_REPORT_STATUS,COMMUNITY_IMPORT_STATUS } from "@/views/knowledge/config";
 import {mapGetters} from 'vuex';
 import commonMixin from "@/mixins/common";
 import createReport from "./create.vue";
@@ -133,6 +136,7 @@ export default {
         contentList: [],
       },
       communityReportStatus: COMMUNITY_REPORT_STATUS,
+      communityImportStatus: COMMUNITY_IMPORT_STATUS,
     };
   },
   computed: {

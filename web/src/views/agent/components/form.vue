@@ -1,26 +1,31 @@
 <template>
-  <div
-    class="agent-from-content"
-    :class="{ 'isDisabled': isPublish }"
-  >
+  <div class="agent-from-content" :class="{ isDisabled: isPublish }">
     <div class="form-header">
       <div class="header-left">
-        <span
-          class="el-icon-arrow-left btn"
-          @click="goBack"
-        ></span>
+        <span class="el-icon-arrow-left btn" @click="goBack"></span>
         <div class="basicInfo">
           <div class="img">
-            <img :src="editForm.avatar.path ? `/user/api`+ editForm.avatar.path : '@/assets/imgs/bg-logo.png'" />
+            <img
+              :src="
+                editForm.avatar.path
+                  ? `/user/api` + editForm.avatar.path
+                  : '@/assets/imgs/bg-logo.png'
+              "
+            />
           </div>
           <div class="basicInfo-desc">
-            <span class="basicInfo-title">{{(editForm.name || $t('agent.form.noInfo')).length > 12 ? (editForm.name || $t('agent.form.noInfo')).substring(0, 12) + '...' : (editForm.name || $t('agent.form.noInfo'))}}</span>
+            <span class="basicInfo-title">{{
+              (editForm.name || $t("agent.form.noInfo")).length > 12
+                ? (editForm.name || $t("agent.form.noInfo")).substring(0, 12) +
+                  "..."
+                : editForm.name || $t("agent.form.noInfo")
+            }}</span>
             <span
               class="el-icon-edit-outline editIcon"
               @click="editAgent"
             ></span>
             <LinkIcon type="agent" />
-            <p>{{editForm.desc || $t('agent.form.noInfo')}}</p>
+            <p>{{ editForm.desc || $t("agent.form.noInfo") }}</p>
           </div>
         </div>
       </div>
@@ -28,49 +33,40 @@
         <el-button
           size="small"
           type="primary"
-          style="padding:13px 12px;"
+          style="padding: 13px 12px"
           @click="handlePublishSet"
         >
           <span class="el-icon-setting"></span>
-          {{ $t('agent.form.publishConfig') }}
+          {{ $t("agent.form.publishConfig") }}
         </el-button>
         <el-button
           size="small"
           type="primary"
           @click="handlePublish"
-          style="padding:13px 12px;"
-        >{{ $t('agent.form.publish') }}<span
-            class="el-icon-arrow-down"
-            style="margin-left:5px;"
-          ></span></el-button>
-        <div
-          class="popover-operation"
-          v-if="showOperation"
-        >
+          style="padding: 13px 12px"
+          >{{ $t("agent.form.publish")
+          }}<span class="el-icon-arrow-down" style="margin-left: 5px"></span
+        ></el-button>
+        <div class="popover-operation" v-if="showOperation">
           <div>
-            <el-radio
-              :label="'private'"
-              v-model="scope"
-            >{{ $t('agent.form.publishType') }}</el-radio>
+            <el-radio :label="'private'" v-model="scope">{{
+              $t("agent.form.publishType")
+            }}</el-radio>
           </div>
           <div>
-            <el-radio
-              :label="'organization'"
-              v-model="scope"
-            >{{ $t('agent.form.publishType1') }}</el-radio>
+            <el-radio :label="'organization'" v-model="scope">{{
+              $t("agent.form.publishType1")
+            }}</el-radio>
           </div>
           <div>
-            <el-radio
-              :label="'public'"
-              v-model="scope"
-            >{{ $t('agent.form.publishType2') }}</el-radio>
+            <el-radio :label="'public'" v-model="scope">{{
+              $t("agent.form.publishType2")
+            }}</el-radio>
           </div>
           <div class="saveBtn">
-            <el-button
-              size="mini"
-              type="primary"
-              @click="savePublish"
-            >{{ $t('common.button.save') }}</el-button>
+            <el-button size="mini" type="primary" @click="savePublish">{{
+              $t("common.button.save")
+            }}</el-button>
           </div>
         </div>
       </div>
@@ -79,19 +75,43 @@
     <div class="agent_form">
       <div class="block prompt-box drawer-info">
         <div class="promptTitle">
-          <h3>{{ $t('agent.form.systemPrompt') }}</h3>
-          <div>
-            <el-tooltip class="item" effect="dark" :content="$t('agent.form.submitToPrompt')" placement="top-start">
+          <h3>{{ $t("agent.form.systemPrompt") }}</h3>
+          <div class="prompt-title-icon">
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="$t('agent.form.submitToPrompt')"
+              placement="top-start"
+            >
               <span class="el-icon-folder-add" @click="handleShowPrompt"></span>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" :content="$t('tempSquare.promptOptimize')" placement="top-start">
-              <span style="margin-left: 5px" class="el-icon-s-help" @click="showPromptOptimize"></span>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="$t('tempSquare.promptOptimize')"
+              placement="top-start"
+            >
+              <span
+                style="margin-left: 5px"
+                class="el-icon-s-help"
+                @click="showPromptOptimize"
+              ></span>
+            </el-tooltip>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="$t('tempSquare.promptCompare')"
+              placement="top-start"
+            >
+              <span class="tool-icon" @click="showPromptCompare"
+                ><img :src="require('@/assets/imgs/temp-compare.png')"
+              /></span>
             </el-tooltip>
           </div>
         </div>
-        <div class="rl" style="padding: 10px;">
+        <div class="rl" style="padding: 10px">
           <el-input
-            class="desc-input "
+            class="desc-input"
             v-model="editForm.instructions"
             :placeholder="$t('agent.form.promptTips')"
             type="textarea"
@@ -103,7 +123,7 @@
       </div>
       <div class="drawer-form">
         <div class="agnetSet">
-          <h3 class="labelTitle">{{ $t('agent.form.agentConfig') }}</h3>
+          <h3 class="labelTitle">{{ $t("agent.form.agentConfig") }}</h3>
           <div class="block prompt-box">
             <p class="block-title model-title">
               <span class="label">
@@ -111,7 +131,7 @@
                   :src="require('@/assets/imgs/require.png')"
                   class="required-label"
                 />
-                {{ $t('agent.form.modelSelect') }}
+                {{ $t("agent.form.modelSelect") }}
               </span>
               <span
                 class="el-icon-s-operation operation"
@@ -133,7 +153,7 @@
               >
                 <el-option
                   class="model-option-item"
-                  v-for="(item) in modleOptions"
+                  v-for="item in modleOptions"
                   :key="item.modelId"
                   :value="item.modelId"
                   :label="item.displayName"
@@ -148,7 +168,8 @@
                         v-for="(tag, tagIdx) in item.tags"
                         :key="tagIdx"
                         class="model-select-tag"
-                      >{{ tag.text }}</span>
+                        >{{ tag.text }}</span
+                      >
                     </div>
                   </div>
                 </el-option>
@@ -156,7 +177,9 @@
               <div
                 class="model-select-tips"
                 v-if="editForm.visionsupport === 'support'"
-              >{{ $t('agent.form.visionModelTips') }}</div>
+              >
+                {{ $t("agent.form.visionModelTips") }}
+              </div>
             </div>
           </div>
           <div class="block prompt-box">
@@ -165,7 +188,7 @@
                 :src="require('@/assets/imgs/require.png')"
                 class="required-label"
               />
-              {{ $t('agent.form.prologue') }}
+              {{ $t("agent.form.prologue") }}
             </p>
             <div class="rl">
               <el-input
@@ -175,25 +198,25 @@
                 :placeholder="$t('agent.form.prologuePlaceholder')"
                 type="textarea"
               ></el-input>
-              <span class="el-input__count">{{editForm.prologue.length}}/100</span>
+              <span class="el-input__count"
+                >{{ editForm.prologue.length }}/100</span
+              >
             </div>
           </div>
           <div class="block recommend-box">
             <p class="block-title recommend-title">
-              <span>{{ $t('agent.form.recommendQuestion') }}</span>
-              <span
-                @click="addRecommend"
-                class="common-add"
-              >
+              <span>{{ $t("agent.form.recommendQuestion") }}</span>
+              <span @click="addRecommend" class="common-add">
                 <span class="el-icon-plus"></span>
-                <span class="handleBtn">{{ $t('agent.add') }}</span>
+                <span class="handleBtn">{{ $t("agent.add") }}</span>
               </span>
             </p>
             <div
               class="recommend-item"
-              v-for="(n,i) in editForm.recommendQuestion"
+              v-for="(n, i) in editForm.recommendQuestion"
               @mouseenter="activeIndex = i"
               @mouseleave="activeIndex = -1"
+              :key="`${i}rml`"
             >
               <el-input
                 class="recommend--input"
@@ -203,7 +226,7 @@
               ></el-input>
               <span
                 class="el-icon-delete recommend-del"
-                @click="clearRecommend(n,i)"
+                @click="clearRecommend(n, i)"
                 v-if="activeIndex === i"
               ></span>
             </div>
@@ -212,21 +235,17 @@
         <div class="common-box">
           <div class="block recommend-box">
             <p class="block-title tool-title">
-              <span>{{ $t('agent.form.linkKnowledge') }}</span>
+              <span>{{ $t("agent.form.linkKnowledge") }}</span>
               <span>
-                <span
-                  class="common-add"
-                  @click="showKnowledgeDiglog"
-                >
+                <span class="common-add" @click="showKnowledgeDiglog">
                   <span class="el-icon-plus"></span>
-                  <span class="handleBtn">{{ $t('agent.add') }}</span>
+                  <span class="handleBtn">{{ $t("agent.add") }}</span>
                 </span>
-                <span
-                  class="common-add"
-                  @click="showKnowledgeSet"
-                >
+                <span class="common-add" @click="showKnowledgeSet">
                   <span class="el-icon-s-operation"></span>
-                  <span class="handleBtn set">{{ $t('agent.form.config') }}</span>
+                  <span class="handleBtn set">{{
+                    $t("agent.form.config")
+                  }}</span>
                 </span>
               </span>
             </p>
@@ -234,15 +253,12 @@
               <div class="tool-right tool">
                 <div class="action-list">
                   <div
-                    v-for="(n,i) in editForm.knowledgebases"
+                    v-for="(n, i) in editForm.knowledgebases"
                     class="action-item"
-                    :key="'knowledge'+ i"
+                    :key="'knowledge' + i"
                   >
-                    <div
-                      class="name"
-                      style="color: #333"
-                    >
-                      <span>{{n.name || n.knowledgeName}}</span>
+                    <div class="name" style="color: #333">
+                      <span>{{ n.name || n.knowledgeName }}</span>
                     </div>
                     <div class="bt">
                       <el-tooltip
@@ -253,8 +269,8 @@
                       >
                         <span
                           class="el-icon-setting del"
-                          @click="showMetaSet(n,i)"
-                          style="margin-right:10px;"
+                          @click="showMetaSet(n, i)"
+                          style="margin-right: 10px"
                         ></span>
                       </el-tooltip>
                       <span
@@ -271,20 +287,14 @@
 
         <div class="block recommend-box tool-box">
           <p class="block-title tool-title">
-            <span>{{ $t('agent.form.tool') }}</span>
-            <span
-              @click="addTool"
-              class="common-add"
-            >
+            <span>{{ $t("agent.form.tool") }}</span>
+            <span @click="addTool" class="common-add">
               <span class="el-icon-plus"></span>
-              <span class="handleBtn">{{ $t('agent.add') }}</span>
+              <span class="handleBtn">{{ $t("agent.add") }}</span>
             </span>
           </p>
           <div class="rl tool-conent">
-            <div
-              class="tool-right tool"
-              v-show="allTools.length"
-            >
+            <div class="tool-right tool" v-show="allTools.length">
               <div class="action-list">
                 <div
                   class="action-item"
@@ -292,25 +302,53 @@
                   :key="`${i}ac`"
                 >
                   <div class="name">
-                  <div class="toolImg">
-                    <img :src="'/user/api/'+n.avatar.path" v-show="n.avatar && n.avatar.path" />
-                  </div>
-                  <el-tooltip class="item" effect="dark" :content="displayName(n)" placement="top-start">
-                    <span>{{ displayName(n).length > 20 ? displayName(n).substring(0, 20) + '...' : displayName(n) }}</span>
-                  </el-tooltip>
-                  <el-tooltip class="item" effect="dark" :content="n.mcpName || n.toolName" placement="top-start">
-                    <span class="el-icon-info desc-info" v-if="n.mcpName || n.toolName"></span>
-                  </el-tooltip>
+                    <div class="toolImg">
+                      <img
+                        :src="'/user/api/' + n.avatar.path"
+                        v-show="n.avatar && n.avatar.path"
+                      />
+                    </div>
+                    <el-tooltip
+                      class="item"
+                      effect="dark"
+                      :content="displayName(n)"
+                      placement="top-start"
+                    >
+                      <span>{{
+                        displayName(n).length > 20
+                          ? displayName(n).substring(0, 20) + "..."
+                          : displayName(n)
+                      }}</span>
+                    </el-tooltip>
+                    <el-tooltip
+                      class="item"
+                      effect="dark"
+                      :content="n.mcpName || n.toolName"
+                      placement="top-start"
+                    >
+                      <span
+                        class="el-icon-info desc-info"
+                        v-if="n.mcpName || n.toolName"
+                      ></span>
+                    </el-tooltip>
                   </div>
                   <div class="bt">
-                    <span class="el-icon-s-operation bt-operation"  @click="handleBuiltin(n)" v-if="n.type === 'action' && n.toolType && n.toolType === 'builtin'"></span>
+                    <span
+                      class="el-icon-s-operation bt-operation"
+                      @click="handleBuiltin(n)"
+                      v-if="
+                        n.type === 'action' &&
+                        n.toolType &&
+                        n.toolType === 'builtin'
+                      "
+                    ></span>
                     <el-switch
                       v-model="n.enable"
                       class="bt-switch"
-                      @change="toolSwitch(n,n.type,n.enable)"
+                      @change="toolSwitch(n, n.type, n.enable)"
                     ></el-switch>
                     <span
-                      @click="toolRemove(n,n.type)"
+                      @click="toolRemove(n, n.type)"
                       class="el-icon-delete del"
                     ></span>
                   </div>
@@ -322,7 +360,7 @@
         <div class="block prompt-box link-box">
           <p class="block-title tool-title">
             <span>
-              {{ $t('agent.form.safetyConfig') }}
+              {{ $t("agent.form.safetyConfig") }}
               <el-tooltip
                 class="item"
                 effect="dark"
@@ -334,11 +372,10 @@
             </span>
             <span class="common-add">
               <span @click="showSafety">
-              <span class="el-icon-s-operation"></span>
-              <span
-                class="handleBtn"
-                style="margin-right:10px;"
-              >{{ $t('agent.form.config') }}</span> 
+                <span class="el-icon-s-operation"></span>
+                <span class="handleBtn" style="margin-right: 10px">{{
+                  $t("agent.form.config")
+                }}</span>
               </span>
               <el-switch
                 v-model="editForm.safetyConfig.enable"
@@ -347,10 +384,13 @@
             </span>
           </p>
         </div>
-        <div class="block prompt-box link-box" v-if="editForm.visionsupport === 'support'">
+        <div
+          class="block prompt-box link-box"
+          v-if="editForm.visionsupport === 'support'"
+        >
           <p class="block-title tool-title">
             <span>
-              {{ $t('agent.form.vision') }}
+              {{ $t("agent.form.vision") }}
               <el-tooltip
                 class="item"
                 effect="dark"
@@ -362,23 +402,15 @@
             </span>
             <span class="common-add" @click="showVisualSet">
               <span class="el-icon-s-operation"></span>
-              <span
-                class="handleBtn"
-                style="margin-right:10px;"
-              >{{ $t('agent.form.config') }}</span>
+              <span class="handleBtn" style="margin-right: 10px">{{
+                $t("agent.form.config")
+              }}</span>
             </span>
           </p>
         </div>
-        <!-- 知识图谱开关 -->
-        <div class="block prompt-box link-box" v-if="showGraphSwitch">
-            <graphSwitch ref="graphSwitch" @graphSwitchchange="graphSwitchchange" :label="$t('knowledgeManage.create.knowledgeGraph')" :graphSwitch="editForm.knowledgeConfig.useGraph"/>
-        </div>
       </div>
       <div class="drawer-test">
-        <Chat
-          :editForm="editForm"
-          :chatType="'test'"
-        />
+        <Chat :editForm="editForm" :chatType="'test'" />
       </div>
     </div>
 
@@ -403,14 +435,12 @@
       :assistantId="editForm.assistantId"
     />
     <!-- 敏感词设置 -->
-    <setSafety
-      ref="setSafety"
-      @sendSafety="sendSafety"
-    />
+    <setSafety ref="setSafety" @sendSafety="sendSafety" />
     <!-- 知识库召回参数配置 -->
     <knowledgeSetDialog
       ref="knowledgeSetDialog"
       @setKnowledgeSet="setKnowledgeSet"
+      :showGraphSwitch="showGraphSwitch"
     />
     <!-- 知识库选择 -->
     <knowledgeSelect
@@ -418,14 +448,16 @@
       @getKnowledgeData="getKnowledgeData"
     />
     <!-- 视图设置 -->
-    <visualSet
-      ref="visualSet"
-      @sendVisual="sendVisual"
-    />
+    <visualSet ref="visualSet" @sendVisual="sendVisual" />
     <!-- 内置工具详情 -->
     <ToolDeatail ref="toolDeatail" @updateDetail="updateDetail" />
     <!-- 提交至提示词 -->
-    <createPrompt :isCustom="true" :type="promptType" ref="createPrompt" @reload="updatePrompt"/>
+    <createPrompt
+      :isCustom="true"
+      :type="promptType"
+      ref="createPrompt"
+      @reload="updatePrompt"
+    />
     <!-- 提示词优化 -->
     <PromptOptimize ref="promptOptimize" @promptSubmit="promptSubmit" />
     <!-- 元数据设置 -->
@@ -437,8 +469,8 @@
     >
       <template #title>
         <div class="metaHeader">
-          <h3>{{ $t('agent.form.configMetaDataFilter') }}</h3>
-          <span>{{ $t('agent.form.metaDataFilterDesc') }}</span>
+          <h3>{{ $t("agent.form.configMetaDataFilter") }}</h3>
+          <span>{{ $t("agent.form.metaDataFilterDesc") }}</span>
         </div>
       </template>
       <metaSet
@@ -446,15 +478,13 @@
         :knowledgeId="currentKnowledgeId"
         :currentMetaData="currentMetaData"
       />
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button @click="handleMetaClose">{{ $t('common.button.cancel') }}</el-button>
-        <el-button
-          type="primary"
-          @click="submitMeta"
-        >{{ $t('common.button.confirm') }}</el-button>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="handleMetaClose">{{
+          $t("common.button.cancel")
+        }}</el-button>
+        <el-button type="primary" @click="submitMeta">{{
+          $t("common.button.confirm")
+        }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -463,7 +493,7 @@
 <script>
 import { appPublish } from "@/api/appspace";
 import { store } from "@/store/index";
-import { mapGetters,mapActions } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import CreateIntelligent from "@/components/createApp/createIntelligent";
 import setSafety from "@/components/setSafety";
 import visualSet from "./visualSet";
@@ -480,7 +510,7 @@ import {
   enableWorkFlow,
   enableAction,
   delCustomBuiltIn,
-  switchCustomBuiltIn
+  switchCustomBuiltIn,
 } from "@/api/agent";
 import ToolDiaglog from "./toolDialog";
 import ToolDeatail from "./toolDetail";
@@ -488,9 +518,8 @@ import knowledgeSetDialog from "./knowledgeSetDialog";
 import { readWorkFlow } from "@/api/workflow";
 import Chat from "./chat";
 import LinkIcon from "@/components/linkIcon.vue";
-import graphSwitch from "@/components/graphSwitch.vue"
 import promptTemplate from "./prompt/index.vue";
-import createPrompt from "@/components/createApp/createPrompt.vue"
+import createPrompt from "@/components/createApp/createPrompt.vue";
 import knowledgeSelect from "@/components/knowledgeSelect.vue";
 import PromptOptimize from "@/components/promptOptimize.vue";
 export default {
@@ -508,13 +537,12 @@ export default {
     ToolDeatail,
     promptTemplate,
     createPrompt,
-    graphSwitch,
-    PromptOptimize
+    PromptOptimize,
   },
   provide() {
     return {
-      getPrompt: this.getPrompt
-    }
+      getPrompt: this.getPrompt,
+    };
   },
   watch: {
     editForm: {
@@ -534,7 +562,7 @@ export default {
             "instructions",
             "safetyConfig",
             "recommendQuestion",
-            "visionConfig"
+            "visionConfig",
           ];
 
           const changed = props.some((prop) => {
@@ -560,7 +588,7 @@ export default {
   },
   data() {
     return {
-      promptType: 'create',
+      promptType: "create",
       limitMaxTokens: 4096,
       knowledgeIndex: -1,
       currentKnowledgeId: "",
@@ -584,9 +612,10 @@ export default {
         prologue: "", //开场白
         instructions: "", //系统提示词
         knowledgebases: [],
-        visionConfig:{//视觉配置
+        visionConfig: {
+          //视觉配置
           picNum: 3,
-          maxPicNum:6
+          maxPicNum: 6,
         },
         knowledgeConfig: {
           keywordPriority: 0.8, //关键词权重
@@ -597,7 +626,7 @@ export default {
           topK: 5, //topK 获取最高的几行
           threshold: 0.4, //过滤分数阈值
           maxHistory: 0, //最长上下文
-          useGraph:false
+          useGraph: false,
         },
         recommendQuestion: [{ value: "" }],
         modelConfig: {
@@ -663,10 +692,13 @@ export default {
       },
     };
   },
-  computed:{
+  computed: {
     showGraphSwitch() {
-      return this.editForm.knowledgebases && this.editForm.knowledgebases.some(item => item.graphSwitch === 1)
-    }
+      return (
+        this.editForm.knowledgebases &&
+        this.editForm.knowledgebases.some((item) => item.graphSwitch === 1)
+      );
+    },
   },
   mounted() {
     this.initialEditForm = JSON.parse(JSON.stringify(this.editForm));
@@ -696,36 +728,42 @@ export default {
     this.clearMaxPicNum();
   },
   methods: {
-    ...mapActions("app", ["setMaxPicNum","clearMaxPicNum"]),
-    graphSwitchchange(val){
-      this.editForm.knowledgeConfig.useGraph = val;
+    ...mapActions("app", ["setMaxPicNum", "clearMaxPicNum"]),
+    showPromptCompare() {
+      this.$router.push({
+        path: `/agent/promptCompare/${this.editForm.assistantId}`,
+      });
     },
-    updatePrompt(){
-        this.$refs.promptTemplate.getPromptTemplateList()
+    updatePrompt() {
+      this.$refs.promptTemplate.getPromptTemplateList();
     },
-    handleShowPrompt(){
-      this.$refs.createPrompt.openDialog({prompt: this.editForm.instructions});
+    handleShowPrompt() {
+      this.$refs.createPrompt.openDialog({
+        prompt: this.editForm.instructions,
+      });
     },
     showPromptOptimize() {
       if (!this.editForm.instructions) {
-        this.$message.warning(this.$t('tempSquare.promptOptimizeHint'))
-        return
+        this.$message.warning(this.$t("tempSquare.promptOptimizeHint"));
+        return;
       }
-      this.$refs.promptOptimize.openDialog({prompt: this.editForm.instructions})
+      this.$refs.promptOptimize.openDialog({
+        prompt: this.editForm.instructions,
+      });
     },
     promptSubmit(prompt) {
-      this.editForm.instructions = prompt
-    },
-    getPrompt(prompt){
       this.editForm.instructions = prompt;
     },
-    handleBuiltin(n){
-      this.$refs.toolDeatail.showDiaglog(n)
+    getPrompt(prompt) {
+      this.editForm.instructions = prompt;
     },
-    showVisualSet(){
+    handleBuiltin(n) {
+      this.$refs.toolDeatail.showDiaglog(n);
+    },
+    showVisualSet() {
       this.$refs.visualSet.showDialog(this.editForm.visionConfig);
     },
-    sendVisual(data){
+    sendVisual(data) {
       this.editForm.visionConfig.picNum = data.picNum;
     },
     handleModelChange(val) {
@@ -748,7 +786,7 @@ export default {
           metaData["metaDataFilterParams"]["metaFilterParams"]
         )
       ) {
-        this.$message.warning(this.$t('agent.form.incompleteInfo'));
+        this.$message.warning(this.$t("agent.form.incompleteInfo"));
         return;
       }
       this.$set(this.editForm.knowledgebases, this.knowledgeIndex, {
@@ -761,8 +799,10 @@ export default {
       this.editForm.knowledgebases.splice(index, 1);
     },
     getKnowledgeData(data) {
-      const originalIds = new Set(this.editForm.knowledgebases.map(item => item.id));
-      const newItems = data.filter(item => !originalIds.has(item.id));
+      const originalIds = new Set(
+        this.editForm.knowledgebases.map((item) => item.id)
+      );
+      const newItems = data.filter((item) => !originalIds.has(item.id));
       this.editForm.knowledgebases.push(...newItems);
     },
     handleMetaClose() {
@@ -833,9 +873,9 @@ export default {
     customSwitch(n, enable) {
       switchCustomBuiltIn({
         assistantId: this.editForm.assistantId,
-        actionName:n.actionName,
-        toolId:n.toolId,
-        toolType:n.toolType,
+        actionName: n.actionName,
+        toolId: n.toolId,
+        toolType: n.toolType,
         enable,
       })
         .then((res) => {
@@ -846,7 +886,13 @@ export default {
         .catch(() => {});
     },
     mcpSwitch(n, enable) {
-      enableMcp({ assistantId: this.editForm.assistantId,actionName:n.actionName, enable,mcpId:n.mcpId,mcpType:n.mcpType })
+      enableMcp({
+        assistantId: this.editForm.assistantId,
+        actionName: n.actionName,
+        enable,
+        mcpId: n.mcpId,
+        mcpType: n.mcpType,
+      })
         .then((res) => {
           if (res.code === 0) {
             this.getAppDetail();
@@ -888,18 +934,18 @@ export default {
       });
     },
     goBack() {
-      this.$router.go(-1);
+      this.$router.push({ path: "/appSpace/agent" });
     },
     handlePublish() {
       this.showOperation = !this.showOperation;
     },
     savePublish() {
       if (this.editForm.modelParams === "") {
-        this.$message.warning(this.$t('agent.form.selectModel'));
+        this.$message.warning(this.$t("agent.form.selectModel"));
         return false;
       }
       if (this.editForm.prologue === "") {
-        this.$message.warning(this.$t('agent.form.inputPrologue'));
+        this.$message.warning(this.$t("agent.form.inputPrologue"));
         return false;
       }
       const data = {
@@ -944,20 +990,30 @@ export default {
       }
     },
     customRemove(n) {
-      delCustomBuiltIn({ assistantId: this.editForm.assistantId, toolId: n.toolId, toolType: n.toolType,actionName: n.actionName})
+      delCustomBuiltIn({
+        assistantId: this.editForm.assistantId,
+        toolId: n.toolId,
+        toolType: n.toolType,
+        actionName: n.actionName,
+      })
         .then((res) => {
           if (res.code === 0) {
-            this.$message.success(this.$t('agent.form.deleteSuccess'));
+            this.$message.success(this.$t("agent.form.deleteSuccess"));
             this.getAppDetail();
           }
         })
         .catch((err) => {});
     },
     mcpRemove(n) {
-      deleteMcp({ assistantId: this.editForm.assistantId,actionName:n.actionName,mcpId:n.mcpId,mcpType:n.mcpType})
+      deleteMcp({
+        assistantId: this.editForm.assistantId,
+        actionName: n.actionName,
+        mcpId: n.mcpId,
+        mcpType: n.mcpType,
+      })
         .then((res) => {
           if (res.code === 0) {
-            this.$message.success(this.$t('agent.form.deleteSuccess'));
+            this.$message.success(this.$t("agent.form.deleteSuccess"));
             this.getAppDetail();
           }
         })
@@ -1018,7 +1074,7 @@ export default {
           provider: modeInfo.provider,
         },
         safetyConfig: this.editForm.safetyConfig,
-        visionConfig: {picNum:this.editForm.visionConfig.picNum},
+        visionConfig: { picNum: this.editForm.visionConfig.picNum },
         rerankConfig: rerankInfo
           ? {
               displayName: rerankInfo.displayName,
@@ -1048,7 +1104,9 @@ export default {
     async getAppDetail() {
       this.startLoading(0);
       this.isSettingFromDetail = true;
-      let res = await getAgentDetail({ assistantId: this.editForm.assistantId });
+      let res = await getAgentDetail({
+        assistantId: this.editForm.assistantId,
+      });
       if (res.code === 0) {
         this.startLoading(100);
         let data = res.data;
@@ -1070,7 +1128,7 @@ export default {
           desc: data.desc || "",
           instructions: data.instructions || "", //系统提示词
           rerankParams: data.rerankConfig.modelId || "",
-          visionConfig: data.visionConfig,//图片配置
+          visionConfig: data.visionConfig, //图片配置
           modelConfig:
             data.modelConfig.config !== null
               ? data.modelConfig.config
@@ -1104,7 +1162,7 @@ export default {
         ];
 
         this.setMaxPicNum(this.editForm.visionConfig.picNum);
-        
+
         this.$nextTick(() => {
           this.isSettingFromDetail = false;
         });
@@ -1323,9 +1381,9 @@ export default {
   }
 }
 .agent-from-content {
-  height:100%;
+  height: 100%;
   width: 100%;
-  overflow: hidden!important;
+  overflow: hidden !important;
 }
 .agent_form {
   padding: 0 10px;
@@ -1334,7 +1392,7 @@ export default {
   gap: 10px;
   height: calc(100% - 60px);
   .drawer-info {
-    position:relative;
+    position: relative;
     width: 30%;
     margin: 10px 0;
     border-radius: 6px;
@@ -1347,22 +1405,39 @@ export default {
     font-weight: 800;
     padding: 10px 20px;
   }
-  .promptTitle{
-    display:flex;
-    justify-content:space-between;
-    padding:10px 10px 0 10px;
-    h3{
+  .promptTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10px 0 10px;
+    .prompt-title-icon {
+      display: flex;
+      align-items: center;
+    }
+    h3 {
       font-size: 18px;
       font-weight: 800;
     }
-    span{
+    span {
+      margin-left: 5px;
       font-size: 16px;
-      color:$color;
-      cursor:pointer;
-      display:inline-block;
-      padding:8px;
-      border-radius:50%;
-      background:#E0E7FF;
+      color: $color;
+      cursor: pointer;
+      display: inline-block;
+      padding: 8px;
+      border-radius: 50%;
+      background: #e0e7ff;
+    }
+    .tool-icon {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
     }
   }
   .actionConfig {
@@ -1466,7 +1541,7 @@ export default {
           cursor: pointer;
           margin-right: 5px;
           font-size: 16px;
-          line-height:20px;
+          line-height: 20px;
         }
       }
       .tool-conent {
@@ -1479,9 +1554,6 @@ export default {
           overflow-y: auto;
           .action-list {
             width: 100%;
-            // display: grid;
-            // grid-template-columns: repeat(2, minmax(0, 1fr));
-            // gap: 10px;
           }
         }
       }
@@ -1704,48 +1776,47 @@ export default {
       box-sizing: border-box;
       padding: 10px;
       cursor: pointer;
-      display:flex;
-      align-items:center;
+      display: flex;
+      align-items: center;
       color: #333;
-      .desc-info{
-        color:#ccc;
-        margin-left:4px;
+      .desc-info {
+        color: #ccc;
+        margin-left: 4px;
       }
-      .toolImg{
-        width:30px;
-        height:30px;
-        border-radius:50%;
-        background:#eee;
-        margin-right:5px;
-        img{
-          width:100%;
-          height:100%;
-          border-radius:50%;
+      .toolImg {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #eee;
+        margin-right: 5px;
+        img {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
           object-fit: cover;
         }
       }
-
     }
     .bt {
       text-align: center;
       width: 30%;
       display: flex;
       justify-content: flex-end;
-      align-items:center;
+      align-items: center;
       padding-right: 10px;
       box-sizing: border-box;
       cursor: pointer;
       .del {
         color: $btn_bg;
         font-size: 16px;
-        line-height:20px;
+        line-height: 20px;
       }
       .bt-switch {
         margin: 0 6px 0 6px;
       }
-      .bt-operation{
-        font-size:16px;
-        line-height:20px;
+      .bt-operation {
+        font-size: 16px;
+        line-height: 20px;
       }
     }
   }
@@ -1766,8 +1837,8 @@ export default {
 .custom-tooltip.el-tooltip__popper.is-light[x-placement^="top"] .popper__arrow {
   border-top-color: #ccc !important;
 }
-.drawer-test .echo .session-item{
-  width:30vw!important;
+.drawer-test .echo .session-item {
+  width: 30vw !important;
 }
 .model-option-content {
   display: flex;

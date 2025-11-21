@@ -40,6 +40,8 @@ export default {
             access_token:'',
             runResponse: "",
             fileList: [],  // 文件列表
+            instanceSessionStatus: -1,
+            sessionComRef: null,
         };
     },
     created() {
@@ -156,12 +158,17 @@ export default {
         },
         // 填充开场白
         setProloguePrompt(val) {
-            this.$refs['editable'].setPrompt(val)
+            // this.$refs['editable'].setPrompt(val)
+            const editable = this.$refs.editable || (this.getEditableRef && this.getEditableRef())
+            if(editable){
+                editable.setPrompt(val)
+            }
             this.preSend()
         },
         //获取上传的文件
         getFileIdList() {
-            let list = this.$refs['editable'].getFileIdList()  //[{fileId:"b67e79615"url:"b4d0a8.jpg"}]
+            const editable = this.$refs.editable || (this.getEditableRef && this.getEditableRef())
+            let list = editable.getFileIdList() 
             let fileIds = []
             this.queryFilePath = ''
             if (list.length) {
@@ -179,10 +186,22 @@ export default {
             n.hover = false
         },
         setSessionStatus(status) {
-            this.setStoreSessionStatus(status)
+            // this.setStoreSessionStatus(status)
+            if (this.fieldId) {
+                this.instanceSessionStatus = status
+            } else {
+                this.setStoreSessionStatus(status)
+            }
+        },
+        getCurrentSessionStatus(){
+            return this.fieldId ? this.instanceSessionStatus : this.sessionStatus
         },
         setSseParams(data) {
-            this.sseParams = data
+            // this.sseParams = data
+            this.sseParams = data ? Object.assign({}, data) : {}
+            if (data && data.sessionComRef) {
+                this.sessionComRef = data.sessionComRef
+            }
         },
         doragSend(){
             this.stopBtShow = true
@@ -311,9 +330,6 @@ export default {
                                             this.setStoreSessionStatus(-1)
                                         }
                                     })
-                            // this.$nextTick(()=>{
-                            //     this.$refs['session-com'].scrollBottom()
-                            // })
                         }else if(data.code === 7 || data.code === -1){
                             this.setStoreSessionStatus(-1)
                             let fillData = {
@@ -350,8 +366,13 @@ export default {
         },
         sendEventSource(prompt, msgStr, lastIndex) {
             console.log('####  sendEventSource',new Date().getTime())
+            let sessionCom = this.sessionComRef || this.$refs['session-com']
+            if (!sessionCom) {
+                console.warn('[sseMethod] session-com ref missing')
+                return
+            }
             const userInfo = this.$store.state.user.userInfo || {}
-            if (this.sessionStatus === 0) {
+            if (this.getCurrentSessionStatus() === 0) {
                 this.$message.warning('上个问题没有回答完！')
                 return
             }
@@ -371,8 +392,9 @@ export default {
                 pendingResponse:''
             }
             //正式环境传模型参数
-            this.$refs['session-com'].pushHistory(params)
-            
+            // this.$refs['session-com'].pushHistory(params)
+            sessionCom.pushHistory(params)
+
             let endStr = ''
             this._print = new Print({
                 onPrintEnd: () => {
@@ -388,7 +410,8 @@ export default {
                 data = {
                     ...this.sseParams,
                     prompt,
-                    trial
+                    trial,
+                    systemPrompt: this.sseParams.systemPrompt//提示词对比参数
                 };
                 headers = {
                     "Content-Type": 'application/json',
@@ -428,7 +451,7 @@ export default {
                                 ...commonData,
                                 "response": errorData.msg                                
                             }
-                            this.$refs['session-com'].replaceLastData(lastIndex, fillData)
+                            sessionCom.replaceLastData(lastIndex, fillData)
                         } catch (e) {
                             const text = await e.text();
                             this.$message.error(text || '未知错误');
@@ -488,14 +511,15 @@ export default {
                                                 }))
                                             : []
                                         }
-                                        this.$refs['session-com'].replaceLastData(lastIndex, fillData)
+                                        sessionCom.replaceLastData(lastIndex, fillData)
                                         if(worldObj.finish !== 0){
                                             if(worldObj.finish === 4){
                                                 let fillData = {
                                                     ...commonData,
                                                     "response":i18n.t('yuanjing.sensitiveTips')
                                                 }
-                                                this.$refs['session-com'].replaceLastData(lastIndex, fillData)
+                                                // this.$refs['session-com'].replaceLastData(lastIndex, fillData)
+                                                sessionCom.replaceLastData(lastIndex, fillData)
                                             }
                                             this.setStoreSessionStatus(-1)
                                         }
@@ -505,7 +529,8 @@ export default {
                                     })
 
                             this.$nextTick(()=>{
-                                this.$refs['session-com'].scrollBottom()
+                                // this.$refs['session-com'].scrollBottom()
+                                sessionCom.scrollBottom()
                             })
 
                         }else if(data.code === 7 || data.code === -1 || data.code === 1){
@@ -514,7 +539,8 @@ export default {
                                 ...commonData,
                                 "response": data.message                               
                             }
-                            this.$refs['session-com'].replaceLastData(lastIndex, fillData)
+                            // this.$refs['session-com'].replaceLastData(lastIndex, fillData)
+                            sessionCom.replaceLastData(lastIndex, fillData)
                         }
                     }
                 },
@@ -617,28 +643,37 @@ export default {
             // })
         },
         setPrompt(data) {
-            this.$refs['editable'].setPrompt(data)
+            const editable = this.$refs.editable || (this.getEditableRef && this.getEditableRef())
+            if(editable){
+                editable.setPrompt(data)
+            }
+            // this.$refs['editable'].setPrompt(data)
         },
         clearInput() {
-            this.$refs.editable.clearInput()
-            this.$refs.editable.clearFile()
+            const editable = this.$refs.editable || (this.getEditableRef && this.getEditableRef())
+            if(editable){
+                editable.clearInput()
+                editable.clearFile()
+            }
             this.inputVal = ''
             this.fileId = ''
         },
         clearPageHistory(){
             this.$refs['session-com'] && this.$refs['session-com'].clearData()
-            this.$refs.editable && this.clearInput()
+            // this.$refs.editable && this.clearInput()
+            this.clearInput()
         },
         clearHistory() {
             this.stopBtShow = false
             this.clearPageHistory()
-            // this.doDeleteHistory()
         },
         refresh() {
-            let history_list = this.$refs['session-com'].getList();
+            let sessionCom = this.sessionComRef || this.$refs['session-com'];
+            if (!sessionCom) return;
+            let history_list = sessionCom.getList();
             let _history = history_list[history_list.length - 1];
             let inputVal = _history.query;
-            let fileInfo = _history.fileInfo ? _history.fileInfo : [];
+            let fileInfo = _history.fileInfo ?_history.fileInfo : [];
             let fileList = _history.fileList ? _history.fileList : [];
             this.preSend(inputVal,fileList,fileInfo);
         }

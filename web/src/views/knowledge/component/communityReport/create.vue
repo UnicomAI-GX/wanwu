@@ -11,7 +11,7 @@
       label-width="120px"
       class="demo-ruleForm"
     >
-      <!-- <el-form-item
+      <el-form-item
         class="itemCenter"
       >
         <el-radio-group
@@ -22,7 +22,7 @@
           <el-radio-button :label="'single'">{{$t('knowledgeManage.create.single')}}</el-radio-button>
           <el-radio-button :label="'file'">{{$t('knowledgeManage.create.file')}}</el-radio-button>
         </el-radio-group>
-      </el-form-item> -->
+      </el-form-item>
       <el-form-item
         :label="$t('knowledgeManage.create.file')"
         v-if="createType === 'file'"
@@ -109,7 +109,7 @@ export default {
       },
       type:'add',
       dialogVisible: false,
-      templateUrl: "/user/api/v1/static/docs/segment.csv",
+      templateUrl: "/user/api/v1/static/docs/report.csv",
       title: ""
     };
   },
@@ -131,6 +131,7 @@ export default {
     },
     showDialog(knowledgeId, type = "", item = null) {
       this.type = type;
+      this.createType = "single";
       if (type === 'edit') {
         this.title = this.$t('knowledgeManage.communityReport.viewDetail');
         this.dialogVisible = true;
@@ -139,7 +140,6 @@ export default {
           this.ruleForm.content = item.content || "";
           this.ruleForm.title = item.title || "";
           this.ruleForm.contentId = item.contentId || "";
-          this.createType = "single";
         } else {
           this.clearForm();
         }
@@ -236,6 +236,7 @@ export default {
       this.ruleForm.title = "";
       this.ruleForm.fileUploadId = "";
       this.ruleForm.contentId = "";
+      this.$refs.fileUpload && this.$refs.fileUpload.clearFileList();
       this.checkType = [];
     },
   },

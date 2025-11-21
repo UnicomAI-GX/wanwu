@@ -79,7 +79,7 @@
               </template>
             </el-tooltip>
           </template>
-          <el-switch v-model="ruleForm.knowledgeGraph.switch"></el-switch>
+          <el-switch v-model="ruleForm.knowledgeGraph.switch" :disabled="isEdit"></el-switch>
         </el-form-item>
         <el-form-item
           :label="$t('knowledgeManage.create.modelSelect') + ':'"
@@ -92,7 +92,7 @@
             @visible-change="visibleChange"
             :loading-text="$t('knowledgeManage.create.modelLoading')"
             class="cover-input-icon model-select"
-            :disabled="isPublish"
+            :disabled="isEdit"
             :loading="modelLoading"
             filterable
             value-key="modelId"
@@ -133,6 +133,7 @@
             :file-list="fileList"
             :limit="1"
             drag
+            :disabled="isEdit"
             accept=".xlsx,.xls"
             class="upload-box"
           >
@@ -302,7 +303,6 @@ export default {
       },
       isEdit: false,
       knowledgeId: "",
-      isPublish: false,
     };
   },
   watch: {
@@ -594,7 +594,11 @@ export default {
           embeddingModelInfo: {
             modelId: row.embeddingModelInfo.modelId,
           },
-          knowledgeGraph: row.knowledgeGraph,
+          knowledgeGraph: {
+            llmModelId: row.llmModelId,
+            switch: row.graphSwitch === 1 ? true : false,
+            schemaUrl: "",
+          },
         };
       } else {
         this.ruleForm = {

@@ -261,10 +261,6 @@
                 })
             },
             doBatchUpload(){
-                //this.fileInfo = {
-                    //...this.fileInfo,
-                    imgUrl:this.imgUrl
-                //}
                 this.$emit('setFileId',this.fileInfo)
                 this.$emit('setFile',this.fileList)
                 this.clearFile()

@@ -25,7 +25,7 @@ export default {
       if (!wrap) return () => {}
 
       const prevent = (e) => { e.preventDefault(); e.stopPropagation(); wrap.classList.add('is-dropping'); }
-      const leave = () => { wrap.classList.remove('is-dropping'); }
+      const leave = () => { wrap.classList.remove('is-dropping');}
       
       // 判断文件是否为图片类型
       const isImageFile = (f) => {
@@ -35,8 +35,8 @@ export default {
         return imageExts.indexOf(ext) > -1 || (f.type && f.type.indexOf('image/') === 0)
       }
       
-      const onDrop = async (e) => {
-        prevent(e)
+      const onDrop = (e) => {
+        e.preventDefault();
         try {
           const dt = e && e.dataTransfer
           const fileList = (dt && dt.files) ? dt.files : []
@@ -156,18 +156,17 @@ export default {
         } finally {
           leave()
         }
+
       }
 
       wrap.addEventListener('dragenter', prevent)
-      wrap.addEventListener('dragover', prevent)
-      wrap.addEventListener('dragleave', leave)
+      wrap.addEventListener('leave',leave)
       wrap.addEventListener('drop', onDrop)
 
       const cleanup = () => {
-        wrap.removeEventListener('dragenter', prevent)
-        wrap.removeEventListener('dragover', prevent)
-        wrap.removeEventListener('dragleave', leave)
-        wrap.removeEventListener('drop', onDrop)
+        wrap.removeEventListener('dragenter')
+        wrap.removeEventListener('leave')
+        wrap.removeEventListener('drop')
       }
 
       this.$once('hook:beforeDestroy', () => {
@@ -417,3 +416,4 @@ export default {
 
   }
 }
+
