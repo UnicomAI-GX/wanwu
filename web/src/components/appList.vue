@@ -582,10 +582,6 @@ export default {
     toEdit(row) {
       if (this.appFrom === "explore") {
         this.commonToChat(row);
-      } else if (row.appType === "agentTemplate") {
-        this.$router.push({
-          path: `/agent/templateDetail?id=${row.assistantTemplateId}`,
-        });
       } else {
         this.commonMethods("edit", row);
       }
