@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -13,12 +12,10 @@ import (
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/request"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/response"
 	oauth2_util "github.com/UnicomAI/wanwu/internal/bff-service/pkg/oauth2-util"
-	gin_util "github.com/UnicomAI/wanwu/pkg/gin-util"
 	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	jwt_util "github.com/UnicomAI/wanwu/pkg/jwt-util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
 )
 
 func OAuthLogin(ctx *gin.Context, req *request.OAuthLoginRequest) (string, error) {
@@ -58,7 +55,7 @@ func OAuthLogin(ctx *gin.Context, req *request.OAuthLoginRequest) (string, error
 func OAuthAuthorize(ctx *gin.Context, req *request.OAuthRequest) (string, error) {
 	userID, err := jwtUserAuth(ctx, req.JwtToken)
 	if err != nil {
-		gin_util.ResponseDetail(ctx, http.StatusUnauthorized, codes.Code(err_code.Code_BFFJWT), nil, err.Error())
+		return "", grpc_util.ErrorStatus(err_code.Code_BFFJWT, err.Error())
 	}
 	oauthApp, err := iam.GetOauthApp(ctx, &iam_service.GetOauthAppReq{
 		ClientId: req.ClientID,
