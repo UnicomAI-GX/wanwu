@@ -1380,7 +1380,8 @@ def snippet_rescore():
         result = es_ops.rescore_bm25_score(index_name, query, search_by, search_list)
         search_list = result["search_list"]
         bm25_scores = result["scores"]
-        cosine_scores = emb_util.calculate_cosine(query, search_list, embedding_model_id)
+        contents = [item["snippet"] for item in search_list]
+        cosine_scores = emb_util.calculate_cosine(query, contents, embedding_model_id)
         logger.info(f"rescore bm25_scores: {bm25_scores}, cosine_scores: {cosine_scores}")
 
         def normalize_to_01(scores):
@@ -2041,7 +2042,8 @@ def qa_rescore():
             result = qa_ops.qa_rescore_bm25_score(qa_index_name, query, temp_search_list)
             temp_search_list = result["search_list"]
             bm25_scores = result["scores"]
-            cosine_scores = emb_util.calculate_cosine(query, temp_search_list, embedding_model_id)
+            contents = [item["question"] for item in temp_search_list]
+            cosine_scores = emb_util.calculate_cosine(query, contents, embedding_model_id)
             logger.info(f"rescore bm25_scores: {bm25_scores}, cosine_scores: {cosine_scores}")
             search_list.extend(temp_search_list)
 

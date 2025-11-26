@@ -1549,7 +1549,7 @@ def search_qa_base():
     try:
         req_info = json.loads(request.get_data())
 
-        return_meta = req_info.get("return_meta", False)
+        return_meta = req_info.get("returnMeta", False)
         qa_base_info = req_info.get("QABaseInfo", {})
         question = req_info['question']
         rate = float(req_info.get('threshold', 0))

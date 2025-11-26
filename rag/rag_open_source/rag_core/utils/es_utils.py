@@ -728,29 +728,24 @@ def qa_weighted_rerank(query, weights, top_k, search_list_infos):
 
     es_url = ES_BASE_URL + "/api/v1/rag/es/qa_rescore"
     headers = {'Content-Type': 'application/json'}
-    try:
-        if not search_list_infos:
-            return response_info
-        response = requests.post(es_url, headers=headers, json=es_data, timeout=TIME_OUT)
-        if response.status_code != 200:
-            logger.error(f"问答对权重重排序请求失败, search_list_infos: {search_list_infos}, response: {repr(response.text)}")
-            raise RuntimeError(str(response.text))
 
-        result_data = json.loads(response.text)
-        if result_data['code'] != 0:
-            logger.error(f"问答对权重重排序请求失败, search_list_infos: {search_list_infos}, response: {result_data}")
-            raise RuntimeError(result_data['message'])
+    if not search_list_infos:
+        return response_info
+    response = requests.post(es_url, headers=headers, json=es_data, timeout=TIME_OUT)
+    if response.status_code != 200:
+        logger.error(f"问答对权重重排序请求失败, search_list_infos: {search_list_infos}, response: {repr(response.text)}")
+        raise RuntimeError(str(response.text))
 
-        response_info["data"]["search_list"] = result_data['data']['search_list'][:top_k]
-        response_info["data"]["scores"] = result_data['data']['scores'][:top_k]
-        logger.info(f"问答对权重重排序请求成功, response_info: {response_info}")
-        return response_info
-    except Exception as e:
-        response_info['code'] = 1
-        response_info['message'] = str(e)
-        logger.error(
-            f"问答对权重重排序请求异常, exception: {repr(e)}, search_list_infos: {search_list_infos}")
-        return response_info
+    result_data = json.loads(response.text)
+    if result_data['code'] != 0:
+        logger.error(f"问答对权重重排序请求失败, search_list_infos: {search_list_infos}, response: {result_data}")
+        raise RuntimeError(result_data['message'])
+
+    sorted_search_list= result_data['data']['search_list'][:top_k]
+    sorted_scores = result_data['data']['scores'][:top_k]
+    logger.info(f"问答对权重重排序请求成功, sorted_search_list: {sorted_search_list}, sorted_scores: {sorted_scores}")
+    return sorted_scores, sorted_search_list
+
 
 
 if __name__ == '__main__':

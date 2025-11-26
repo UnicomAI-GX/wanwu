@@ -119,12 +119,9 @@ def get_embs(texts: list, embedding_model_id=""):
     raise RuntimeError(f"Failed to get embeddings after retries. Model config: {emb_info}")
 
 
-def calculate_cosine(query, search_list, embedding_model_id="") -> list[float]:
+def calculate_cosine(query, contents, embedding_model_id="") -> list[float]:
     query_vector_scores = []
     query_vector = get_embs([query], embedding_model_id=embedding_model_id)["result"][0]["dense_vec"]
-    contents = []
-    for item in search_list:
-        contents.append(item["snippet"])
     contents_vector = get_embs(contents, embedding_model_id=embedding_model_id)["result"]
     for item in contents_vector:
         vec1 = np.array(query_vector)

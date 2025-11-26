@@ -450,7 +450,16 @@ def qa_rescore_bm25_score(index_name, query, search_list = []):
         "size": len(search_list),  # 指定返回的文档数量
         "sort": [
             {"_score": {"order": "desc"}}  # 按分数降序排序
-        ]
+        ],
+        "_source": {
+            "excludes": [
+                "content_vector",
+                "q_768_content_vector",
+                "q_1024_content_vector",
+                "q_1536_content_vector",
+                "q_2048_content_vector"
+            ]
+        }  # 排除embedding数据
     }
 
     response = es.search(index=index_name, body=search_body)
