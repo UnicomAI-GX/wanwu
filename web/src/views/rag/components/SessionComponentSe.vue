@@ -160,6 +160,11 @@
                   :key="`${j}sdsl`"
                   class="search-list-item"
                 >
+                 <div v-if="m.content_type && m.content_type === 'qa'" class="qa_content">
+                    <span>{{m.question}}</span>
+                    <span>{{m.answer}}</span>
+                 </div>
+                 <template v-else>
                   <div
                     class="serach-list-item"
                     v-if="n.citations && n.citations.includes(j+1)"
@@ -189,6 +194,7 @@
                       <p v-html="m.snippet"></p>
                     </div>
                   </el-collapse-transition>
+                 </template>
                 </div>
               </div>
             </div>
@@ -512,7 +518,7 @@ export default {
       this.scrollBottom();
     },
     replaceLastData(index, data) {
-      if (!data.response) {
+      if (!data.response && data.finish === 1 ) {
         data.response = "无响应数据";
       }
       this.scrollBottom();
@@ -955,6 +961,17 @@ img.failed::after {
     /*出处*/
     .search-list {
       padding: 10px 20px 3px 0;
+      .qa_content{
+        display: flex;
+        gap: 10px;
+        margin-top:5px;
+        span{
+          padding: 10px 15px;
+          border-radius: 8px;
+          background: #f3f2f2;
+          color: $color;
+        }
+      }
       .search-list-item {
         margin-bottom: 5px;
         line-height: 22px;

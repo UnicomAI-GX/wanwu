@@ -8,7 +8,7 @@
       <template #title>
         <div class="metaHeader">
           <h3>{{ $t("agent.form.configMetaDataFilter") }}</h3>
-          <span>{{ $t("agent.form.metaDataFilterDesc") }}</span>
+          <span>{{ category === 0 ? $t("agent.form.metaDataFilterDesc") : $t("agent.form.metaDataQaFilterDesc")  }}</span>
         </div>
       </template>
       <metaSet
@@ -43,6 +43,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    category:{
+      type:Number,
+      default:0
+    }
   },
   data() {
     return {

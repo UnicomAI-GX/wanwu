@@ -960,6 +960,25 @@ export default {
         "支持上传csv格式文件，单个文件不超过10MB;最多上传1个文件，文件中问答对最多添加1000条。",
       uploadTips1: "批量导入的问答对内容都将被处理成纯文本形式",
       exportRecord: "导出记录",
+      exportData: "导出数据",
+      linkQaDatabase: "关联问答库",
+    },
+    qaExport: {
+      title: "导出记录",
+      tip: "问答库系统管理员和管理员能看所有记录，其余人只能看见自己的。",
+      exportTime: "导出时间",
+      exportUser: "导出人",
+      status: "状态",
+      action: "操作",
+      download: "下载",
+      delete: "删除",
+      empty: "暂无导出记录",
+    },
+    qaExportStatus: {
+      processing: "任务待处理",
+      exporting: "导出中",
+      finished: "导出成功",
+      failed: "导出失败",
     },
   },
   knowledgeSelect: {
@@ -1296,6 +1315,8 @@ export default {
       configMetaDataFilter: "配置元数据过滤",
       metaDataFilterDesc:
         "[ 通过设置的元数据，对知识库内信息进行更加细化的筛选与检索控制。]",
+      metaDataQaFilterDesc:
+        "[ 通过设置的元数据，对问答库内信息进行更加细化的筛选与检索控制。]",
       incompleteInfo: "存在未填信息,请补充",
       selectModel: "请选择模型！",
       inputPrologue: "请输入开场白！",
@@ -1437,6 +1458,8 @@ export default {
     selectKnowledge: "请选择关联知识库！",
     recallParameterSet:'召回参数配置',
     linkQaDatabase:'关联问答库',
+    selectQAdatabase:'选择问答库',
+    qaSearchPlaceholder:'输入问答库名称搜索',
     publishType: {
       private: "私密发布为应用：仅自己可见",
       organization: "公开发布为应用：组织内可见",

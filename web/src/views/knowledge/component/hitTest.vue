@@ -203,6 +203,12 @@ export default {
       activeNames: [],
     };
   },
+  mounted(){
+    this.$nextTick(() =>{
+       const config = this.$refs.searchConfig.formInline;
+       this.formInline = config;
+    })
+  },
   methods: {
     formatScore,
     goBack() {

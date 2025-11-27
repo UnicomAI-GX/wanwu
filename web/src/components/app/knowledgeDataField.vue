@@ -63,7 +63,7 @@
       </div>
     </div>
     <knowledgeSelect ref="knowledgeSelect" :category="category" @getKnowledgeData="getKnowledgeData" :setType="setType"/>
-    <metaDataFilterField ref="metaDataFilterField" :knowledgeId="currentKnowledgeId" :metaData="currentMetaData" @submitMetaData="submitMetaData"/>
+    <metaDataFilterField ref="metaDataFilterField" :knowledgeId="currentKnowledgeId" :metaData="currentMetaData" @submitMetaData="submitMetaData" :category="category" />
     <knowledgeRecallField 
       ref="knowledgeRecallField" 
       :showGraphSwitch="showGraphSwitch" 

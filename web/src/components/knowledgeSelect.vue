@@ -7,10 +7,10 @@
     >
       <template slot="title">
         <div class="diglog_title">
-          <h3>{{ $t("knowledgeSelect.title") }}</h3>
+          <h3>{{ category === 0 ? $t("knowledgeSelect.title") : $t("app.selectQAdatabase")}}</h3>
           <el-input
             v-model="toolName"
-            :placeholder="$t('knowledgeSelect.searchPlaceholder')"
+            :placeholder="category === 0 ? $t('knowledgeSelect.searchPlaceholder') : $t('app.qaSearchPlaceholder')"
             class="tool-input"
             suffix-icon="el-icon-search"
             @keyup.enter.native="searchTool"

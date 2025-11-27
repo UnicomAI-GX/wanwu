@@ -101,7 +101,7 @@
                 <el-table-column
                   type="selection"
                   reserve-selection
-                  v-if="hasManagePerm"
+                  v-show="hasManagePerm"
                   width="55"
                 >
                 </el-table-column>
@@ -150,7 +150,7 @@
                 <el-table-column
                   prop="metaDataList"
                   :label="$t('knowledgeManage.qaDatabase.metaData')"
-                  v-if="hasManagePerm"
+                  v-show="hasManagePerm"
                 >
                   <template slot-scope="scope">
                     <span>
@@ -170,7 +170,7 @@
                 <el-table-column
                   prop="switch"
                   :label="$t('user.table.status')"
-                  v-if="hasManagePerm"
+                  v-show="hasManagePerm"
                 >
                   <template slot-scope="scope">
                     <el-switch
@@ -206,7 +206,7 @@
                 <el-table-column
                   :label="$t('knowledgeManage.operate')"
                   width="200"
-                  v-if="hasManagePerm"
+                  v-show="hasManagePerm"
                 >
                   <template slot-scope="scope">
                     <el-button

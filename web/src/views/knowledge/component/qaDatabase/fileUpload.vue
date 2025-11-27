@@ -13,7 +13,7 @@
       label-width="140px"
       class="upload-form"
     >
-      <el-form-item :label="$t('knowledgeManage.importDoc')">
+      <el-form-item>
         <fileUpload
           ref="fileUpload"
           :templateUrl="templateUrl"
@@ -165,6 +165,9 @@ export default {
   /deep/ .el-dialog__footer {
     padding: 10px 20px 20px;
     border-top: 1px solid #f0f0f0;
+  }
+  /deep/ .el-form-item__content{
+    margin-left:0 !important;
   }
 }
 
