@@ -13,7 +13,7 @@
         </el-tooltip>
       </div>
       <div class="safety-config-right">
-        <el-switch v-model="isEnabled" @change="handleSwitchChange"></el-switch>
+        <el-switch v-model="isEnabled" @change="handleSwitchChange" :disabled="isDisabled"></el-switch>
       </div>
     </div>
   </div>
@@ -27,6 +27,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isDisabled:{
+      type:Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -43,7 +47,6 @@ export default {
   },
   methods: {
     handleSwitchChange(value) {
-      // 处理开关变化事件
       this.$emit("chiSwitchChange", value);
     },
   },

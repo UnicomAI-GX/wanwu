@@ -895,6 +895,7 @@ export default {
     },
     meta: {
       batchEdit: "批量编辑元数据值",
+      editMetaData: "编辑元数据值",
       edit: "编辑",
       documentNum: "个文档",
       createMetaData: "创建元数据值",
@@ -1434,6 +1435,8 @@ export default {
     modelTips: "暂不支持选择图文问答类模型",
     selectRerank: "请选rerank择模型！",
     selectKnowledge: "请选择关联知识库！",
+    recallParameterSet:'召回参数配置',
+    linkQaDatabase:'关联问答库',
     publishType: {
       private: "私密发布为应用：仅自己可见",
       organization: "公开发布为应用：组织内可见",

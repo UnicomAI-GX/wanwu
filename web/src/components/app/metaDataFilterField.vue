@@ -1,7 +1,7 @@
 <template>
 <el-dialog
       :visible.sync="metaSetVisible"
-      width="1050px"
+      width="80%"
       class="metaSetVisible"
       :before-close="handleMetaClose"
     >
@@ -65,7 +65,7 @@ export default {
         this.$message.warning(this.$t("agent.form.incompleteInfo"));
         return;
       }
-      this.$emit("submit", metaData);
+      this.$emit("submitMetaData", metaData);
       this.metaSetVisible = false;
     },
     showDialog() {

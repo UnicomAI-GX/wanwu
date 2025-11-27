@@ -199,7 +199,7 @@ export default {
       formInline: {
         knowledgeMatchParams: {
           keywordPriority: 0.8, //关键词权重
-          matchType: "", //vector（向量检索）、text（文本检索）、mix（混合检索：向量+文本）
+          matchType: "mix", //vector（向量检索）、text（文本检索）、mix（混合检索：向量+文本）
           priorityMatch: 1, //权重匹配，只有在混合检索模式下，选择权重设置后，这个才设置为1
           rerankModelId: "", //rerank模型id
           threshold: 0.4, //过滤分数阈值
@@ -207,6 +207,7 @@ export default {
           topK: 5, //topK 获取最高的几行
           maxHistory: 0, //最长上下文
           useGraph: false, //是否使用图谱
+          chiChat:false,//是否开启闲聊模式
         },
       },
       initialEditForm: null,

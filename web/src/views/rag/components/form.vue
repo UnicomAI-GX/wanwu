@@ -125,82 +125,33 @@
             </div>
           </div>
         </div>
+        <!-- 问答库配置 -->
         <div class="block safety-box">
-          <qaDatabaseField :knowledgeList="editForm.knowledgebases" :category="1" @getKnowledgeData="getKnowledgeData"/>
+          <knowledgeDataField 
+            :knowledgeConfig="editForm.qaKnowledgeBaseConfig" 
+            :category="1" 
+            @getSelectKnowledge="getSelectKnowledge" 
+            @knowledgeDelete="knowledgeDelete"
+            @knowledgeRecallSet="knowledgeRecallSet"
+            @updateMetaData="updateMetaData"
+            :setType="'rag'"
+            :labelText="$t('app.linkQaDatabase')"
+            :type="'qaKnowledgeBaseConfig'"/>
         </div>
-        <!-- 知识库配置 -->
-        <div class="block safety-box">
-          <!-- 知识库列表 -->
-          <div class="recommend-box">
-            <p class="block-title common-set">
-              <span class="common-set-label">
-                <img
-                  :src="require('@/assets/imgs/require.png')"
-                  class="required-label"
-                />
-                {{ $t("agent.form.linkKnowledge") }}
-              </span>
-              <span>
-                <span class="common-add" @click="showKnowledgeDiglog">
-                  <span class="el-icon-plus"></span>
-                  <span class="handleBtn">{{ $t("knowledgeSelect.add") }}</span>
-                </span>
-              </span>
-            </p>
-            <div class="rl knowledge-conent">
-              <div class="tool-right tool">
-                <div class="action-list">
-                  <div
-                    v-for="(n, i) in editForm.knowledgebases"
-                    class="action-item"
-                    :key="'knowledge' + i"
-                  >
-                    <div class="name" style="color: #333">
-                      <span>{{ n.name }}</span>
-                    </div>
-                    <div class="bt">
-                      <el-tooltip
-                        class="item"
-                        effect="dark"
-                        :content="$t('agent.form.metaDataFilter')"
-                        placement="top-start"
-                      >
-                        <span
-                          class="el-icon-setting del"
-                          @click="showMetaSet(n, i)"
-                          style="margin-right: 10px"
-                        ></span>
-                      </el-tooltip>
-                      <span
-                        class="el-icon-delete del"
-                        @click="delKnowledge(i)"
-                      ></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 检索方式配置 -->
-          <p class="block-title common-set">
-            <span class="common-set-label">
-              <img
-                :src="require('@/assets/imgs/require.png')"
-                class="required-label"
-              />
-              {{ $t("searchConfig.title") }}
-            </span>
-          </p>
-          <div class="rl">
-            <searchConfig
-              ref="searchConfig"
-              @sendConfigInfo="sendConfigInfo"
-              :setType="'rag'"
-              :config="editForm.knowledgeConfig"
-              :showGraphSwitch="showGraphSwitch"
-            />
-          </div>
-          </div>
+        <!-- 知识库库配置 -->
+         <div class="block safety-box">
+          <knowledgeDataField 
+            :knowledgeConfig="editForm.knowledgeBaseConfig" 
+            :category="0" 
+            @getSelectKnowledge="getSelectKnowledge" 
+            @knowledgeDelete="knowledgeDelete"
+            @knowledgeRecallSet="knowledgeRecallSet"
+            @updateMetaData="updateMetaData"
+            :setType="'rag'"
+            :required="true"
+            :labelText="$t('agent.form.linkKnowledge')"
+            :type="'knowledgeBaseConfig'"/>
+        </div>
         <div class="block prompt-box safety-box">
           <p class="block-title tool-title">
             <span class="block-title-text">
@@ -230,10 +181,10 @@
           </p>
         </div>
         <!-- 闲聊模式 -->
-        <ChiChat
-          ref="chiChat"
-          @chiswitchChange="chiSwitchChange"
-          :chiChatSwitch="editForm.knowledgeConfig.chiChat"
+        <chiChat
+          @chiSwitchChange="chiSwitchChange"
+          :isDisabled="!editForm.knowledgeBaseConfig.knowledgebases.length"
+          :chiChatSwitch="editForm.knowledgeBaseConfig.config.chiChat"
         />
       </div>
       <div class="drawer-test">
@@ -253,47 +204,9 @@
       ref="modelSetDialog"
       :modelConfig="editForm.modelConfig"
     />
-    <!-- 知识库设置 -->
-    <knowledgeSet
-      @setKnowledgeSet="setKnowledgeSet"
-      ref="knowledgeSetDialog"
-      :knowledgeConfig="editForm.knowledgeConfig"
-    />
     <!-- apikey -->
     <ApiKeyDialog ref="apiKeyDialog" :appId="editForm.appId" :appType="'rag'" />
     <setSafety ref="setSafety" @sendSafety="sendSafety" />
-    <!-- 知识库选择 -->
-    <knowledgeSelect
-      ref="knowledgeSelect"
-      @getKnowledgeData="getKnowledgeData"
-    />
-    <!-- 元数据设置 -->
-    <el-dialog
-      :visible.sync="metaSetVisible"
-      width="1050px"
-      class="metaSetVisible"
-      :before-close="handleMetaClose"
-    >
-      <template #title>
-        <div class="metaHeader">
-          <h3>{{ $t("agent.form.configMetaDataFilter") }}</h3>
-          <span>{{ $t("agent.form.metaDataFilterDesc") }}</span>
-        </div>
-      </template>
-      <metaSet
-        ref="metaSet"
-        :knowledgeId="currentKnowledgeId"
-        :currentMetaData="currentMetaData"
-      />
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="handleMetaClose">
-          {{ $t("common.button.cancel") }}
-        </el-button>
-        <el-button type="primary" @click="submitMeta">
-          {{ $t("common.button.confirm") }}
-        </el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
@@ -309,10 +222,10 @@ import { getRerankList, selectModelList } from "@/api/modelAccess";
 import { getRagInfo, updateRagConfig } from "@/api/rag";
 import Chat from "./chat";
 import searchConfig from "@/components/searchConfig.vue";
-import ChiChat from "@/components/app/chiChat.vue";
+import chiChat from "@/components/app/chiChat.vue";
 import LinkIcon from "@/components/linkIcon.vue";
 import knowledgeSelect from "@/components/knowledgeSelect.vue";
-import qaDatabaseField from "@/components/app/qaDatabaseField.vue";
+import knowledgeDataField from "@/components/app/knowledgeDataField.vue";
 export default {
   components: {
     LinkIcon,
@@ -325,15 +238,11 @@ export default {
     searchConfig,
     knowledgeSelect,
     metaSet,
-    ChiChat,
-    qaDatabaseField
+    chiChat,
+    knowledgeDataField
   },
   data() {
     return {
-      knowledgeIndex: -1,
-      currentKnowledgeId: "",
-      currentMetaData: {},
-      metaSetVisible: false,
       rerankOptions: [],
       showOperation: false,
       scope: "public",
@@ -353,18 +262,36 @@ export default {
           frequencyPenaltyEnable: true,
         },
         rerankParams: "",
-        knowledgebases: [],
-        knowledgeConfig: {
-          keywordPriority: 0.8, //关键词权重
-          matchType: "mix", //vector（向量检索）、text（文本检索）、mix（混合检索：向量+文本）
-          priorityMatch: 1, //权重匹配，只有在混合检索模式下，选择权重设置后，这个才设置为1
-          rerankModelId: "", //rerank模型id
-          semanticsPriority: 0.2, //语义权重
-          topK: 5, //topK 获取最高的几行
-          threshold: 0.4, //过滤分数阈值
-          maxHistory: 0, //
-          useGraph: false,
-          chiChat: false,
+        knowledgeBaseConfig: {
+          config:{
+            keywordPriority: 0.8, //关键词权重
+            matchType: "mix", //vector（向量检索）、text（文本检索）、mix（混合检索：向量+文本）
+            priorityMatch: 1, //权重匹配，只有在混合检索模式下，选择权重设置后，这个才设置为1
+            rerankModelId: "", //rerank模型id
+            semanticsPriority: 0.2, //语义权重
+            topK: 5, //topK 获取最高的几行
+            threshold: 0.4, //过滤分数阈值
+            maxHistory: 0, //
+            useGraph: false,
+            chiChat: false,
+          },
+          knowledgebases: []
+        },
+        knowledgeConfig:{},
+        qaKnowledgeBaseConfig:{
+          knowledgebases:[],
+          config:{
+            keywordPriority: 0.8, //关键词权重
+            matchType: "mix", //vector（向量检索）、text（文本检索）、mix（混合检索：向量+文本）
+            priorityMatch: 1, //权重匹配，只有在混合检索模式下，选择权重设置后，这个才设置为1
+            rerankModelId: "", //rerank模型id
+            semanticsPriority: 0.2, //语义权重
+            topK: 5, //topK 获取最高的几行
+            threshold: 0.4, //过滤分数阈值
+            maxHistory: 0, //
+            useGraph: false,
+            chiChat: false,
+          }
         },
         safetyConfig: {
           enable: false,
@@ -409,9 +336,9 @@ export default {
           const props = [
             "modelParams",
             "modelConfig",
-            "knowledgebases",
-            "knowledgeConfig",
+            "knowledgeBaseConfig",
             "safetyConfig",
+            "qaKnowledgeBaseConfig"
           ];
           const changed = props.some((prop) => {
             return (
@@ -446,6 +373,7 @@ export default {
   },
   mounted() {
     this.initialEditForm = JSON.parse(JSON.stringify(this.editForm));
+    this.$set(this.editForm, "knowledgeConfig", this.editForm.knowledgeBaseConfig.config);
   },
   created() {
     this.getModelData(); //获取模型列表
@@ -463,54 +391,27 @@ export default {
     }
   },
   methods: {
+    //获取知识库或问答库选中数据
+    getSelectKnowledge(data,type){
+      this.editForm[type]['knowledgebases'] = data;
+    },
+    //删除知识库或问答库
+    knowledgeDelete(index,type){
+      this.editForm[type]['knowledgebases'].splice(index,1);
+    },
+    //设置知识库或问答库召回参数
+    knowledgeRecallSet(data,type){
+      this.editForm[type]['config'] = data;
+    },
     chiSwitchChange(value) {
-      this.editForm.knowledgeConfig.chiChat = value;
+      this.$set(this.editForm.knowledgeBaseConfig.config, 'chiChat', value);
     },
-    submitMeta() {
-      const metaData = this.$refs.metaSet.getMetaData();
-      if (
-        this.$refs.metaSet.validateRequiredFields(
-          metaData["metaDataFilterParams"]["metaFilterParams"]
-        )
-      ) {
-        this.$message.warning(
-          this.$t("knowledgeManage.meta.metaInfoIncomplete")
-        );
-        return;
-      }
-      this.$set(this.editForm.knowledgebases, this.knowledgeIndex, {
-        ...this.editForm.knowledgebases[this.knowledgeIndex],
-        ...metaData,
+    //更新知识库元数据
+    updateMetaData(data,index,type){
+      this.$set(this.editForm[type]['knowledgebases'], index, {
+        ...this.editForm[type]['knowledgebases'][index],
+        ...data,
       });
-      this.metaSetVisible = false;
-    },
-    delKnowledge(index) {
-      this.editForm.knowledgebases.splice(index, 1);
-    },
-    handleMetaClose() {
-      this.metaSetVisible = false;
-    },
-    getKnowledgeData(data) {
-      const originalIds = new Set(
-        this.editForm.knowledgebases.map((item) => item.id)
-      );
-      const newItems = data.filter((item) => !originalIds.has(item.id));
-      this.editForm.knowledgebases.push(...newItems);
-    },
-    showMetaSet(e, index) {
-      this.currentKnowledgeId = e.id;
-      this.knowledgeIndex = index;
-      this.currentMetaData = {};
-      this.$nextTick(() => {
-        this.currentMetaData = e.metaDataFilterParams;
-      });
-      this.metaSetVisible = true;
-    },
-    showKnowledgeDiglog() {
-      this.$refs.knowledgeSelect.showDialog(this.editForm.knowledgebases);
-    },
-    sendConfigInfo(data) {
-      this.editForm.knowledgeConfig = { ...data.knowledgeMatchParams };
     },
     sendSafety(data) {
       const tablesData = data.map(({ tableId, tableName }) => ({
@@ -535,30 +436,28 @@ export default {
             this.editForm.name = res.data.name;
             this.editForm.desc = res.data.desc;
             this.editForm.modelParams = res.data.modelConfig.modelId;
+
+            if(res.data.qaKnowledgeBaseConfig && res.data.qaKnowledgeBaseConfig !== null){
+              this.editForm.qaKnowledgeBaseConfig.knowledgebases = res.data.qaKnowledgeBaseConfig.knowledgebases;
+              this.editForm.qaKnowledgeBaseConfig.config = 
+              res.data.qaKnowledgeBaseConfig.config !== null ? res.data.qaKnowledgeBaseConfig.config : this.editForm.qaKnowledgeBaseConfig.config;
+            }
+
+            if(res.data.knowledgeBaseConfig && res.data.knowledgeBaseConfig !== null){
+              this.editForm.knowledgeBaseConfig.knowledgebases = res.data.knowledgeBaseConfig.knowledgebases;
+              this.editForm.knowledgeBaseConfig.config = 
+              res.data.knowledgeBaseConfig.config !== null ? res.data.knowledgeBaseConfig.config : this.editForm.knowledgeBaseConfig.config;
+            }
+
             if (res.data.safetyConfig && res.data.safetyConfig !== null) {
               this.editForm.safetyConfig = res.data.safetyConfig;
             }
+
             if (res.data.modelConfig.config !== null) {
               this.editForm.modelConfig = res.data.modelConfig.config;
             }
+
             this.editForm.rerankParams = res.data.rerankConfig.modelId;
-            const knowledgeData = res.data.knowledgeBaseConfig.knowledgebases;
-            if (knowledgeData && knowledgeData.length > 0) {
-              this.editForm.knowledgebases = knowledgeData;
-            }
-            if (res.data.knowledgeBaseConfig.config !== null) {
-              this.editForm.knowledgeConfig =
-                res.data.knowledgeBaseConfig.config;
-              const { matchType, priorityMatch } =
-                res.data.knowledgeBaseConfig.config;
-              if (matchType === "") {
-                this.editForm.knowledgeConfig = {
-                  ...this.editForm.knowledgeConfig,
-                  matchType: "mix",
-                  priorityMatch: 1,
-                };
-              }
-            }
 
             this.editForm.knowledgeConfig.rerankModelId =
               res.data.rerankConfig.modelId;
@@ -630,9 +529,6 @@ export default {
     showKnowledgeSet() {
       this.$refs.knowledgeSetDialog.showDialog();
     },
-    setKnowledgeSet(data) {
-      this.editForm.knowledgeConfig = data;
-    },
     editAgent() {
       this.$refs.createTxtQues.openDialog();
     },
@@ -678,10 +574,8 @@ export default {
         );
         let fromParams = {
           ragId: this.editForm.appId,
-          knowledgeBaseConfig: {
-            knowledgebases: this.editForm.knowledgebases,
-            config: this.editForm.knowledgeConfig,
-          },
+          knowledgeBaseConfig:this.editForm.knowledgeBaseConfig,
+          qaKnowledgeBaseConfig:this.editForm.qaKnowledgeBaseConfig,
           modelConfig: {
             config: this.editForm.modelConfig,
             displayName: modeInfo.displayName,

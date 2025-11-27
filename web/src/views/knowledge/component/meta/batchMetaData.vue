@@ -6,10 +6,7 @@
     class="batch-meta-dialog"
   >
     <div slot="title" class="custom-title">
-      <h1>{{ $t("metaData.batchEdit") }}</h1>
-      <span v-if="type !== 'single'">
-        [ {{ $t("metaData.selected") }} {{ selectedDocIds.length }} ]
-      </span>
+      <h1>{{ type !== 'single' ? $t("metaData.batchEdit") : $t("knowledgeManage.meta.editMetaData") }}</h1>
     </div>
     <div class="dialog-content">
       <div class="create-section">

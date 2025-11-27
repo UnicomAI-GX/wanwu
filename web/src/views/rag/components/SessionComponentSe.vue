@@ -114,17 +114,26 @@
               class="session-wrap"
               style="width:calc(100% - 30px);"
             >
-              <div
-                v-if="showDSBtn(n.response)"
-                class="deepseek"
-                @click="toggle($event,i)"
-              >
+              <div class="deepseek" v-if="n.msg_type && ['qa_start','qa_finish','knowledge_start'].includes(n.msg_type)">
                 <img
                   :src="require('@/assets/imgs/think-icon.png')"
                   class="think_icon"
-                />{{n.thinkText}}
-                <i v-bind:class="{'el-icon-arrow-down': !n.isOpen,'el-icon-arrow-up': n.isOpen}"></i>
+                />
+                {{getTitle(n.msg_type)}}
               </div>
+              <template v-else>
+                <div
+                  v-if="showDSBtn(n.response)"
+                  class="deepseek"
+                  @click="toggle($event,i)"
+                >
+                  <img
+                    :src="require('@/assets/imgs/think-icon.png')"
+                    class="think_icon"
+                  />{{n.thinkText}}
+                  <i v-bind:class="{'el-icon-arrow-down': !n.isOpen,'el-icon-arrow-up': n.isOpen}"></i>
+                </div>
+              </template>
               <!--内容-->
               <div
                 class="answer-content"
@@ -401,6 +410,15 @@ export default {
           this.scrollBottom();
         }
       }, 500); // 500ms内没有新滚动视为停止
+    },
+    getTitle(type){
+      if(type === 'qa_start'){
+        return '问题库搜索中...'
+      }else if(type === 'knowledge_start'){
+        return '知识库搜索中...'
+      }else{
+        return '问答库'
+      }
     },
     replaceHTML(data, n) {
       let _data = data;

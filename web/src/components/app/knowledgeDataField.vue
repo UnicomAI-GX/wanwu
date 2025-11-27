@@ -8,7 +8,7 @@
           v-if="required"
         />
         <span class="header-title">
-          {{ $t("knowledgeManage.qaDatabase.linkQaDatabase") }}
+          {{ labelText }}
         </span>
       </div>
       <div class="header-right">
@@ -24,7 +24,7 @@
         >
           <span
             class="el-icon-s-operation operation"
-            @click="showMetaSet(n, i)"
+            @click="showknowledgeRecallSet"
           >
             <span class="handleBtn">{{ $t("agent.form.config") }}</span>
           </span>
@@ -32,7 +32,7 @@
       </div>
     </div>
     <div class="qa-database-content">
-      <div class="action-list" v-if="knowledgeList && knowledgeList.length">
+      <div class="action-list" v-if="showKnowledgeList">
         <div
           v-for="(item, index) in knowledgeList"
           :key="index"
@@ -56,28 +56,34 @@
             </el-tooltip>
             <span
               class="el-icon-delete del"
-              @click="handleDelete(item, index)"
+              @click="handleDelete(index)"
             ></span>
           </div>
         </div>
       </div>
     </div>
-    <knowledgeSelect ref="knowledgeSelect" :category="category" @getKnowledgeData="getKnowledgeData"/>
-    <metaDataFilterField ref="metaDataFilterField" :knowledgeId="currentKnowledgeId" :metaData="currentMetaData"/>
-    <searchConfigField ref="searchConfigField" :config="searchConfig"/>
+    <knowledgeSelect ref="knowledgeSelect" :category="category" @getKnowledgeData="getKnowledgeData" :setType="setType"/>
+    <metaDataFilterField ref="metaDataFilterField" :knowledgeId="currentKnowledgeId" :metaData="currentMetaData" @submitMetaData="submitMetaData"/>
+    <knowledgeRecallField 
+      ref="knowledgeRecallField" 
+      :showGraphSwitch="showGraphSwitch" 
+      @setKnowledgeSet="knowledgeRecallSet" 
+      :config="knowledgeRecallConfig"
+    />
   </div>
 </template>
 <script>
 import knowledgeSelect from "@/components/knowledgeSelect.vue";
 import metaDataFilterField from "./metaDataFilterField.vue";
-import searchConfigField from "@/components/searchConfig.vue";
+import knowledgeRecallField from "./knowledgeRecallField.vue";
 export default {
   name: "QaDatabase",
-  components:{knowledgeSelect,metaDataFilterField,searchConfigField},
+  components:{knowledgeSelect,metaDataFilterField,knowledgeRecallField},
   props: {
-    knowledgeList: {
-      type: Array,
-      default: () => [],
+    knowledgeConfig: {
+      type: Object,
+      default: () => null,
+      require:true
     },
     category:{
       type:Number,
@@ -90,44 +96,85 @@ export default {
     searchConfig:{
       type:Object,
       default:() => {}
+    },
+    type:{
+      type:String,
+      default:'',
+      require:true
+    },
+    labelText:{
+      type:String,
+      default:'',
+      require:true
+    },
+    setType:{
+      type:String,
+      default:'',
     }
   },
   data(){
     return {
-      knowledge_List:[],
+      knowledgeList:[],
+      knowledgeRecallConfig:{},
       currentKnowledgeId:'',
-      knowledgeIndex:0,
-      currentMetaData:{}
+      knowledgeIndex:-1,
+      currentMetaData:{},
+      showGraphSwitch:false
     }
   },
   watch:{
-    knowledgeList: {
-      handler(val) {
-        this.knowledge_List = val || []
+    type:{
+      handler(val){
+        if(val === 'qaKnowledgeBaseConfig'){
+          this.showGraphSwitch = false;
+        }else{
+          this.showGraphSwitch = true;
+        }
+      },
+      immediate: true
+    },
+    knowledgeConfig:{
+      handler(val){
+        this.knowledgeList = val.knowledgebases || [];
+        this.knowledgeRecallConfig = val.config || {};
       },
       immediate: true,
       deep: true
     }
   },
+  computed:{
+    showKnowledgeList(){
+      return this.knowledgeConfig && this.knowledgeConfig.knowledgebases && this.knowledgeConfig.knowledgebases.length;
+    }
+  },
   methods: {
+    knowledgeRecallSet(data){
+      this.$emit("knowledgeRecallSet",data,this.type);
+    },
     handleAdd() {
-      this.$refs.knowledgeSelect.showDialog(this.knowledge_List)
+      this.$refs.knowledgeSelect.showDialog(this.knowledgeList)
     },
     getKnowledgeData(data){
-      this.$emit("getKnowledgeData",data,this.category);
+      this.$emit("getSelectKnowledge",data,this.type);
     },
     handleSetting(item, index) {
-      this.currentKnowledgeId = e.id;
+      this.currentKnowledgeId = item.id;
       this.knowledgeIndex = index;
       this.currentMetaData = {};
       this.$nextTick(() => {
-        this.currentMetaData = e.metaDataFilterParams;
+        this.currentMetaData = item.metaDataFilterParams;
       });
       this.$refs.metaDataFilterField.showDialog();
     },
-    handleDelete(item, index) {
-      this.$emit("delete", item, index);
+    handleDelete(index) {
+      this.$emit("knowledgeDelete",index,this.type);
     },
+    submitMetaData(data){
+      this.$emit("updateMetaData",data,this.knowledgeIndex,this.type);
+    },
+    showknowledgeRecallSet(){
+      this.$refs.knowledgeRecallField.showDialog();
+    }
   },
 };
 </script>
