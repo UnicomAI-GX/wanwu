@@ -2,7 +2,11 @@
   <div class="qa-database-container">
     <div class="qa-database-header">
       <div class="header-left">
-        <span class="header-icon el-icon-star-off"></span>
+        <img
+          :src="require('@/assets/imgs/require.png')"
+          class="required-label"
+          v-if="required"
+        />
         <span class="header-title">
           {{ $t("knowledgeManage.qaDatabase.linkQaDatabase") }}
         </span>
@@ -12,6 +16,19 @@
           <span class="el-icon-plus"></span>
           <span class="handleBtn">{{ $t("knowledgeSelect.add") }}</span>
         </span>
+        <el-tooltip
+          class="item"
+          effect="dark"
+          :content="$t('agent.form.metaDataFilter')"
+          placement="top-start"
+        >
+          <span
+            class="el-icon-s-operation operation"
+            @click="showMetaSet(n, i)"
+          >
+            <span class="handleBtn">{{ $t("agent.form.config") }}</span>
+          </span>
+        </el-tooltip>
       </div>
     </div>
     <div class="qa-database-content">
@@ -46,13 +63,17 @@
       </div>
     </div>
     <knowledgeSelect ref="knowledgeSelect" :category="category" @getKnowledgeData="getKnowledgeData"/>
+    <metaDataFilterField ref="metaDataFilterField" :knowledgeId="currentKnowledgeId" :metaData="currentMetaData"/>
+    <searchConfigField ref="searchConfigField" :config="searchConfig"/>
   </div>
 </template>
 <script>
 import knowledgeSelect from "@/components/knowledgeSelect.vue";
+import metaDataFilterField from "./metaDataFilterField.vue";
+import searchConfigField from "@/components/searchConfig.vue";
 export default {
   name: "QaDatabase",
-  components:{knowledgeSelect},
+  components:{knowledgeSelect,metaDataFilterField,searchConfigField},
   props: {
     knowledgeList: {
       type: Array,
@@ -61,11 +82,22 @@ export default {
     category:{
       type:Number,
       default:0
+    },
+    required:{
+      type:Boolean,
+      default:false
+    },
+    searchConfig:{
+      type:Object,
+      default:() => {}
     }
   },
   data(){
     return {
-      knowledge_List:[]
+      knowledge_List:[],
+      currentKnowledgeId:'',
+      knowledgeIndex:0,
+      currentMetaData:{}
     }
   },
   watch:{
@@ -81,8 +113,17 @@ export default {
     handleAdd() {
       this.$refs.knowledgeSelect.showDialog(this.knowledge_List)
     },
+    getKnowledgeData(data){
+      this.$emit("getKnowledgeData",data,this.category);
+    },
     handleSetting(item, index) {
-      this.$emit("setting", item, index);
+      this.currentKnowledgeId = e.id;
+      this.knowledgeIndex = index;
+      this.currentMetaData = {};
+      this.$nextTick(() => {
+        this.currentMetaData = e.metaDataFilterParams;
+      });
+      this.$refs.metaDataFilterField.showDialog();
     },
     handleDelete(item, index) {
       this.$emit("delete", item, index);
@@ -94,18 +135,20 @@ export default {
 <style lang="scss" scoped>
 .qa-database-container {
   width: 100%;
-
   .qa-database-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 5px;
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 8px;
-
+      .required-label {
+        width: 18px;
+        height: 18px;
+        margin-right: 4px;
+      }
       .header-icon {
         font-size: 16px;
         color: #999;
@@ -119,14 +162,24 @@ export default {
     }
 
     .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      .operation{
+        cursor: pointer;
+        font-size: 15px;
+        .handleBtn{
+          font-weight: bold;
+        }
+      }
       .common-add {
         display: flex;
         align-items: center;
         gap: 4px;
         cursor: pointer;
-        color: #333;
         font-size: 14px;
-
+        font-weight: bold;
         .el-icon-plus {
           font-size: 14px;
         }
@@ -156,8 +209,7 @@ export default {
         background: #fafafa;
         border: 1px solid #e8e8e8;
         border-radius: 8px;
-        padding: 12px 16px;
-        min-height: 48px;
+        padding: 10px 20px;
         box-sizing: border-box;
 
         .name {

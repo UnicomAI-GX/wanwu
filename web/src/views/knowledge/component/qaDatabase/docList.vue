@@ -115,7 +115,6 @@
                       placement="bottom-start"
                       :content="scope.row.question"
                       trigger="hover"
-                      width="300"
                     >
                       <span slot="reference">
                         {{
@@ -131,6 +130,22 @@
                   prop="answer"
                   :label="$t('knowledgeManage.qaDatabase.answer')"
                 >
+                <template slot-scope="scope">
+                    <el-popover
+                      placement="bottom-start"
+                      :content="scope.row.answer"
+                      trigger="hover"
+                      width="300"
+                    >
+                      <span slot="reference">
+                        {{
+                          scope.row.answer.length > 20
+                            ? scope.row.answer.slice(0, 20) + "..."
+                            : scope.row.answer
+                        }}
+                      </span>
+                    </el-popover>
+                  </template>
                 </el-table-column>
                 <el-table-column
                   prop="metaDataList"
@@ -154,7 +169,6 @@
                 <el-table-column
                   prop="switch"
                   :label="$t('user.table.status')"
-                  width="150"
                 >
                   <template slot-scope="scope">
                     <el-switch
@@ -168,7 +182,6 @@
                 <el-table-column
                   prop="status"
                   :label="$t('knowledgeManage.importStatus')"
-                  width="200"
                 >
                   <template slot-scope="scope">
                     <span>
@@ -185,12 +198,12 @@
                 <el-table-column
                   prop="uploadTime"
                   :label="$t('knowledgeManage.importTime')"
-                  width="200"
+                  width="150"
                 >
                 </el-table-column>
                 <el-table-column
                   :label="$t('knowledgeManage.operate')"
-                  width="260"
+                  width="200"
                 >
                   <template slot-scope="scope">
                     <el-button

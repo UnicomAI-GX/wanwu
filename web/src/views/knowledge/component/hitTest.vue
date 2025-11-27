@@ -210,11 +210,11 @@ export default {
     },
     getTitle(contentType) {
       const map = {
-        qa: "knowledgeManage.qaDatabase.name",
-        graph: "knowledgeManage.graphTag",
-        community_report: "knowledgeManage.communityReportTag",
+        qa: this.$t("knowledgeManage.qaDatabase.name"),
+        graph: this.$t("knowledgeManage.hitTest.graph"),
+        community_report: this.$t("knowledgeManage.hitTest.communityReport"),
       };
-      return "#" + this.$t(map[contentType]);
+      return "#" + map[contentType];
     },
     sendConfigInfo(data) {
       this.formInline = data;

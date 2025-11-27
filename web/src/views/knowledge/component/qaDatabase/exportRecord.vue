@@ -10,9 +10,6 @@
     <template #title>
       <div class="custom-title">
         <h1>{{ $t("knowledgeManage.qaExport.title") }}</h1>
-        <span class="title-tip">
-          [ {{ $t("knowledgeManage.qaExport.tip") }} ]
-        </span>
       </div>
     </template>
     <el-table
@@ -166,12 +163,12 @@ export default {
       return "pending";
     },
     handleDownload(row) {
-      const url = "/user/api" + row.filePath;
-      if (!url) {
-        this.$message.warning(this.$t("common.noData"));
-        return;
-      }
-      window.open(url, "_blank", "noopener,noreferrer");
+      const url = row.filePath;
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'download.csv';
+      link.click();
+      window.URL.revokeObjectURL(link.href);
     },
     handleDelete(row) {
       const data = {

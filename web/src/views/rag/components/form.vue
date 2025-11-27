@@ -124,7 +124,14 @@
               </el-select>
             </div>
           </div>
-          <div class="block recommend-box">
+        </div>
+        <div class="block safety-box">
+          <qaDatabaseField :knowledgeList="editForm.knowledgebases" :category="1" @getKnowledgeData="getKnowledgeData"/>
+        </div>
+        <!-- 知识库配置 -->
+        <div class="block safety-box">
+          <!-- 知识库列表 -->
+          <div class="recommend-box">
             <p class="block-title common-set">
               <span class="common-set-label">
                 <img
@@ -174,8 +181,7 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="block safety-box">
+          <!-- 检索方式配置 -->
           <p class="block-title common-set">
             <span class="common-set-label">
               <img
@@ -194,7 +200,7 @@
               :showGraphSwitch="showGraphSwitch"
             />
           </div>
-        </div>
+          </div>
         <div class="block prompt-box safety-box">
           <p class="block-title tool-title">
             <span class="block-title-text">
@@ -271,7 +277,7 @@
       <template #title>
         <div class="metaHeader">
           <h3>{{ $t("agent.form.configMetaDataFilter") }}</h3>
-          <span>[ {{ $t("agent.form.metaDataFilterDesc") }}]</span>
+          <span>{{ $t("agent.form.metaDataFilterDesc") }}</span>
         </div>
       </template>
       <metaSet
@@ -306,6 +312,7 @@ import searchConfig from "@/components/searchConfig.vue";
 import ChiChat from "@/components/app/chiChat.vue";
 import LinkIcon from "@/components/linkIcon.vue";
 import knowledgeSelect from "@/components/knowledgeSelect.vue";
+import qaDatabaseField from "@/components/app/qaDatabaseField.vue";
 export default {
   components: {
     LinkIcon,
@@ -319,6 +326,7 @@ export default {
     knowledgeSelect,
     metaSet,
     ChiChat,
+    qaDatabaseField
   },
   data() {
     return {
@@ -925,7 +933,7 @@ export default {
       box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
       border-radius: 8px;
       padding: 20px 15px;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
       .block {
         margin-bottom: 10px;
       }
@@ -940,7 +948,6 @@ export default {
       box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
       border-radius: 8px;
       padding: 10px 15px;
-      margin-top: 14px;
       .block-title {
         line-height: 30px;
         font-size: 15px;
@@ -970,7 +977,7 @@ export default {
     }
     /*通用*/
     .block {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       .block-title {
         line-height: 30px;
         font-size: 15px;

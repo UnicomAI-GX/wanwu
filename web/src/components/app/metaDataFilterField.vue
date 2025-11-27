@@ -1,0 +1,76 @@
+<template>
+<el-dialog
+      :visible.sync="metaSetVisible"
+      width="1050px"
+      class="metaSetVisible"
+      :before-close="handleMetaClose"
+    >
+      <template #title>
+        <div class="metaHeader">
+          <h3>{{ $t("agent.form.configMetaDataFilter") }}</h3>
+          <span>{{ $t("agent.form.metaDataFilterDesc") }}</span>
+        </div>
+      </template>
+      <metaSet
+        ref="metaSet"
+        :knowledgeId="knowledgeId"
+        :currentMetaData="metaData"
+      />
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="handleMetaClose">
+          {{ $t("common.button.cancel") }}
+        </el-button>
+        <el-button type="primary" @click="submitMeta">
+          {{ $t("common.button.confirm") }}
+        </el-button>
+      </span>
+    </el-dialog>
+</template>
+
+<script>
+import metaSet from "@/components/metaSet";
+export default {
+  name: "MetaDataFilterField",
+  components: {
+    metaSet,
+  },
+  props: {
+    knowledgeId: {
+      type: String,
+      default: "",
+    },
+    metaData: {
+      type: Object,
+      default: () => {},
+    },
+  },
+  data() {
+    return {
+      metaSetVisible: false,
+      currentKnowledgeId: "",
+      currentMetaData: {},
+    };
+  },
+  methods: {
+    handleMetaClose() {
+      this.metaSetVisible = false;
+    },
+    submitMeta() {
+      const metaData = this.$refs.metaSet.getMetaData();
+      if (
+        this.$refs.metaSet.validateRequiredFields(
+          metaData["metaDataFilterParams"]["metaFilterParams"]
+        )
+      ) {
+        this.$message.warning(this.$t("agent.form.incompleteInfo"));
+        return;
+      }
+      this.$emit("submit", metaData);
+      this.metaSetVisible = false;
+    },
+    showDialog() {
+      this.metaSetVisible = true;
+    },
+  },
+}
+</script>
