@@ -33,7 +33,7 @@
         <div class="searchType-content" v-if="item.showContent">
           <div v-if="item.isWeight" class="weightType-box">
             <div
-              v-for="mixItem in item.mixType"
+              v-for="mixItem in filteredMixType(item)"
               :class="[
                 'weightType',
                 { active: mixItem.value === item.mixTypeValue },
@@ -189,7 +189,7 @@
 <script>
 import { getRerankList } from "@/api/modelAccess";
 export default {
-  props: ["setType", "config", "showGraphSwitch"],
+  props: ["setType", "config", "showGraphSwitch","category"],
   data() {
     return {
       debounceTimer: null,
@@ -200,7 +200,7 @@ export default {
         knowledgeMatchParams: {
           keywordPriority: 0.8, //关键词权重
           matchType: "", //vector（向量检索）、text（文本检索）、mix（混合检索：向量+文本）
-          priorityMatch: 1, //权重匹配，只有在混合检索模式下，选择权重设置后，这个才设置为1
+          priorityMatch:this.category && this.category === 1 ? 0 : 1, //权重匹配，只有在混合检索模式下，选择权重设置后，这个才设置为1
           rerankModelId: "", //rerank模型id
           threshold: 0.4, //过滤分数阈值
           semanticsPriority: 0.2, //语义权重
@@ -235,7 +235,7 @@ export default {
           icon: "el-icon-s-grid",
           isWeight: true,
           Weight: "",
-          mixTypeValue: "weight",
+          mixTypeValue: this.category && this.category === 1 ? "rerank" : "weight",
           showContent: false,
           mixTypeRange: 0.2,
           mixType: [
@@ -323,6 +323,12 @@ export default {
     this.getRerankData();
   },
   methods: {
+    filteredMixType(item){
+      if (this.category && this.category === 1) {
+        return item.mixType.filter((_, idx) => idx !== 0);
+      }
+      return item.mixType;
+    },
     rangeChage(val) {
       this.formInline.knowledgeMatchParams.keywordPriority = Number(
         (1 - (val || 0)).toFixed(1)

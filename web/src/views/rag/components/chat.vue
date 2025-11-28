@@ -269,11 +269,15 @@
             verifiyFormParams(){
                 if (this.chatType === 'chat') return true;
                 const { matchType, priorityMatch, rerankModelId } = this.editForm.knowledgeBaseConfig.config;
+                const qArerankModelId  = this.editForm.qaKnowledgeBaseConfig.config.rerankModelId;
                 const isMixPriorityMatch = matchType === 'mix' && priorityMatch;
                 const conditions = [
                     { check: !this.editForm.modelParams, message: this.$t('knowledgeManage.create.selectModel') },
                     { check: !isMixPriorityMatch && !rerankModelId, message:  this.$t('knowledgeManage.hitTest.selectRerankModel')},
-                    { check: this.editForm.qaKnowledgeBaseConfig.knowledgebases.length === 0 &&this.editForm.knowledgeBaseConfig.knowledgebases.length === 0, message: this.$t('app.selectKnowledge') }
+                    { check: this.editForm.qaKnowledgeBaseConfig.knowledgebases.length === 0 && this.editForm.knowledgeBaseConfig.knowledgebases.length === 0, message: this.$t('app.selectKnowledge') },
+                    { check: this.editForm.qaKnowledgeBaseConfig.knowledgebases.length > 0 && !qArerankModelId,
+                      message: this.$t('knowledgeManage.hitTest.selectRerankModel')
+                    },
                 ];
                 for (const condition of conditions) {
                     if (condition.check) {

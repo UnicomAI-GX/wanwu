@@ -80,6 +80,7 @@
       :showGraphSwitch="showGraphSwitch" 
       @setKnowledgeSet="knowledgeRecallSet" 
       :config="knowledgeRecallConfig"
+      :category="category" 
     />
   </div>
 </template>
@@ -184,6 +185,7 @@ export default {
       this.$emit("updateMetaData", data, this.knowledgeIndex, this.type);
     },
     showknowledgeRecallSet() {
+      if(!this.knowledgeConfig.knowledgebases.length) return
       this.$refs.knowledgeRecallField.showDialog();
     }
   },

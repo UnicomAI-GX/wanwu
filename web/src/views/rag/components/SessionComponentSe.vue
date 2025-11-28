@@ -148,6 +148,7 @@
               </template>
               <!--内容-->
               <div
+                v-if="n.response"
                 class="answer-content"
                 :id="i"
                 v-bind:class="{'ds-res':showDSBtn(n.response)}"

@@ -12,6 +12,7 @@
           :setType="'agent'" 
           :config="config" 
           :showGraphSwitch="showGraphSwitch"
+          :category="category"
         />
       </span>
       <span slot="footer" class="dialog-footer">
@@ -24,7 +25,7 @@
 <script>
 import searchConfig from '@/components/searchConfig.vue';
 export default {
-  props:['showGraphSwitch','config'],
+  props:['showGraphSwitch','config','category'],
   components:{
     searchConfig
   },
