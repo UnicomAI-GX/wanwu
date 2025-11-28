@@ -48,6 +48,7 @@ func (c *Client) GetRag(ctx context.Context, req *rag_service.RagDetailReq) (*ra
 			return nil, toErrStatus("rag_get_err", "sensitive "+err.Error())
 		}
 	}
+
 	knowledgeConfig := info.KnowledgeBaseConfig
 	kbGlobalConfig := &rag_service.RagGlobalConfig{
 		MaxHistory:        int32(knowledgeConfig.MaxHistory),
@@ -63,6 +64,7 @@ func (c *Client) GetRag(ctx context.Context, req *rag_service.RagDetailReq) (*ra
 		ChiChat:           knowledgeConfig.ChiChat,
 	}
 
+	// 反序列化 - 知识库元数据
 	var perKbConfig []*rag_service.RagPerKnowledgeConfig
 	if info.KnowledgeBaseConfig.MetaParams != "" {
 		err = json.Unmarshal([]byte(info.KnowledgeBaseConfig.MetaParams), &perKbConfig)
@@ -71,12 +73,34 @@ func (c *Client) GetRag(ctx context.Context, req *rag_service.RagDetailReq) (*ra
 		}
 	}
 
-	// 反序列化qaKnowledgeBaseConfig
-	qaKnowledgeBaseConfig := &rag_service.RagQAKnowledgeBaseConfig{}
+	// 反序列化 - 问答库配置
+	qaConfig := &rag_service.RagQAKnowledgeBaseConfig{}
 	if info.QAKnowledgebaseConfig != "" {
-		if err := json.Unmarshal([]byte(info.QAKnowledgebaseConfig), qaKnowledgeBaseConfig); err != nil {
+		if err := json.Unmarshal([]byte(info.QAKnowledgebaseConfig), qaConfig); err != nil {
 			return nil, toErrStatus("rag_get_err", "kb_qa "+err.Error())
 		}
+	}
+
+	// 设置检索方式默认值
+	if kbGlobalConfig.MatchType == "" {
+		kbGlobalConfig.KeywordPriority = model.KeywordPriorityDefault
+		kbGlobalConfig.MatchType = model.MatchTypeDefault
+		kbGlobalConfig.PriorityMatch = model.PriorityDefault
+		kbGlobalConfig.Threshold = model.ThresholdDefault
+		kbGlobalConfig.SemanticsPriority = model.SemanticsPriorityDefault
+		kbGlobalConfig.TopK = model.TopKDefault
+	}
+
+	if qaConfig.GlobalConfig == nil {
+		qaConfig.GlobalConfig = &rag_service.RagQAGlobalConfig{}
+	}
+	if qaConfig.GlobalConfig.MatchType == "" {
+		qaConfig.GlobalConfig.KeywordPriority = model.KeywordPriorityDefault
+		qaConfig.GlobalConfig.MatchType = model.MatchTypeDefault
+		qaConfig.GlobalConfig.PriorityMatch = model.PriorityDefault
+		qaConfig.GlobalConfig.Threshold = model.ThresholdDefault
+		qaConfig.GlobalConfig.SemanticsPriority = model.SemanticsPriorityDefault
+		qaConfig.GlobalConfig.TopK = model.TopKDefault
 	}
 
 	// 填充 rag 的信息
@@ -112,13 +136,12 @@ func (c *Client) GetRag(ctx context.Context, req *rag_service.RagDetailReq) (*ra
 			PerKnowledgeConfigs: perKbConfig,
 			GlobalConfig:        kbGlobalConfig,
 		},
-		QAknowledgeBaseConfig: qaKnowledgeBaseConfig,
+		QAknowledgeBaseConfig: qaConfig,
 		SensitiveConfig: &rag_service.RagSensitiveConfig{
 			Enable:   info.SensitiveConfig.Enable,
 			TableIds: sensitiveIds,
 		},
 	}
-
 	return resp, nil
 }
 

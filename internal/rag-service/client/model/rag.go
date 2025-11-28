@@ -1,5 +1,14 @@
 package model
 
+const (
+	MatchTypeDefault         = "mix"
+	PriorityDefault          = 1
+	KeywordPriorityDefault   = 0.8
+	ThresholdDefault         = 0.4
+	SemanticsPriorityDefault = 0.2
+	TopKDefault              = 5
+)
+
 type RagInfo struct {
 	ID    int64  `json:"id" gorm:"primaryKey;type:bigint(20) auto_increment;not null;"`
 	RagID string `json:"ragId" gorm:"uniqueIndex:idx_unique_rag_id;column:rag_id;type:varchar(255);comment:ragId"`

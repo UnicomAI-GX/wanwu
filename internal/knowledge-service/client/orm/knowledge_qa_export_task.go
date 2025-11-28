@@ -6,6 +6,7 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm/sqlopt"
 	async_task "github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/async-task"
+	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/config"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	"github.com/UnicomAI/wanwu/pkg/log"
@@ -56,10 +57,13 @@ func SelectKnowledgeQAPairExportTaskById(ctx context.Context, exportId string) (
 }
 
 // SelectKnowledgeQAPairExportTaskByQAId 根据knowledge id查询导出信息
-func SelectKnowledgeQAPairExportTaskByQAId(ctx context.Context, knowledgeId string) ([]*model.KnowledgeQAPairExportTask, error) {
+func SelectKnowledgeQAPairExportTaskByQAId(ctx context.Context, knowledgeId string, userId string, orgId string, pageSize int32, pageNum int32) ([]*model.KnowledgeQAPairExportTask, error) {
+	limit := pageSize
+	offset := pageSize * (pageNum - 1)
 	var exportTask []*model.KnowledgeQAPairExportTask
-	err := sqlopt.SQLOptions(sqlopt.WithKnowledgeID(knowledgeId)).
-		Apply(db.GetHandle(ctx), &model.KnowledgeQAPairExportTask{}).
+	err := sqlopt.SQLOptions(sqlopt.WithKnowledgeID(knowledgeId),
+		sqlopt.WithPermit(orgId, userId)).Apply(db.GetHandle(ctx), &model.KnowledgeQAPairExportTask{}).
+		Order("create_at desc").Limit(int(limit)).Offset(int(offset)).
 		Find(&exportTask).Error
 	if err != nil {
 		log.Errorf("SelectKnowledgeQAPairRunningExportTask knowledgeId %s err: %v", knowledgeId, err)
@@ -99,7 +103,8 @@ func DeleteQAExportTaskById(ctx context.Context, taskId string) error {
 				return err
 			}
 			//删除minio中的文件
-			err = service.DeleteFile(ctx, exportTask.ExportFilePath)
+			filePath := "http://" + config.GetConfig().Minio.EndPoint + "/" + exportTask.ExportFilePath
+			err = service.DeleteFile(ctx, filePath)
 			if err != nil {
 				log.Errorf("minioDelete error %v", err)
 				return err

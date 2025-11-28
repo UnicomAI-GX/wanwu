@@ -78,7 +78,16 @@ func (s *Service) GetQAPairList(ctx context.Context, req *knowledgebase_qa_servi
 }
 
 func (s *Service) GetExportRecordList(ctx context.Context, req *knowledgebase_qa_service.GetExportRecordListReq) (*knowledgebase_qa_service.GetExportRecordListResp, error) {
-	list, err := orm.SelectKnowledgeQAPairExportTaskByQAId(ctx, req.KnowledgeId)
+	userId, orgId := req.UserId, req.OrgId
+	permission, err := orm.SelectUserKnowledgePermission(ctx, req.UserId, req.OrgId, req.KnowledgeId)
+	if err != nil {
+		log.Errorf(fmt.Sprintf("CheckKnowledgeUserPermission 失败(%v)  参数(%v)", err, req))
+		return nil, util.ErrCode(errs.Code_KnowledgePermissionDeny)
+	}
+	if permission.PermissionType == model.PermissionTypeGrant || permission.PermissionType == model.PermissionTypeSystem {
+		userId, orgId = "", ""
+	}
+	list, err := orm.SelectKnowledgeQAPairExportTaskByQAId(ctx, req.KnowledgeId, userId, orgId, req.PageSize, req.PageNum)
 	if err != nil {
 		log.Errorf("select QA export task failed err: (%v) req:(%v)", err, req)
 		return nil, util.ErrCode(errs.Code_KnowledgeQAExportRecordsSelectFailed)
@@ -113,7 +122,7 @@ func (s *Service) CreateQAPair(ctx context.Context, req *knowledgebase_qa_servic
 	}
 	// 3.新建问答对
 	qaPairId := generator.GetGenerator().NewID()
-	qaPairs, ragParams := buildCreateQAPairParams(knowledgeBase, question, answer, questionMD5, qaPairId)
+	qaPairs, ragParams := buildCreateQAPairParams(knowledgeBase, question, answer, questionMD5, qaPairId, req.UserId, req.OrgId)
 	err = orm.CreateKnowledgeQAPairAndCount(ctx, req.KnowledgeId, qaPairs, ragParams)
 	if err != nil {
 		log.Errorf("create qa pair fail: %v", err)
@@ -192,7 +201,7 @@ func (s *Service) DeleteQAPair(ctx context.Context, req *knowledgebase_qa_servic
 		return nil, util.ErrCode(errs.Code_KnowledgeQABaseSelectFailed)
 	}
 	// 3。删除问答对
-	qaPair, ragParams := buildDeleteQAPairParams(knowledgeBase, req.QaPairId, req.UserId)
+	qaPair, ragParams := buildDeleteQAPairParams(knowledgeBase, req.QaPairId)
 	err = orm.DeleteKnowledgeQAPair(ctx, qaPair, ragParams)
 	if err != nil {
 		log.Errorf("delete knowledge qa pair fail: %v", err)
@@ -243,12 +252,13 @@ func (s *Service) DeleteExportRecord(ctx context.Context, req *knowledgebase_qa_
 }
 
 // buildDeleteQAPairParams 构造问答库删除问答对参数
-func buildDeleteQAPairParams(knowledgeBase *model.KnowledgeBase, qaPairId, userId string) (*model.KnowledgeQAPair, *service.RagDeleteQAPairParams) {
+func buildDeleteQAPairParams(knowledgeBase *model.KnowledgeBase, qaPairId string) (*model.KnowledgeQAPair, *service.RagDeleteQAPairParams) {
 	qaPair := &model.KnowledgeQAPair{
-		QAPairId: qaPairId,
+		QAPairId:    qaPairId,
+		KnowledgeId: knowledgeBase.KnowledgeId,
 	}
 	ragUpdateQAPairParams := &service.RagDeleteQAPairParams{
-		UserId:     userId,
+		UserId:     knowledgeBase.UserId,
 		QAId:       knowledgeBase.KnowledgeId,
 		QABaseName: knowledgeBase.RagName,
 		QAPairIds:  []string{qaPairId},
@@ -473,6 +483,7 @@ func buildQAPairImportTask(req *knowledgebase_qa_service.ImportQAPairReq) (*mode
 		CreatedAt:   time.Now().UnixMilli(),
 		UpdatedAt:   time.Now().UnixMilli(),
 		DocInfo:     string(docImportInfo),
+		Status:      model.KnowledgeQAPairImportInit,
 		UserId:      req.UserId,
 		OrgId:       req.OrgId,
 	}, nil
@@ -485,6 +496,7 @@ func buildQAPairExportTask(req *knowledgebase_qa_service.ExportQAPairReq) (*mode
 		KnowledgeId: req.KnowledgeId,
 		CreatedAt:   time.Now().UnixMilli(),
 		UpdatedAt:   time.Now().UnixMilli(),
+		Status:      model.KnowledgeQAPairExportInit,
 		UserId:      req.UserId,
 		OrgId:       req.OrgId,
 	}, nil
@@ -546,7 +558,7 @@ func buildExportRecordListResp(list []*model.KnowledgeQAPairExportTask, total in
 }
 
 // buildCreateQAPairParams 构造问答库新建问答对参数
-func buildCreateQAPairParams(knowledgeBase *model.KnowledgeBase, question, answer, questionMD5, qaPairId string) ([]*model.KnowledgeQAPair, *service.RagAddQAPairParams) {
+func buildCreateQAPairParams(knowledgeBase *model.KnowledgeBase, question, answer, questionMD5, qaPairId, userId, orgId string) ([]*model.KnowledgeQAPair, *service.RagAddQAPairParams) {
 	qaPairs := []*model.KnowledgeQAPair{&model.KnowledgeQAPair{
 		QAPairId:    qaPairId,
 		KnowledgeId: knowledgeBase.KnowledgeId,
@@ -555,8 +567,8 @@ func buildCreateQAPairParams(knowledgeBase *model.KnowledgeBase, question, answe
 		Status:      model.KnowledgeQAPairImportSuccess,
 		Switch:      true,
 		QuestionMd5: questionMD5,
-		UserId:      knowledgeBase.UserId,
-		OrgId:       knowledgeBase.OrgId,
+		UserId:      userId,
+		OrgId:       orgId,
 	}}
 	ragAddQAPairParams := &service.RagAddQAPairParams{
 		UserId:     knowledgeBase.UserId,
@@ -578,6 +590,7 @@ func buildUpdateQAPairParams(knowledgeBase *model.KnowledgeBase, question, answe
 		Question:    question,
 		Answer:      answer,
 		QuestionMd5: questionMD5,
+		KnowledgeId: knowledgeBase.KnowledgeId,
 	}
 	qaPairItem := &service.RagQAPairItem{
 		QAPairId: qaPairId,
@@ -600,8 +613,9 @@ func buildUpdateQAPairParams(knowledgeBase *model.KnowledgeBase, question, answe
 // buildUpdateQAPairSwitchParams 构造启停问答对参数
 func buildUpdateQAPairSwitchParams(knowledgeBase *model.KnowledgeBase, qaPairSwitch bool, qaPairId string) (*model.KnowledgeQAPair, *service.RagUpdateQAPairStatusParams) {
 	qaPair := &model.KnowledgeQAPair{
-		QAPairId: qaPairId,
-		Switch:   qaPairSwitch,
+		QAPairId:    qaPairId,
+		Switch:      qaPairSwitch,
+		KnowledgeId: knowledgeBase.KnowledgeId,
 	}
 	ragUpdateQAPairStatusParams := &service.RagUpdateQAPairStatusParams{
 		UserId:     knowledgeBase.UserId,

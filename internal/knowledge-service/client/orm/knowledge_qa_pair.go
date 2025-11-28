@@ -3,6 +3,7 @@ package orm
 import (
 	"context"
 	"errors"
+	"time"
 
 	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
 	"gorm.io/gorm"
@@ -84,7 +85,7 @@ func CreateKnowledgeQAPairAndCount(ctx context.Context, knowledgeId string, qaPa
 			return err
 		}
 		//2.更新问答库问答对数量
-		err = UpdateKnowledgeDocCount(tx, knowledgeId, len(qaPairs))
+		err = UpdateKnowledgeDocCount(tx, knowledgeId)
 		if err != nil {
 			return err
 		}
@@ -106,7 +107,13 @@ func UpdateKnowledgeQAPair(ctx context.Context, qaPair *model.KnowledgeQAPair, u
 		if err != nil {
 			return err
 		}
-		//2.通知rag更新问答对
+		//2. 更新问答库记录
+		err = tx.Model(&model.KnowledgeBase{}).Where("knowledge_id = ?", qaPair.KnowledgeId).
+			Update("update_at", time.Now().UnixMilli()).Error
+		if err != nil {
+			return err
+		}
+		//3.通知rag更新问答对
 		return service.RagUpdateQAPair(ctx, updateParams)
 	})
 }
@@ -122,7 +129,13 @@ func UpdateKnowledgeQAPairSwitch(ctx context.Context, qaPair *model.KnowledgeQAP
 		if err != nil {
 			return err
 		}
-		//2.通知rag更新问答对
+		//2. 更新问答库记录
+		err = tx.Model(&model.KnowledgeBase{}).Where("knowledge_id = ?", qaPair.KnowledgeId).
+			Update("update_at", time.Now().UnixMilli()).Error
+		if err != nil {
+			return err
+		}
+		//3.通知rag更新问答对
 		return service.RagUpdateQAPairStatus(ctx, updateParams)
 	})
 }
@@ -136,19 +149,13 @@ func DeleteKnowledgeQAPair(ctx context.Context, qaPair *model.KnowledgeQAPair, d
 			return err
 		}
 		//2.更新问答库记录
-		err = DeleteQAPairFileInfo(tx, qaPair.KnowledgeId)
+		err = UpdateKnowledgeDocCount(tx, qaPair.KnowledgeId)
 		if err != nil {
 			return err
 		}
-		//2.通知rag更新问答对
+		//3.通知rag更新问答对
 		return service.RagDeleteQAPair(ctx, deleteParams)
 	})
-}
-
-// DeleteQAPairFileInfo 删除问答对后修改数量
-func DeleteQAPairFileInfo(tx *gorm.DB, knowledgeId string) error {
-	return tx.Model(&model.KnowledgeBase{}).Where("knowledge_id = ?", knowledgeId).
-		Update("doc_count", gorm.Expr("doc_count - ?", 1)).Error
 }
 
 // GetQAPairList 查询问答库问答对列表
@@ -156,7 +163,7 @@ func GetQAPairList(ctx context.Context, userId, orgId, knowledgeId, name string,
 	tx := sqlopt.SQLOptions(sqlopt.WithPermit(orgId, userId),
 		sqlopt.WithKnowledgeID(knowledgeId),
 		sqlopt.WithStatus(status),
-		sqlopt.LikeName(name),
+		sqlopt.LikeQuestion(name),
 		sqlopt.WithDelete(0)).
 		Apply(db.GetHandle(ctx), &model.KnowledgeQAPair{})
 	var total int64

@@ -275,9 +275,15 @@ func UpdateKnowledgeFileInfo(tx *gorm.DB, knowledgeId string, resultList []*mode
 }
 
 // UpdateKnowledgeDocCount 更新知识库文档数量
-func UpdateKnowledgeDocCount(tx *gorm.DB, knowledgeId string, docCount int) error {
+func UpdateKnowledgeDocCount(tx *gorm.DB, knowledgeId string) error {
+	var total int64
+	err := tx.Model(&model.KnowledgeQAPair{}).Where("knowledge_id = ?", knowledgeId).
+		Count(&total).Error
+	if err != nil {
+		return err
+	}
 	return tx.Model(&model.KnowledgeBase{}).Where("knowledge_id = ?", knowledgeId).
-		Update("doc_count", gorm.Expr("doc_count + ?", docCount)).Error
+		Update("doc_count", total).Error
 }
 
 // DeleteKnowledgeFileInfo 删除知识库文档信息

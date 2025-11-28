@@ -292,6 +292,15 @@ func LikeName(name string) SQLOption {
 	})
 }
 
+func LikeQuestion(question string) SQLOption {
+	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
+		if question != "" {
+			return db.Where("question LIKE ?", "%"+question+"%")
+		}
+		return db
+	})
+}
+
 func LikeTag(tag string) SQLOption {
 	return funcSQLOption(func(db *gorm.DB) *gorm.DB {
 		if tag != "" {

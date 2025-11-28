@@ -55,8 +55,11 @@ func SelectKnowledgeQAPairImportTaskById(ctx context.Context, importId string) (
 }
 
 // UpdateKnowledgeQAPairImportTaskStatus 更新导入任务状态
-func UpdateKnowledgeQAPairImportTaskStatus(ctx context.Context, taskId string, status int, errMsg string, totalCount int64, successCount int64) error {
-	return db.GetHandle(ctx).Model(&model.KnowledgeQAPairImportTask{}).
+func UpdateKnowledgeQAPairImportTaskStatus(ctx context.Context, tx *gorm.DB, taskId string, status int, errMsg string, totalCount int64, successCount int64) error {
+	if tx == nil {
+		tx = db.GetHandle(ctx)
+	}
+	return tx.Model(&model.KnowledgeQAPairImportTask{}).
 		Where("import_id = ?", taskId).
 		Updates(map[string]interface{}{
 			"status":        status,
@@ -64,6 +67,23 @@ func UpdateKnowledgeQAPairImportTaskStatus(ctx context.Context, taskId string, s
 			"success_count": successCount,
 			"total_count":   totalCount,
 		}).Error
+}
+
+// UpdateKnowledgeQAPairImportTaskStatusAndCount 更新导入任务状态和数量
+func UpdateKnowledgeQAPairImportTaskStatusAndCount(ctx context.Context, taskId string, status int, errMsg string, totalCount int64, successCount int64, knowledgeId string) error {
+	return db.GetHandle(ctx).Transaction(func(tx *gorm.DB) error {
+		err := UpdateKnowledgeQAPairImportTaskStatus(ctx, tx, taskId, status, errMsg, totalCount, successCount)
+		if err != nil {
+			log.Errorf("UpdateKnowledgeQAPairImportTaskStatus importId %s lineCount %d successCount %d err: %v", taskId, totalCount, successCount, err)
+			return err
+		}
+		err = UpdateKnowledgeDocCount(tx, knowledgeId)
+		if err != nil {
+			log.Errorf("UpdateKnowledgeDocCount knowledgeId %s successCount %d err: %v", knowledgeId, successCount, err)
+			return err
+		}
+		return nil
+	})
 }
 
 func createQAPairImportTask(tx *gorm.DB, importTask *model.KnowledgeQAPairImportTask) error {

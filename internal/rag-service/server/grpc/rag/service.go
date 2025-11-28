@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
 	knowledgebase_service "github.com/UnicomAI/wanwu/api/proto/knowledgebase-service"
 	rag_service "github.com/UnicomAI/wanwu/api/proto/rag-service"
@@ -165,6 +166,7 @@ func (s *Service) UpdateRagConfig(ctx context.Context, in *rag_service.UpdateRag
 		}
 		knowledgeIds = string(knowledgeIdBytes)
 	}
+
 	var metaParams string
 	perConfig := in.KnowledgeBaseConfig.PerKnowledgeConfigs
 	if perConfig != nil {
@@ -176,6 +178,32 @@ func (s *Service) UpdateRagConfig(ctx context.Context, in *rag_service.UpdateRag
 	}
 	kbGlobalConfig := in.KnowledgeBaseConfig.GlobalConfig
 
+	// 设置检索方式默认值
+	if kbGlobalConfig.MatchType == "" {
+		kbGlobalConfig.KeywordPriority = model.KeywordPriorityDefault
+		kbGlobalConfig.MatchType = model.MatchTypeDefault
+		kbGlobalConfig.PriorityMatch = model.PriorityDefault
+		kbGlobalConfig.Threshold = model.ThresholdDefault
+		kbGlobalConfig.SemanticsPriority = model.SemanticsPriorityDefault
+		kbGlobalConfig.TopK = model.TopKDefault
+	}
+
+	if in.QAknowledgeBaseConfig == nil {
+		in.QAknowledgeBaseConfig = &rag_service.RagQAKnowledgeBaseConfig{}
+	}
+	qaConfig := in.QAknowledgeBaseConfig
+	if in.QAknowledgeBaseConfig.GlobalConfig == nil {
+		qaConfig.GlobalConfig = &rag_service.RagQAGlobalConfig{}
+	}
+	if qaConfig.GlobalConfig.MatchType == "" {
+		qaConfig.GlobalConfig.KeywordPriority = model.KeywordPriorityDefault
+		qaConfig.GlobalConfig.MatchType = model.MatchTypeDefault
+		qaConfig.GlobalConfig.PriorityMatch = model.PriorityDefault
+		qaConfig.GlobalConfig.Threshold = model.ThresholdDefault
+		qaConfig.GlobalConfig.SemanticsPriority = model.SemanticsPriorityDefault
+		qaConfig.GlobalConfig.TopK = model.TopKDefault
+	}
+	in.QAknowledgeBaseConfig.GlobalConfig = qaConfig.GlobalConfig
 	// 序列化QAknowledgeBaseConfig
 	var qaKnowledgeConfig string
 	if in.QAknowledgeBaseConfig != nil {
@@ -186,6 +214,7 @@ func (s *Service) UpdateRagConfig(ctx context.Context, in *rag_service.UpdateRag
 		qaKnowledgeConfig = string(knowledgeBaseConfigBytes)
 		log.Debugf("knowConfig = %s", qaKnowledgeConfig)
 	}
+
 	if err := s.cli.UpdateRagConfig(ctx, &model.RagInfo{
 		RagID: in.RagId,
 		ModelConfig: model.AppModelConfig{

@@ -134,19 +134,27 @@ func deleteKnowledgeQAByKnowledgeId(ctx context.Context, taskCtx string) Result 
 
 	//3.事务执行删除数据
 	err = db.GetClient().DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// 删除问答库
 		err = orm.ExecuteDeleteKnowledge(tx, knowledge.Id)
 		if err != nil {
 			return err
 		}
+		// 删除问答库导入任务
 		err = orm.DeleteQAImportTaskByKnowledgeId(tx, knowledge.KnowledgeId)
 		if err != nil {
 			return err
 		}
-		//删除相关权限
+		// 删除问答库导出任务
+		err = orm.DeleteQAExportTaskByKnowledgeId(tx, knowledge.KnowledgeId)
+		if err != nil {
+			return err
+		}
+		// 删除相关权限
 		err1 := orm.AsyncDeletePermissionByKnowledgeId(knowledge.KnowledgeId)
 		if err1 != nil {
 			log.Errorf("deleteKnowledgeIdPermission err: %s", err1)
 		}
+		// 删除全部qa pair
 		if len(qaPairList) > 0 {
 			err := BatchDeleteAllQAPair(ctx, tx, knowledge, qaPairList)
 			if err != nil {

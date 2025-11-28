@@ -138,7 +138,7 @@ func deleteQAPairByQAPairId(ctx context.Context, taskCtx string) Result {
 	return Result{Error: err}
 }
 
-// BatchDeleteAllQAPair 批量删除所有文档
+// BatchDeleteAllQAPair 批量删除所有问答对
 func BatchDeleteAllQAPair(ctx context.Context, tx *gorm.DB, knowledge *model.KnowledgeBase, qaPairList []*model.KnowledgeQAPair) error {
 	var qaPairIdList []string
 	for _, qaPair := range qaPairList {

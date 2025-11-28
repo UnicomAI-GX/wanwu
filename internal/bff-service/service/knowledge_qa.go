@@ -105,6 +105,8 @@ func GetKnowledgeQAExportRecordList(ctx *gin.Context, userId, orgId string, r *r
 		KnowledgeId: r.KnowledgeId,
 		UserId:      userId,
 		OrgId:       orgId,
+		PageSize:    int32(r.PageSize),
+		PageNum:     int32(r.PageNo),
 	})
 	if err != nil {
 		return nil, err

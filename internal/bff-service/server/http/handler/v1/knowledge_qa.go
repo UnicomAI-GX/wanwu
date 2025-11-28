@@ -1,17 +1,10 @@
 package v1
 
 import (
-	"net/http"
-
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/request"
 	"github.com/UnicomAI/wanwu/internal/bff-service/service"
 	gin_util "github.com/UnicomAI/wanwu/pkg/gin-util"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc/codes"
-)
-
-const (
-	QA_NO_RESPONSE = "根据已知信息，无法回答您的问题"
 )
 
 // GreateKnowledgeQAPair
@@ -158,13 +151,6 @@ func KnowledgeQAHit(ctx *gin.Context) {
 		return
 	}
 	resp, err := service.KnowledgeQAHit(ctx, userId, orgId, &req)
-	if err != nil {
-		gin_util.ResponseErr(ctx, err)
-		return
-	}
-	if len(resp.SearchList) == 0 {
-		gin_util.ResponseDetail(ctx, http.StatusOK, codes.OK, resp, QA_NO_RESPONSE)
-	}
 	gin_util.Response(ctx, resp, err)
 }
 

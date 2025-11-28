@@ -13,14 +13,12 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
 	async_task_pkg "github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/async-task"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	"github.com/UnicomAI/wanwu/pkg/log"
 	"github.com/UnicomAI/wanwu/pkg/util"
 	async "github.com/gromitlee/go-async"
 	"github.com/gromitlee/go-async/pkg/async/async_task"
-	"gorm.io/gorm"
 )
 
 const (
@@ -149,7 +147,7 @@ func importKnowledgeQAPair(ctx context.Context, taskCtx string) Result {
 	}
 
 	//3.更新状态处理中
-	err = orm.UpdateKnowledgeQAPairImportTaskStatus(ctx, params.TaskId, model.KnowledgeQAPairImportImporting, "", 0, 0)
+	err = orm.UpdateKnowledgeQAPairImportTaskStatus(ctx, nil, params.TaskId, model.KnowledgeQAPairImportImporting, "", 0, 0)
 	if err != nil {
 		log.Errorf("UpdateQAPairImportTaskStatus err: %s", err)
 		return Result{Error: err}
@@ -182,17 +180,11 @@ func doKnowledgeQAPairImport(ctx context.Context, knowledgeBase *model.Knowledge
 			errMsg = "文件所有行全部处理失败"
 		}
 		//更新状态和数量
-		err = db.GetHandle(ctx).Transaction(func(tx *gorm.DB) error {
-			err = orm.UpdateKnowledgeQAPairImportTaskStatus(ctx, importTask.ImportId, status, errMsg, lineCount, successCount)
-			if err != nil {
-				return err
-			}
-			err = orm.UpdateKnowledgeDocCount(tx, knowledgeBase.KnowledgeId, int(successCount))
-			if err != nil {
-				return err
-			}
-			return nil
-		})
+		err = orm.UpdateKnowledgeQAPairImportTaskStatusAndCount(ctx, importTask.ImportId, status, errMsg, lineCount, successCount, knowledgeBase.KnowledgeId)
+		if err != nil {
+			log.Errorf("UpdateQAPairImportTaskStatus err: %s", err)
+			return
+		}
 	})
 	for _, docInfo := range importTaskParams.DocInfoList {
 		docLineCount, docSuccessCount, err := processCsvFileBatchLine(ctx, docInfo, buildQAPairBatchProcessor(knowledgeBase, importTask))
@@ -299,7 +291,7 @@ func buildQAPairBatchProcessor(knowledgeBase *model.KnowledgeBase, importTask *m
 			question := strings.Trim(lineData[0], " ")
 			answer := strings.Trim(lineData[1], " ")
 			questionMD5 := util.MD5([]byte(question))
-			err := orm.CheckKnowledgeQAPairQuestion(ctx, "", knowledgeBase.KnowledgeId, question)
+			err := orm.CheckKnowledgeQAPairQuestion(ctx, "", knowledgeBase.KnowledgeId, questionMD5)
 			if err != nil {
 				continue
 			}
@@ -317,8 +309,8 @@ func buildQAPairBatchProcessor(knowledgeBase *model.KnowledgeBase, importTask *m
 				Status:       model.KnowledgeQAPairImportSuccess,
 				Switch:       true,
 				QuestionMd5:  questionMD5,
-				UserId:       knowledgeBase.UserId,
-				OrgId:        knowledgeBase.OrgId,
+				UserId:       importTask.UserId,
+				OrgId:        importTask.OrgId,
 			})
 			successCount++
 		}
