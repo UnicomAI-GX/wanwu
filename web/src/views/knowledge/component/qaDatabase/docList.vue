@@ -664,11 +664,9 @@ export default {
         });
         if (res.code === 0) {
           this.$message.success(this.$t("common.info.delete"));
-          this.getTableData(this.docQuery);
         }
-      } catch (error) {
-        this.getTableData(this.docQuery);
       } finally {
+        await this.getTableData(this.docQuery);
         this.loading = false;
       }
     },
