@@ -1,2 +1,2 @@
-def get_message():
-    return "Hello from service layer!"
+def get_message(username):
+    return f"Hello, {username}!"

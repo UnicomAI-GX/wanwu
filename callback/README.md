@@ -2,11 +2,11 @@
 ```text
 callback/
 ├── callback/
-│   ├── models/                     # 数据模型层，如 ORM 模型
-│   ├── routes/                     # 路由层，定义 API 接口
-│   ├── services/                   # 业务逻辑层，处理具体业务逻辑
-│   ├── static/                     # 静态文件（如 js、css、图片等）
-│   └── __init__.py                 # 包初始化，注册蓝图、初始化应用
+│   ├── models/                      # 数据模型层，如 ORM 模型
+│   ├── routes/                      # 路由层，定义 API 接口
+│   ├── services/                    # 业务逻辑层，处理具体业务逻辑
+│   ├── static/                      # 静态文件（如 js、css、图片等）
+│   └── __init__.py                  # 包初始化，注册蓝图、初始化应用
 │
 ├── configs/
 │   ├── config.ini                   # 配置文件，存储各种环境和服务配置
@@ -18,26 +18,26 @@ callback/
 ├── utils/
 │   ├── response.py                  # 响应封装工具，例如统一返回格式
 │   └── router_trace.py              # 路由追踪工具，可能用于日志或调试
-├── .gitignore                        # Git 忽略文件配置
-├── README.md                         # 项目说明文档
-├── requirements.txt                  # Python 依赖包清单
-└── run.py                             # 项目入口文件，启动 Flask 服务
+├── .gitignore                       # Git 忽略文件配置
+├── README.md                        # 项目说明文档
+├── requirements.txt                 # Python 依赖包清单
+└── run.py                           # 项目入口文件，启动 Flask 服务
 ```
 
 ## 运行callback服务
-1. 构建镜像
 ```bash
-make docker-image-callback-base  
-```
-
-2. 关闭容器
-```bash
+# 启动容器
+make -f Makefile.develop run-callback
+# 关闭容器
 make -f Makefile.develop stop-callback
 ```
 
-3. 启动容器
+## 构建镜像
 ```bash
-make -f Makefile.develop run-callback
+# 构建base镜像
+make docker-image-callback-base
+# 构建发版镜像
+make docker-image-callback
 ```
 
 ## Swagger文档
@@ -73,3 +73,7 @@ redis_client = redis.Redis(
         decode_responses=True 
     )
 ```
+
+## 代码规范
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)

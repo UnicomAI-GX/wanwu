@@ -1,49 +1,110 @@
-from flask import Blueprint,request 
+from flask import Blueprint, request
+
 from callback.services.hello_demo import get_message
-from utils.response import response_ok
-from utils.response import BizError
-hello_demo = Blueprint("hello", __name__,url_prefix="/")
+from utils.response import BizError, response_error, response_ok
 
-@hello_demo.route("/")
-def index():
+hello_demo = Blueprint("hello", __name__)
+
+
+@hello_demo.route("/hello", methods=["GET"])
+def get_hello():
     """
-    首页接口  
+    API 示例
     ---
     tags:
-      - Hello
+      - hello
+    parameters:
+      - name: username
+        description: 用户名
+        in: query
+        required: true
+        schema:
+          type: string
     responses:
       200:
-        description: 返回 Hello 信息
+        description: 返回信息
         schema:
           type: object
           properties:
             msg:
               type: string
-              example: Hello from service
+              example: Hello, {username}!
     """
-    message = get_message()
-    return response_ok(f"Hello from service:{message}")
-
-
-@hello_demo.route("/api/hello")
-def hello():
-    """
-    Hello API 示例  
-    ---
-    tags:
-      - Hello
-    responses:
-      200:
-        description: 返回静态 hello
-        schema:
-          type: object
-          properties:
-            msg:
-              type: string
-              example: Hello from API
-    """
-    username = request.args.get("user")
+    username = request.args.get("username")
     if not username:
-      raise BizError("username is None", code=2002)
-    
-    return response_ok("Hello from API")
+        raise BizError("username is None", code=2002)
+
+    return response_ok(get_message(username))
+
+
+@hello_demo.route("/hello", methods=["POST"])
+def post_hello():
+    """
+    API 示例
+    ---
+    tags:
+      - hello
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: 用户名
+            required:
+              - username
+    responses:
+      200:
+        description: 返回信息
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              example: Hello, {username}!
+    """
+    data = request.get_json()
+    if data is None:
+        return response_error(2003, "invalid body")
+    username = data["username"]
+    if not username:
+        raise BizError("username is None", code=2002)
+
+    return response_ok(get_message(username))
+
+
+@hello_demo.route("/hello", methods=["PUT"])
+def put_hello():
+    """
+    API 示例
+    ---
+    tags:
+      - hello
+    requestBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: 用户名
+            required:
+              - username
+    responses:
+      200:
+        description: 返回信息
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              example: Hello, {username}!
+    """
+    username = request.form["username"]
+    if not username:
+        raise BizError("username is None", code=2002)
+
+    return response_ok(get_message(username))

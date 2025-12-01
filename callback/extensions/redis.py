@@ -1,4 +1,5 @@
 import redis
+
 from configs.config import config
 
 redis_client: redis.Redis = None
@@ -11,7 +12,7 @@ def init_redis():
         host=config.callback_cfg["REDIS"]["HOST"],
         port=config.callback_cfg["REDIS"]["PORT"],
         password=config.callback_cfg["REDIS"]["PASSWORD"],
-        decode_responses=True 
+        decode_responses=True,
     )
 
     # 测试连接（可选）

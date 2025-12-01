@@ -1,8 +1,11 @@
 import time
-from flask import Flask, request, g 
+
+from flask import Flask, g, request
+
 
 def add_request_tracing(app: Flask):
     """封装路由追踪"""
+
     @app.before_request
     def start_trace():
         g.start_time = time.time()
@@ -10,10 +13,10 @@ def add_request_tracing(app: Flask):
 
     @app.after_request
     def end_trace(response):
-        if request.path == '/favicon.ico':
+        if request.path == "/favicon.ico":
             return response
         # 如果已经在异常处理中打印过日志，就跳过 TRACE 日志
-        if getattr(g, 'has_exception', False):
+        if getattr(g, "has_exception", False):
             return response
         cost = round((time.time() - g.start_time) * 1000, 2)
         app.logger.info(
