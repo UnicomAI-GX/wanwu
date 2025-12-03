@@ -11,8 +11,8 @@ export default {
     const query = `?workflow_id=${this.$route.query.id}&space_id=${this.$store.state.user.userInfo.orgId}`
     return {
       workflowUrl: process.env.NODE_ENV === 'development'
-        ? `http://localhost:8081/workflow${query}`
-        : window.location.origin + this.$basePath + `/workflow/${query}`
+        ? `http://localhost:8081/workflow/run${query}`
+        : window.location.origin + this.$basePath + `/workflow/run${query}`
     }
   },
 }
@@ -21,7 +21,7 @@ export default {
 <style lang="scss" scoped>
 .wp {
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 3px);
   background: #f4f5f6;
   iframe {
     width: 100%;

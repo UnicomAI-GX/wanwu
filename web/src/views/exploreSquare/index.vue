@@ -19,9 +19,9 @@
           <el-tab-pane :label="$t('menu.app.rag')" name="rag">
             <AppList :appData="listData" :isShowTool="false" :appFrom="'explore'"/>
           </el-tab-pane>
-          <!--<el-tab-pane :label="$t('menu.app.workflow')" name="workflow">
+          <el-tab-pane :label="$t('menu.app.workflow')" name="workflow">
             <AppList :appData="listData" :isShowTool="false" :appFrom="'explore'" />
-          </el-tab-pane>-->
+          </el-tab-pane>
         </el-tabs>
       </div>
     </div>
