@@ -43,7 +43,7 @@
         min-width="140"
       >
         <template slot-scope="scope">
-          <span :class="['status-text', statusClass(scope.row.status)]">
+          <span class="status-text">
             {{ formatStatus(scope.row.status) }}
           </span>
         </template>
@@ -57,7 +57,7 @@
           <el-button
             type="text"
             size="mini"
-            :disabled="[0, 1, 3].includes(scope.row.status)"
+            :disabled="[STATUS_PENDING, STATUS_PROCESSING, STATUS_FAILED].includes(scope.row.status)"
             @click="handleDownload(scope.row)"
           >
             {{ $t("knowledgeManage.qaExport.download") }}
@@ -89,7 +89,13 @@
 
 <script>
 import commonMixin from "@/mixins/common";
-import { getQaExportRecordList, delQaRecord } from "@/api/qaDatabase";
+import {getQaExportRecordList, delQaRecord} from "@/api/qaDatabase";
+import {
+  STATUS_FAILED,
+  STATUS_FINISHED,
+  STATUS_PENDING,
+  STATUS_PROCESSING
+} from "@/views/knowledge/constants";
 
 export default {
   name: "QaExportRecord",
@@ -111,11 +117,15 @@ export default {
         total: 0,
       },
       statusMap: {
-        0: this.$t("knowledgeManage.qaExportStatus.processing"),
-        1: this.$t("knowledgeManage.qaExportStatus.exporting"),
-        2: this.$t("knowledgeManage.qaExportStatus.finished"),
-        3: this.$t("knowledgeManage.qaExportStatus.failed"),
+        [STATUS_PENDING]: this.$t("knowledgeManage.qaExportStatus.pending"),
+        [STATUS_PROCESSING]: this.$t("knowledgeManage.qaExportStatus.processing"),
+        [STATUS_FINISHED]: this.$t("knowledgeManage.qaExportStatus.finished"),
+        [STATUS_FAILED]: this.$t("knowledgeManage.qaExportStatus.failed"),
       },
+      STATUS_FAILED,
+      STATUS_FINISHED,
+      STATUS_PENDING,
+      STATUS_PROCESSING
     };
   },
   methods: {
@@ -149,18 +159,14 @@ export default {
             this.pagination.total = data.total || 0;
           }
         })
-        .catch(() => {})
+        .catch(() => {
+        })
         .finally(() => {
           this.tableLoading = false;
         });
     },
     formatStatus(status) {
       return this.statusMap[status] || this.$t("knowledgeManage.noStatus");
-    },
-    statusClass(status) {
-      if (status === 1) return "success";
-      if (status === 2) return "error";
-      return "pending";
     },
     handleDownload(row) {
       const url = row.filePath;
@@ -172,7 +178,7 @@ export default {
     },
     handleDelete(row) {
       const data = {
-        qaExportRecordId:row.qaExportRecordId,
+        qaExportRecordId: row.qaExportRecordId,
         knowledgeId: this.knowledgeId,
       }
       this.$confirm(
@@ -193,12 +199,14 @@ export default {
                 this.fetchRecordList();
               }
             })
-            .catch(() => {})
+            .catch(() => {
+            })
             .finally(() => {
               this.tableLoading = false;
             });
         })
-        .catch(() => {});
+        .catch(() => {
+        });
     },
   },
 };
@@ -219,7 +227,8 @@ export default {
     padding: 10px 20px 20px;
     border-top: 1px solid #f0f0f0;
   }
-  /deep/ .el-button.is-disabled{
+
+  /deep/ .el-button.is-disabled {
     background: transparent;
   }
 }
@@ -228,12 +237,14 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
+
   h1 {
     font-size: 18px;
     font-weight: bold;
     margin: 0;
     color: #1f2329;
   }
+
   .title-tip {
     color: $color;
   }
@@ -249,9 +260,11 @@ export default {
   &.success {
     color: #67c23a;
   }
+
   &.error {
     color: #f56c6c;
   }
+
   &.pending {
     color: #909399;
   }

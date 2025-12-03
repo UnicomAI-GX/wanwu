@@ -1,5 +1,6 @@
 import { getHistoryList } from "@/api/explore";
 import { getEmbeddingList } from "@/api/modelAccess";
+import {INITIAL} from "@/views/knowledge/constants";
 export const app = {
     namespaced: true,
     state: {
@@ -22,7 +23,7 @@ export const app = {
         historyAppList:[],
         embeddingList:[],
         fromList:'',
-        permissionType:-1
+        permissionType: INITIAL
     },
 
     mutations: {
@@ -30,7 +31,7 @@ export const app = {
             state.permissionType = data
         },
         CLEAR_PERMISSION_TYPE(state){
-            state.permissionType = -1
+            state.permissionType = INITIAL
         },
         SET_MAX_PICNUM(state,data){
             state.maxPicNum = data

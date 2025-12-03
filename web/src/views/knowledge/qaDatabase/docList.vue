@@ -12,12 +12,20 @@
     <div class="block table-wrap list-common wrap-fullheight">
       <el-container class="konw_container">
         <el-main class="noPadding">
+          <el-alert
+            :title="title_tips"
+            type="warning"
+            show-icon
+            style="margin-bottom: 10px"
+            v-if="showTips"
+          ></el-alert>
           <el-container>
             <el-header class="classifyTitle">
               <div class="searchInfo">
                 <el-select
                   @change="changeOption($event)"
                   v-model="docQuery.status"
+                  clearable
                   :placeholder="$t('knowledgeManage.please')"
                   style="width: 150px"
                   class="marginRight no-border-select cover-input-icon"
@@ -31,7 +39,7 @@
                 </el-select>
                 <search-input
                   class="cover-input-icon"
-                  :placeholder="$t('knowledgeManage.docPlaceholder')"
+                  :placeholder="$t('knowledgeManage.questionPlaceholder')"
                   ref="searchInput"
                   @handleSearch="handleSearch"
                 />
@@ -44,56 +52,13 @@
                   icon="el-icon-refresh"
                   @click="reload"
                 >
-                  {{ $t("common.gpuDialog.reload") }}
                 </el-button>
                 <el-button
                   size="mini"
                   type="primary"
                   @click="
                     $router.push(
-                      `/knowledge/graphMap/${docQuery.knowledgeId}?name=${knowledgeName}`
-                    )
-                  "
-                  v-if="showGraphReport"
-                >
-                  {{ $t("knowledgeManage.hitTest.graph") }}
-                </el-button>
-                <el-button
-                  size="mini"
-                  type="primary"
-                  @click="
-                    $router.push(
-                      `/knowledge/communityReport?knowledgeId=${docQuery.knowledgeId} &name=${knowledgeName}`
-                    )
-                  "
-                  v-if="showGraphReport"
-                >
-                  <span>
-                    {{ $t("knowledgeManage.hitTest.communityReport") }}
-                  </span>
-                  <el-tooltip
-                    class="item"
-                    effect="dark"
-                    :content="$t('knowledgeManage.docList.communityReportTips')"
-                    placement="top"
-                  >
-                    <i class="el-icon-question" style="margin-left: 2px"></i>
-                  </el-tooltip>
-                </el-button>
-                <el-button
-                  size="mini"
-                  type="primary"
-                  @click="showMeta"
-                  v-if="[10, 20, 30].includes(permissionType)"
-                >
-                  {{ $t("knowledgeManage.docList.metaDataManagement") }}
-                </el-button>
-                <el-button
-                  size="mini"
-                  type="primary"
-                  @click="
-                    $router.push(
-                      `/knowledge/hitTest?knowledgeId=${docQuery.knowledgeId}&graphSwitch=${graphSwitch}`
+                      `/knowledge/hitTest?knowledgeId=${docQuery.knowledgeId}&type=qa`
                     )
                   "
                 >
@@ -102,72 +67,108 @@
                 <el-button
                   size="mini"
                   type="primary"
-                  :underline="false"
-                  @click="handleUpload"
-                  v-if="[10, 20, 30].includes(permissionType)"
+                  @click="showMeta"
+                  v-if="hasManagePerm"
                 >
-                  {{ $t("knowledgeManage.fileUpload") }}
+                  {{ $t("knowledgeManage.docList.metaDataManagement") }}
                 </el-button>
+                <template v-if="hasManagePerm">
+                  <el-dropdown
+                    v-for="(group,index) in dropdownGroups"
+                    :key="group.label"
+                    @command="handleCommand"
+                    :style="{ margin: index === 0 ? '0 10px' : '' }"
+                  >
+                    <el-button size="mini" type="primary">
+                      {{ group.label }}
+                      <i :class="['el-icon--right', group.icon]"></i>
+                    </el-button>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item
+                        v-for="item in group.items"
+                        :key="item.command"
+                        :command="item.command"
+                      >
+                        {{ item.label }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </template>
               </div>
             </el-header>
             <el-main class="noPadding" v-loading="tableLoading">
-              <el-alert
-                :title="title_tips"
-                type="warning"
-                show-icon
-                style="margin-bottom: 10px"
-                v-if="showTips"
-              ></el-alert>
               <el-table
                 ref="dataTable"
                 :data="tableData"
                 style="width: 100%"
-                :row-key="'docId'"
+                :row-key="'qaPairId'"
                 :header-cell-style="{ background: '#F9F9F9', color: '#999999' }"
                 @selection-change="handleSelectionChange"
               >
                 <el-table-column
                   type="selection"
                   reserve-selection
-                  v-if="[10, 20, 30].includes(permissionType)"
+                  :key="'selection-' + hasManagePerm"
+                  v-if="hasManagePerm"
                   width="55"
                 >
                 </el-table-column>
                 <el-table-column
-                  prop="docName"
-                  :label="$t('knowledgeManage.fileName')"
-                  min-width="180"
+                  prop="question"
+                  :label="$t('knowledgeManage.qaDatabase.question')"
+                  min-width="100"
                 >
                   <template slot-scope="scope">
                     <el-popover
                       placement="bottom-start"
-                      :content="scope.row.docName"
+                      :content="scope.row.question"
                       trigger="hover"
-                      width="300"
                     >
                       <span slot="reference">
                         {{
-                          scope.row.docName.length > 20
-                            ? scope.row.docName.slice(0, 20) + "..."
-                            : scope.row.docName
+                          scope.row.question.length > 20
+                            ? scope.row.question.slice(0, 20) + "..."
+                            : scope.row.question
                         }}
                       </span>
                     </el-popover>
                   </template>
                 </el-table-column>
                 <el-table-column
-                  prop="docType"
-                  :label="$t('knowledgeManage.fileStyle')"
+                  prop="answer"
+                  :label="$t('knowledgeManage.qaDatabase.answer')"
+                  width="180"
                 >
+                  <template slot-scope="scope">
+                    <el-popover
+                      placement="bottom-start"
+                      :content="scope.row.answer"
+                      trigger="hover"
+                      width="300"
+                    >
+                      <span slot="reference">
+                        {{
+                          scope.row.answer.length > 20
+                            ? scope.row.answer.slice(0, 20) + "..."
+                            : scope.row.answer
+                        }}
+                      </span>
+                    </el-popover>
+                  </template>
                 </el-table-column>
                 <el-table-column
-                  prop="segmentMethod"
-                  :label="$t('knowledgeManage.docList.segmentMode')"
+                  prop="metaDataList"
+                  :label="$t('knowledgeManage.qaDatabase.metaData')"
+                  v-if="hasManagePerm"
                 >
                   <template slot-scope="scope">
                     <span>
-                      {{ getSegmentMethodText(scope.row.segmentMethod) }}
+                      {{ getMetaDataText(scope.row.metaDataList) }}
                     </span>
+                    <span
+                      class="el-icon-edit-outline edit-icon"
+                      @click="handleEditMetaData(scope.row)"
+                    ></span>
                   </template>
                 </el-table-column>
                 <el-table-column
@@ -176,94 +177,84 @@
                 >
                 </el-table-column>
                 <el-table-column
-                  prop="uploadTime"
-                  :label="$t('knowledgeManage.importTime')"
-                  width="200"
+                  prop="switch"
+                  :label="$t('user.table.status')"
+                  v-if="hasManagePerm"
                 >
+                  <template slot-scope="scope">
+                    <el-switch
+                      v-model="scope.row.switch"
+                      :active-value="true"
+                      :inactive-value="false"
+                      @change="handleSwitch(scope.row)"
+                    ></el-switch>
+                  </template>
                 </el-table-column>
                 <el-table-column
                   prop="status"
-                  :label="$t('knowledgeManage.currentStatus')"
-                  width="150"
-                >
-                  <template slot-scope="scope">
-                    <span
-                      :class="[
-                        [4, 5].includes(scope.row.status) ? 'error' : '',
-                      ]"
-                    >
-                      {{ filterStatus(scope.row.status) }}
-                    </span>
-                    <el-tooltip
-                      class="item"
-                      effect="light"
-                      :content="scope.row.errorMsg ? scope.row.errorMsg : ''"
-                      placement="top"
-                      v-if="scope.row.status === 5"
-                      popper-class="custom-tooltip"
-                    >
-                      <span
-                        class="el-icon-warning"
-                        style="margin-left: 5px; color: #e6a23c"
-                      ></span>
-                    </el-tooltip>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  v-if="graphSwitch"
-                  prop="graphStatus"
-                  :label="$t('knowledgeManage.graph.graphStatus')"
+                  :label="$t('knowledgeManage.importStatus')"
                 >
                   <template slot-scope="scope">
                     <span>
-                      {{ knowledgeGraphStatus[scope.row.graphStatus] }}
+                      {{
+                        qaImportStatus &&
+                        scope.row &&
+                        scope.row.status !== undefined
+                          ? qaImportStatus[Number(scope.row.status)]
+                          : "--"
+                      }}
                     </span>
-                    <el-tooltip
-                      class="item"
-                      effect="light"
-                      :content="
-                        scope.row.graphErrMsg ? scope.row.graphErrMsg : ''
-                      "
-                      placement="top"
-                      v-if="scope.row.graphStatus === 3"
-                      popper-class="custom-tooltip"
-                    >
-                      <span
-                        class="el-icon-warning"
-                        style="margin-left: 5px; color: #e6a23c"
-                      ></span>
-                    </el-tooltip>
                   </template>
                 </el-table-column>
                 <el-table-column
+                  prop="uploadTime"
+                  :label="$t('knowledgeManage.importTime')"
+                  width="150"
+                >
+                </el-table-column>
+                <el-table-column
                   :label="$t('knowledgeManage.operate')"
-                  width="260"
+                  width="200"
+                  v-if="hasManagePerm"
                 >
                   <template slot-scope="scope">
                     <el-button
                       size="mini"
                       round
-                      @click="handleDel(scope.row)"
-                      :disabled="[2, 3].includes(Number(scope.row.status))"
-                      v-if="[10, 20, 30].includes(permissionType)"
                       :type="
-                        [2, 3].includes(Number(scope.row.status)) ? 'info' : ''
+                        scope.row &&
+                        scope.row.status &&
+                        [QA_STATUS_PENDING, QA_STATUS_PROCESSING, QA_STATUS_FAILED].includes(Number(scope.row.status))
+                          ? 'info'
+                          : ''
                       "
+                      :disabled="
+                        scope.row &&
+                        scope.row.status &&
+                        [QA_STATUS_PENDING, QA_STATUS_PROCESSING, QA_STATUS_FAILED].includes(Number(scope.row.status))
+                      "
+                      @click="handleEdit(scope.row)"
                     >
-                      {{ $t("common.button.delete") }}
+                      {{ $t("common.button.edit") }}
                     </el-button>
                     <el-button
                       size="mini"
                       round
+                      @click="handleDel(scope.row)"
+                      :disabled="
+                        scope.row &&
+                        scope.row.status &&
+                        [QA_STATUS_PENDING, QA_STATUS_PROCESSING, QA_STATUS_FAILED].includes(Number(scope.row.status))
+                      "
                       :type="
-                        [0, 3, 5].includes(Number(scope.row.status))
+                        scope.row &&
+                        scope.row.status &&
+                        [QA_STATUS_PENDING, QA_STATUS_PROCESSING, QA_STATUS_FAILED].includes(Number(scope.row.status))
                           ? 'info'
                           : ''
                       "
-                      :disabled="[0, 3, 5].includes(Number(scope.row.status))"
-                      @click="handleView(scope.row)"
                     >
-                      {{ $t("knowledgeManage.view") }}
+                      {{ $t("common.button.delete") }}
                     </el-button>
                   </template>
                 </el-table-column>
@@ -313,56 +304,94 @@
       ref="batchMetaData"
       :selectedDocIds="selectedDocIds"
       @reLoadDocList="reLoadDocList"
+      :type="batchMetaType"
     />
     <!-- 批量编辑元数据值操作框 -->
-    <BatchMetatButton
-      ref="BatchMetatButton"
+    <BatchMetaButton
+      ref="BatchMetaButton"
       :selectedCount="selectedTableData.length"
       @showBatchMeta="showBatchMeta"
       @handleBatchDelete="handleBatchDelete"
       @handleMetaCancel="handleMetaCancel"
+      :type="batchMetaType"
     />
+    <!-- 新建/编辑问答对 -->
+    <createQa
+      ref="createQa"
+      @updateData="updateData"
+      :knowledgeId="docQuery.knowledgeId"
+    />
+    <!-- 文件上传 -->
+    <fileUpload
+      ref="fileUpload"
+      @updateData="updateData"
+      :knowledgeId="docQuery.knowledgeId"
+    />
+    <!-- 导出记录 -->
+    <exportRecord ref="exportRecord" :knowledgeId="docQuery.knowledgeId"/>
   </div>
 </template>
 
 <script>
 import Pagination from "@/components/pagination.vue";
 import SearchInput from "@/components/searchInput.vue";
-import mataData from "./metadata.vue";
-import batchMetaData from "./meta/batchMetaData.vue";
-import BatchMetatButton from "./meta/batchMetatButton.vue";
+import mataData from "../component/metadata.vue";
+import batchMetaData from "../component/meta/batchMetaData.vue";
+import BatchMetaButton from "../component/meta/batchMetaButton.vue";
+import createQa from "./createQa.vue";
+import fileUpload from "./fileUpload.vue";
+import exportRecord from "./exportRecord.vue";
+import {updateDocMeta} from "@/api/knowledge";
 import {
-  getDocList,
-  delDocItem,
-  uploadFileTips,
-  updateDocMeta,
-} from "@/api/knowledge";
-import { mapGetters } from "vuex";
-import { KNOWLEDGE_GRAPH_STATUS } from "../config";
+  getQaPairList,
+  delQaPair,
+  switchQaPair,
+  qaDocExport,
+  qaTips
+} from "@/api/qaDatabase";
+import {mapGetters} from "vuex";
+import {COMMUNITY_IMPORT_STATUS, DROPDOWN_GROUPS, QA_STATUS_OPTIONS} from "../config";
+import {
+  INITIAL,
+  POWER_TYPE_READ,
+  POWER_TYPE_ADMIN,
+  POWER_TYPE_EDIT,
+  POWER_TYPE_SYSTEM_ADMIN,
+  QA_STATUS_ALL,
+  QA_STATUS_FAILED,
+  QA_STATUS_FINISHED,
+  QA_STATUS_PENDING,
+  QA_STATUS_PROCESSING,
+} from "@/views/knowledge/constants";
+
 export default {
   components: {
     Pagination,
     SearchInput,
     mataData,
     batchMetaData,
-    BatchMetatButton,
+    BatchMetaButton,
+    createQa,
+    fileUpload,
+    exportRecord,
   },
   data() {
     return {
+      title_tips: '',
+      showTips: false,
+      batchMetaType: "single",
       knowledgeName: "",
       loading: false,
       tableLoading: false,
       docQuery: {
-        docName: "",
+        name: "",
         knowledgeId: this.$route.params.id,
-        status: -1,
+        status: QA_STATUS_ALL,
       },
       fileList: [],
-      listApi: getDocList,
-      title_tips: "",
-      showTips: false,
+      listApi: getQaPairList,
       tableData: [],
-      knowLegOptions: this.getKnowOptions(),
+      knowLegOptions: QA_STATUS_OPTIONS,
       knowledgeData: [],
       currentKnowValue: null,
       timer: null,
@@ -373,20 +402,15 @@ export default {
       isDisabled: false,
       selectedTableData: [],
       selectedDocIds: [],
-      graphSwitch: false,
-      showGraphReport: false,
-      knowledgeGraphStatus: KNOWLEDGE_GRAPH_STATUS,
+      qaImportStatus: COMMUNITY_IMPORT_STATUS,
+      dropdownGroups: DROPDOWN_GROUPS,
+      QA_STATUS_FAILED,
+      QA_STATUS_FINISHED,
+      QA_STATUS_PENDING,
+      QA_STATUS_PROCESSING
     };
   },
   watch: {
-    $route: {
-      handler(val) {
-        if (val.query.done) {
-          this.startTimer();
-        }
-      },
-      immediate: true,
-    },
     metaData: {
       handler(val) {
         if (
@@ -402,11 +426,14 @@ export default {
   },
   computed: {
     ...mapGetters("app", ["permissionType"]),
+    hasManagePerm() {
+      return [POWER_TYPE_EDIT, POWER_TYPE_ADMIN, POWER_TYPE_SYSTEM_ADMIN].includes(this.permissionType);
+    }
   },
   mounted() {
     this.getTableData(this.docQuery);
     if (
-      this.permissionType === -1 ||
+      this.permissionType === INITIAL ||
       this.permissionType === null ||
       this.permissionType === undefined
     ) {
@@ -416,10 +443,11 @@ export default {
           const parsed = JSON.parse(savedData);
           const savedPermissionType =
             parsed && parsed.app && parsed.app.permissionType;
-          if (savedPermissionType !== undefined && savedPermissionType !== -1) {
+          if (savedPermissionType !== undefined && savedPermissionType !== INITIAL) {
             this.$store.dispatch("app/setPermissionType", savedPermissionType);
           }
-        } catch (e) {}
+        } catch (e) {
+        }
       }
     }
   },
@@ -427,6 +455,84 @@ export default {
     this.clearTimer();
   },
   methods: {
+    handleCommand(command) {
+      const actions = {
+        exportData: this.exportData,
+        exportRecord: this.exportRecord,
+        createQaPair: this.handleCreateQaPair,
+        fileUpload: this.handleUpload,
+      };
+      (actions[command] || this.handleUpload)();
+    },
+    exportRecord() {
+      this.$refs.exportRecord.showDialog();
+    },
+    updateData(type = '') {
+      if (type !== '') {
+        this.startTimer()
+      } else {
+        this.getTableData(this.docQuery);
+      }
+    },
+    exportData() {
+      if (!this.docQuery.knowledgeId) {
+        this.$message.warning(this.$t("common.noData"));
+        return;
+      }
+      if (this.loading) return;
+      const params = {
+        knowledgeId: this.docQuery.knowledgeId,
+      };
+      if (
+        this.docQuery.status !== undefined &&
+        this.docQuery.status !== null &&
+        this.docQuery.status !== "" &&
+        this.docQuery.status !== QA_STATUS_ALL
+      ) {
+        params.status = this.docQuery.status;
+      }
+      if (this.docQuery.name) {
+        params.name = this.docQuery.name.trim();
+      }
+      this.loading = true;
+      qaDocExport(params)
+        .then((res) => {
+          if (res.code === 0) {
+            this.$message.success(this.$t("common.message.success"));
+            const data = res.data || {};
+            const url = data.fileUrl || data.downloadUrl;
+            if (url) {
+              window.open(url, "_blank");
+            } else if (data.recordCreated) {
+              this.exportRecord();
+            }
+          }
+        })
+        .catch(() => {
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    handleCreateQaPair() {
+      this.$refs.createQa.showDialog();
+    },
+    handleEditMetaData(row) {
+      this.$refs.batchMetaData.showDialog(row);
+      this.batchMetaType = "single";
+      this.selectedTableData = [row];
+      this.selectedDocIds = [row.qaPairId];
+    },
+    handleSwitch(row) {
+      switchQaPair({qaPairId: row.qaPairId, switch: row.switch}).then(
+        (res) => {
+          if (res.code === 0) {
+            this.$message.success(this.$t("common.message.success"));
+            this.getTableData(this.docQuery);
+          }
+        }
+      );
+    },
     handleMetaCancel() {
       this.selectedTableData = [];
       this.selectedDocIds = [];
@@ -468,17 +574,14 @@ export default {
         return;
       }
       this.selectedTableData = val;
-      this.selectedDocIds = val.map((item) => item.docId);
+      this.batchMetaType = "multiple";
+      this.selectedDocIds = val.map((item) => item.qaPairId);
     },
-    getSegmentMethodText(value) {
-      switch (value) {
-        case "0":
-          return this.$t("knowledgeManage.config.commonSegment");
-        case "1":
-          return this.$t("knowledgeManage.config.parentSonSegment");
-        default:
-          return this.$t("knowledgeManage.docList.unknown");
+    getMetaDataText(list) {
+      if (!list || !Array.isArray(list) || list.length === 0) {
+        return "";
       }
+      return list.map((item) => item.metaKey).join(", ");
     },
     createMeta() {
       this.$refs.mataData.createMetaData();
@@ -496,11 +599,11 @@ export default {
       this.isDisabled = true;
       const metaList = this.metaData
         .filter((item) => item.option !== "")
-        .map(({ metaId, metaKey, metaValueType, option }) => ({
+        .map(({metaId, metaKey, metaValueType, option}) => ({
           metaKey,
-          ...(option === "add" ? { metaValueType } : {}),
+          ...(option === "add" ? {metaValueType} : {}),
           option,
-          ...(option === "update" || option === "delete" ? { metaId } : {}),
+          ...(option === "update" || option === "delete" ? {metaId} : {}),
         }));
       const data = {
         docId: "",
@@ -548,57 +651,20 @@ export default {
       }
     },
     goBack() {
-      this.$router.push({ path: "/knowledge" });
+      this.$router.push({path: "/knowledge"});
     },
     reload() {
       this.getTableData(this.docQuery);
     },
     handleSearch(val) {
-      this.docQuery.docName = val;
+      this.docQuery.name = val;
       this.getTableData(this.docQuery);
     },
-    getKnowOptions() {
-      const commonOptions = [
-        { label: this.$t("knowledgeManage.all"), value: -1 },
-        { label: this.$t("knowledgeManage.finish"), value: 1 },
-        { label: this.$t("knowledgeManage.fail"), value: 5 },
-        { label: this.$t("knowledgeManage.analysising"), value: 3 },
-        { label: this.$t("knowledgeManage.checkFail"), value: 4 },
-        { label: this.$t("knowledgeManage.pendingProcessing"), value: 0 },
-        { label: this.$t("knowledgeManage.checking"), value: 2 },
-      ];
-      return commonOptions;
-    },
-    submitDocname(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          this.modifyDoc({
-            id: this.currentDocdata.id,
-            docName: this.ruleForm.docName,
-          });
-        }
-      });
-    },
-    async modifyDoc(data) {
-      this.loading = true;
-      const res = await modifyDoc(data);
-      if (res.code === 0) {
-        this.$message.success(this.$t("knowledgeManage.operateSuccess"));
-        this.docListVisible = false;
-        this.getTableData(this.docQuery);
-      }
-      this.loading = false;
-    },
-    handleEdit(data) {
-      this.ruleForm.docName = data.docName;
-      this.docListVisible = true;
-      this.currentDocdata = data;
-    },
-    async handleDelete(docIdList) {
+    async handleDelete(QAPairIdList) {
       this.loading = true;
       try {
-        let res = await delDocItem({
-          docIdList,
+        let res = await delQaPair({
+          QAPairIdList,
           knowledgeId: this.docQuery.knowledgeId
         });
         if (res.code === 0) {
@@ -619,8 +685,9 @@ export default {
           type: "warning",
         }
       ).then(() => {
-        this.handleDelete([data.docId]);
-      }).catch(() => {});
+        this.handleDelete([data.qaPairId]);
+      }).catch(() => {
+      });
     },
     handleBatchDelete() {
       this.$confirm(
@@ -633,7 +700,8 @@ export default {
         }
       ).then(() => {
         this.handleDelete(this.selectedDocIds);
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
     async getTableData(data) {
       this.tableLoading = true;
@@ -642,7 +710,7 @@ export default {
       this.getTips();
     },
     getTips() {
-      uploadFileTips({ knowledgeId: this.docQuery.knowledgeId }).then((res) => {
+      qaTips({knowledgeId: this.docQuery.knowledgeId}).then((res) => {
         if (res.code === 0) {
           if (res.data.uploadstatus === 1) {
             this.showTips = true;
@@ -658,65 +726,20 @@ export default {
       });
     },
     changeOption(data) {
-      //通过文档状态查找
       this.docQuery.status = data;
-      this.getTableData({ ...this.docQuery, pageNo: 1 });
+      this.getTableData({...this.docQuery, pageNo: 1});
     },
-    filterStatus(status) {
-      switch (status) {
-        case 0:
-          return this.$t("knowledgeManage.pendingProcessing");
-          break;
-        case 1:
-          return this.$t("knowledgeManage.finish");
-          break;
-        case 2:
-          return this.$t("knowledgeManage.checking");
-          break;
-        case 3:
-          return this.$t("knowledgeManage.analysising");
-          break;
-        case 4:
-          return this.$t("knowledgeManage.checkFail");
-          break;
-        case 5:
-          return this.$t("knowledgeManage.fail");
-          break;
-        case -2:
-          return this.$t("knowledgeManage.beUploaded");
-          break;
-        default:
-          return this.$t("knowledgeManage.noStatus");
-      }
-    },
-    handleView(row) {
-      this.$router.push({
-        path: "/knowledge/section",
-        query: {
-          id: row.docId,
-          type: row.docType,
-          name: row.docName,
-          knowledgeId: row.knowledgeId,
-          knowledgeName: this.knowledgeName,
-        },
-      });
+
+    handleEdit(row) {
+      this.$refs.createQa.showDialog(row);
     },
     handleUpload() {
-      this.$router.push({
-        path: "/knowledge/fileUpload",
-        query: { id: this.docQuery.knowledgeId, name: this.knowledgeName },
-      });
+      this.$refs.fileUpload.showDialog();
     },
     refreshData(data, tableInfo) {
       this.tableData = data;
-      if (tableInfo && tableInfo.docKnowledgeInfo) {
-        this.graphSwitch =
-          tableInfo.docKnowledgeInfo.graphSwitch === 1 ? true : false;
-        this.showGraphReport = tableInfo.docKnowledgeInfo.showGraphReport;
-        this.knowledgeName = tableInfo.docKnowledgeInfo.knowledgeName;
-      } else {
-        this.graphSwitch = false;
-        this.showGraphReport = false;
+      if (tableInfo && tableInfo.qaKnowledgeInfo) {
+        this.knowledgeName = tableInfo.qaKnowledgeInfo.knowledgeName;
       }
     },
   },
@@ -727,15 +750,18 @@ export default {
   max-height: 400px;
   overflow-y: auto;
 }
+
 .edit-icon {
   color: $color;
   cursor: pointer;
   font-size: 16px;
   margin-left: 5px;
 }
+
 .doc_tag {
   margin: 0 2px;
 }
+
 /deep/ {
   .el-button.is-disabled,
   .el-button--info.is-disabled {
@@ -743,49 +769,62 @@ export default {
     background-color: #fff !important;
     border-color: #ebeef5 !important;
   }
+
   .el-tree--highlight-current
-    .el-tree-node.is-current
-    > .el-tree-node__content {
+  .el-tree-node.is-current
+  > .el-tree-node__content {
     background: #ffefef;
   }
+
   .el-tabs__item.is-active {
     color: #e60001 !important;
   }
+
   .el-tabs__active-bar {
     background-color: #e60001 !important;
   }
+
   .el-tabs__content {
     width: 100%;
     height: calc(100% - 40px);
   }
+
   .el-tab-pane {
     width: 100%;
     height: 100%;
   }
+
   .el-tree .el-tree-node__content {
     height: 40px;
   }
+
   .custom-tree-node {
     padding: 0 10px;
   }
+
   .el-tree .el-tree-node__content:hover {
     background: #ffefef;
   }
+
   .el-tree-node__expand-icon {
     display: none;
   }
+
   .el-button.is-round {
     border-color: #dcdfe6;
     color: #606266;
   }
+
   .el-upload-list {
     max-height: 200px;
     overflow-y: auto;
   }
+
   .el-dialog__body {
     padding: 10px 20px;
   }
 }
+
 .fileNumber {
   margin-left: 10px;
   display: inline-block;
@@ -794,24 +833,31 @@ export default {
   background: rgb(243, 243, 243);
   border-radius: 8px;
 }
+
 .defalutColor {
   color: #e7e7e7 !important;
 }
+
 .border {
   border: 1px solid #e4e7ed;
 }
+
 .noPadding {
   padding: 0 10px;
 }
+
 .activeColor {
   color: #e60001;
 }
+
 .error {
   color: #e60001;
 }
+
 .marginRight {
   margin-right: 10px;
 }
+
 .full-content {
   //padding: 20px 20px 30px 20px;
   margin: auto;
@@ -823,36 +869,45 @@ export default {
     color: #333;
     padding: 10px 0;
   }
+
   .tips {
     font-size: 14px;
     color: #aaabb0;
     margin-bottom: 10px;
   }
+
   .block {
     width: 100%;
     height: calc(100% - 58px);
+
     .el-tabs {
       width: 100%;
       height: 100%;
+
       .konw_container {
         width: 100%;
         height: 100%;
+
         .tree {
           height: 100%;
           background: none;
+
           .custom-tree-node {
             width: 100%;
             display: flex;
             justify-content: space-between;
+
             .icon {
               font-size: 16px;
               transform: rotate(90deg);
               color: #aaabb0;
             }
+
             .nodeLabel {
               color: #e60001;
               display: flex;
               align-items: center;
+
               .tag {
                 display: block;
                 width: 5px;
@@ -866,14 +921,17 @@ export default {
         }
       }
     }
+
     .classifyTitle {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 10px;
+
       h2 {
         font-size: 16px;
       }
+
       .content_title {
         display: flex;
         align-items: center;
@@ -881,13 +939,16 @@ export default {
       }
     }
   }
+
   .uploadTips {
     color: #aaabb0;
     font-size: 12px;
     height: 30px;
   }
+
   .document_lise {
     list-style: none;
+
     li {
       display: flex;
       justify-content: space-between;
@@ -895,12 +956,15 @@ export default {
       padding: 7px;
       border-radius: 3px;
       line-height: 1;
+
       .el-icon-success {
         display: block;
       }
+
       .el-icon-error {
         display: none;
       }
+
       &:hover {
         cursor: pointer;
         background: #eee;
@@ -908,10 +972,12 @@ export default {
         .el-icon-success {
           display: none;
         }
+
         .el-icon-error {
           display: block;
         }
       }
+
       &.document_loading {
         &:hover {
           cursor: pointer;
@@ -920,11 +986,13 @@ export default {
           .el-icon-success {
             display: none;
           }
+
           .el-icon-error {
             display: none;
           }
         }
       }
+
       .el-icon-success {
         color: #67c23a;
       }
@@ -932,10 +1000,12 @@ export default {
       .result_icon {
         float: right;
       }
+
       .size {
         font-weight: bold;
       }
     }
+
     .document_error {
       color: red;
     }
@@ -948,9 +1018,11 @@ export default {
   background-color: #fff; /* 设置背景颜色 */
   color: #666; /* 设置文字颜色 */
 }
+
 .custom-tooltip.el-tooltip__popper[x-placement^="top"] .popper__arrow::after {
   border-top-color: #fff !important;
 }
+
 .custom-tooltip.el-tooltip__popper.is-light[x-placement^="top"] .popper__arrow {
   border-top-color: #ccc !important;
 }

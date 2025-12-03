@@ -677,7 +677,7 @@ export default {
     all: "全部",
     finish: "处理完成",
     fail: "解析失败",
-    analysising: "正在解析中",
+    analysing: "正在解析中",
     pendingProcessing: "待处理",
     beUploaded: "待上传",
     checking: "正在审核中",
