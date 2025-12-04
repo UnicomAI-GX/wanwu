@@ -252,6 +252,7 @@ func AssistantToolConfig(ctx *gin.Context, userId, orgId string, req request.Ass
 	})
 	return err
 }
+
 func assistantModelConvert(ctx *gin.Context, modelConfigInfo *common.AppModelConfig) (modelConfig request.AppModelConfig, err error) {
 	if modelConfigInfo != nil && modelConfigInfo.ModelId != "" {
 		log.Debugf("检测到模型配置，模型ID: %s", modelConfigInfo.ModelId)
@@ -280,13 +281,14 @@ func assistantRerankConvert(ctx *gin.Context, rerankConfigInfo *common.AppModelC
 		modelInfo, err := model.GetModelById(ctx.Request.Context(), &model_service.GetModelByIdReq{ModelId: rerankConfigInfo.ModelId})
 		if err != nil {
 			log.Errorf("获取Rerank模型信息失败，模型ID: %s, 错误: %v", rerankConfigInfo.ModelId, err)
+		} else {
+			rerankConfig, err = appModelConfigProto2Model(rerankConfigInfo, modelInfo.DisplayName)
+			if err != nil {
+				log.Errorf("Rerank配置Proto转换到模型失败，模型ID: %s, 错误: %v", rerankConfigInfo.ModelId, err)
+				return rerankConfig, err
+			}
+			log.Debugf("Rerank配置转换成功: %+v", rerankConfig)
 		}
-		rerankConfig, err = appModelConfigProto2Model(rerankConfigInfo, modelInfo.DisplayName)
-		if err != nil {
-			log.Errorf("Rerank配置Proto转换到模型失败，模型ID: %s, 错误: %v", rerankConfigInfo.ModelId, err)
-			return rerankConfig, err
-		}
-		log.Debugf("Rerank配置转换成功: %+v", rerankConfig)
 	} else {
 		log.Debugf("Rerank配置为空或模型ID为空")
 	}
