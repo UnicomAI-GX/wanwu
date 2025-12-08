@@ -247,6 +247,7 @@
             @updateMetaData="updateMetaData"
             :labelText="$t('agent.form.linkKnowledge')"
             :type="'knowledgeBaseConfig'"
+            :appType="'agent'"
           />
         </div>
 

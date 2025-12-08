@@ -32,7 +32,7 @@
       </div>
     </div>
     <div class="qa-database-content">
-      <div class="action-list" v-if="showKnowledgeList">
+      <div class="action-list" v-if="showKnowledgeList" :class="{'single-row':appType === 'agent', 'two-row':appType !== 'agent'}">
         <div
           v-for="(item, index) in knowledgeList"
           :key="index"
@@ -118,6 +118,10 @@ export default {
       default: '',
       require: true
     },
+    appType:{
+      type: String,
+      default: 'rag',
+    }
   },
   data() {
     return {
@@ -134,9 +138,6 @@ export default {
       handler(val) {
         if (val === 'qaKnowledgeBaseConfig') {
           this.showGraphSwitch = false;
-        } else {
-          const knowledgebases = (this.knowledgeConfig && this.knowledgeConfig.knowledgebases) || [];
-          this.showGraphSwitch = knowledgebases.some((item) => item.graphSwitch === 1);
         }
       },
       immediate: true
@@ -145,6 +146,7 @@ export default {
       handler(val) {
         this.knowledgeList = val.knowledgebases || [];
         this.knowledgeRecallConfig = val.config || {};
+        this.showGraphSwitch =  this.knowledgeList.some((item) => item.graphSwitch === 1);
       },
       immediate: true,
       deep: true
@@ -254,10 +256,14 @@ export default {
   .qa-database-content {
     .action-list {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       width: 100%;
-
+      &.single-row {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+      &.two-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
       .action-item {
         display: flex;
         justify-content: space-between;
