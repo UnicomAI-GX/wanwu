@@ -326,7 +326,8 @@
     <BatchMetaButton
       ref="BatchMetaButton"
       :selectedCount="selectedTableData.length"
-      type="qa"
+      :type="'qa'"
+      :batchMetaType="batchMetaType"
       @showBatchMeta="showBatchMeta"
       @handleBatchDelete="handleBatchDelete"
       @handleMetaCancel="handleMetaCancel"
