@@ -1,12 +1,12 @@
 <div align="center">
   <img src="https://github.com/user-attachments/assets/6ceb4269-a861-4545-84db-bad322592156" style="width:45%; height:auto;" />
 <p>
-  <a href="#-Using Wanwu">Feature List</a> •
-  <a href="#-Typical Application Scenarios">Typical Application Scenarios</a> •
-  <a href="#-Quick Start">Quick Start</a> •
-  <a href="#-Using Wanwu">Using Wanwu</a> •
-  <a href="#-q--a">Q & A</a> •
-  <a href="#-Contact Us">Contact Us</a> 
+  <a href="#🚩 Core Function Modules">Core Function Modules</a> •
+  <a href="#x1F3AF; Typical Application Scenarios">Typical Application Scenarios</a> •
+  <a href="#🚀 Quick Start">Quick Start</a> •
+  <a href="#x1F4D1; Using Wanwu">Using Wanwu</a> •
+  <a href="#128172; Q & A">Q & A</a> •
+  <a href="#x1F4E9; Contact Us">Contact Us</a> 
 </p>
 <p>
   <img alt="License" src="https://img.shields.io/badge/license-apache2.0-blue.svg">
@@ -53,7 +53,7 @@
 
 ### 🚩 Core Function Modules
 
-#### **1. Model Management (Model Hub**)
+#### **1. Model Management (Model Hub)**
 ▸ Supports the unified access and lifecycle management of **hundreds of proprietary/open-source large models** (including GPT, Claude, Llama, etc.)
 
 ▸ Deeply adapts to **OpenAI API standards** and **Unicom Yuanjing** ecological models, realizing seamless switching of heterogeneous models
@@ -72,7 +72,7 @@
 
 ▸ **Intelligent search strategy**: Adopt intelligent search algorithms, automatically optimize search strategies based on user questions to improve search efficiency and accuracy. Support keyword search, semantic search and other search methods to meet the needs of different users. At the same time, intelligently sort and filter search results, prioritize the display of the most relevant and valuable information
 
-#### **4. Visual Workflow (Workflow Studio**)
+#### **4. Visual Workflow (Workflow Studio)**
 ▸ Quickly build complex AI business processes through **low-code drag-and-drop canvas**
 
 ▸ Built-in **conditional branching, API, large model, knowledge base, code, MCP** and other nodes, support end-to-end process debugging and performance analysis
@@ -82,12 +82,12 @@
 
 ▸ Integrates **multi-modal retrieval**, **cascading segmentation** and **adaptive segmentation**, significantly improves the accuracy of Q&A
 
-#### **6. AI Agent Development Framework (Agent Framework**)
-▸ Can be based on the **function call (Function Calling**) agent construction paradigm, supports tool expansion, private knowledge base association and multi-round dialogue
+#### **6. AI Agent Development Framework (Agent Framework)**
+▸ Can be based on the **function call (Function Calling)** agent construction paradigm, supports tool expansion, private knowledge base association and multi-round dialogue
 
 ▸ Support **online debugging**
 
-#### **7. Backend as a Service (BaaS**)
+#### **7. Backend as a Service (BaaS)**
 ▸ Provides **RESTful API**, supports deep integration with existing enterprise systems (OA/CRM/ERP, etc.)
 
 ▸ Provides **fine-grained permission control** to ensure stable operation in production environments
@@ -128,7 +128,7 @@ The platform has been successfully applied in multiple industries such as **fina
   - v0.1.8 and earlier: wanwu-agentscope project
   - v0.2.0 and later: [wanwu-workflow](https://github.com/UnicomAI/wanwu-workflow/tree/dev/wanwu-backend) project
 
-- **Docker Installation (Recommended**)
+- **Docker Installation (Recommended)**
 
 1. Before the first run
 
