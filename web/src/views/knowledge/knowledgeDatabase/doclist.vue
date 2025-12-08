@@ -5,8 +5,7 @@
         class="el-icon-arrow-left"
         @click="goBack"
         style="margin-right: 10px; font-size: 20px; cursor: pointer"
-      >
-      </i>
+      ></i>
       {{ knowledgeName }}
     </div>
     <div class="block table-wrap list-common wrap-fullheight">
@@ -35,6 +34,12 @@
                   ref="searchInput"
                   @handleSearch="handleSearch"
                 />
+                <search-input
+                  class="cover-input-icon"
+                  :placeholder="$t('knowledgeManage.metaPlaceholder')"
+                  ref="searchInputMeta"
+                  @handleSearch="handleSearchByMeta"
+                />
               </div>
 
               <div class="content_title">
@@ -43,71 +48,80 @@
                   type="primary"
                   icon="el-icon-refresh"
                   @click="reload"
-                >
-                  {{ $t("common.gpuDialog.reload") }}
-                </el-button>
-                <el-button
-                  size="mini"
-                  type="primary"
-                  @click="
-                    $router.push(
-                      `/knowledge/graphMap/${docQuery.knowledgeId}?name=${knowledgeName}`
-                    )
-                  "
-                  v-if="showGraphReport"
-                >
-                  {{ $t("knowledgeManage.hitTest.graph") }}
-                </el-button>
-                <el-button
-                  size="mini"
-                  type="primary"
-                  @click="
-                    $router.push(
-                      `/knowledge/communityReport?knowledgeId=${docQuery.knowledgeId} &name=${knowledgeName}`
-                    )
-                  "
-                  v-if="showGraphReport"
-                >
-                  <span>
-                    {{ $t("knowledgeManage.hitTest.communityReport") }}
-                  </span>
-                  <el-tooltip
-                    class="item"
-                    effect="dark"
-                    :content="$t('knowledgeManage.docList.communityReportTips')"
-                    placement="top"
+                ></el-button>
+                <template v-if="showGraphReport">
+                  <el-dropdown
+                    v-for="(group, index) in graphDropdownGroups"
+                    :key="group.label"
+                    @command="handleCommand"
+                    :style="{ margin: index === 0 ? '0 10px' : '' }"
                   >
-                    <i class="el-icon-question" style="margin-left: 2px"></i>
-                  </el-tooltip>
-                </el-button>
+                    <el-button size="mini" type="primary">
+                      {{ group.label }}
+                      <i :class="['el-icon--right', group.icon]"></i>
+                    </el-button>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item
+                        v-for="item in group.items"
+                        :key="item.command"
+                        :command="item.command"
+                      >
+                        {{ item.label }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </template>
+
                 <el-button
                   size="mini"
                   type="primary"
                   @click="showMeta"
-                  v-if="[10, 20, 30].includes(permissionType)"
+                  v-if="hasManagePerm"
                 >
-                  {{ $t("knowledgeManage.docList.metaDataManagement") }}
+                  {{ $t('knowledgeManage.docList.metaDataManagement') }}
                 </el-button>
                 <el-button
                   size="mini"
                   type="primary"
                   @click="
                     $router.push(
-                      `/knowledge/hitTest?knowledgeId=${docQuery.knowledgeId}&graphSwitch=${graphSwitch}`
+                      `/knowledge/hitTest?knowledgeId=${docQuery.knowledgeId}&graphSwitch=${graphSwitch}`,
                     )
                   "
                 >
-                  {{ $t("knowledgeManage.hitTest.name") }}
+                  {{ $t('knowledgeManage.hitTest.name') }}
                 </el-button>
                 <el-button
                   size="mini"
                   type="primary"
                   :underline="false"
                   @click="handleUpload"
-                  v-if="[10, 20, 30].includes(permissionType)"
+                  v-if="hasManagePerm"
                 >
-                  {{ $t("knowledgeManage.fileUpload") }}
+                  {{ $t('knowledgeManage.fileUpload') }}
                 </el-button>
+                <template v-if="hasManagePerm">
+                  <el-dropdown
+                    v-for="(group, index) in dropdownGroups"
+                    :key="group.label"
+                    @command="handleCommand"
+                    :style="{ margin: index === 0 ? '0 10px' : '' }"
+                  >
+                    <el-button size="mini" type="primary">
+                      {{ group.label }}
+                      <i :class="['el-icon--right', group.icon]"></i>
+                    </el-button>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item
+                        v-for="item in group.items"
+                        :key="item.command"
+                        :command="item.command"
+                      >
+                        {{ item.label }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </template>
               </div>
             </el-header>
             <el-main class="noPadding" v-loading="tableLoading">
@@ -129,10 +143,9 @@
                 <el-table-column
                   type="selection"
                   reserve-selection
-                  v-if="[10, 20, 30].includes(permissionType)"
+                  v-if="hasManagePerm"
                   width="55"
-                >
-                </el-table-column>
+                ></el-table-column>
                 <el-table-column
                   prop="docName"
                   :label="$t('knowledgeManage.fileName')"
@@ -148,7 +161,7 @@
                       <span slot="reference">
                         {{
                           scope.row.docName.length > 20
-                            ? scope.row.docName.slice(0, 20) + "..."
+                            ? scope.row.docName.slice(0, 20) + '...'
                             : scope.row.docName
                         }}
                       </span>
@@ -158,8 +171,7 @@
                 <el-table-column
                   prop="docType"
                   :label="$t('knowledgeManage.fileStyle')"
-                >
-                </el-table-column>
+                ></el-table-column>
                 <el-table-column
                   prop="segmentMethod"
                   :label="$t('knowledgeManage.docList.segmentMode')"
@@ -173,14 +185,12 @@
                 <el-table-column
                   prop="author"
                   :label="$t('knowledgeManage.author')"
-                >
-                </el-table-column>
+                ></el-table-column>
                 <el-table-column
                   prop="uploadTime"
                   :label="$t('knowledgeManage.importTime')"
                   width="200"
-                >
-                </el-table-column>
+                ></el-table-column>
                 <el-table-column
                   prop="status"
                   :label="$t('knowledgeManage.currentStatus')"
@@ -189,7 +199,12 @@
                   <template slot-scope="scope">
                     <span
                       :class="[
-                        [4, 5].includes(scope.row.status) ? 'error' : '',
+                        [
+                          KNOWLEDGE_STATUS_CHECK_FAIL,
+                          KNOWLEDGE_STATUS_FAIL,
+                        ].includes(scope.row.status)
+                          ? 'error'
+                          : '',
                       ]"
                     >
                       {{ filterStatus(scope.row.status) }}
@@ -199,7 +214,7 @@
                       effect="light"
                       :content="scope.row.errorMsg ? scope.row.errorMsg : ''"
                       placement="top"
-                      v-if="scope.row.status === 5"
+                      v-if="scope.row.status === KNOWLEDGE_STATUS_FAIL"
                       popper-class="custom-tooltip"
                     >
                       <span
@@ -244,26 +259,46 @@
                       size="mini"
                       round
                       @click="handleDel(scope.row)"
-                      :disabled="[2, 3].includes(Number(scope.row.status))"
-                      v-if="[10, 20, 30].includes(permissionType)"
+                      :disabled="
+                        [
+                          KNOWLEDGE_STATUS_CHECKING,
+                          KNOWLEDGE_STATUS_ANALYSING,
+                        ].includes(Number(scope.row.status))
+                      "
+                      v-if="hasManagePerm"
                       :type="
-                        [2, 3].includes(Number(scope.row.status)) ? 'info' : ''
+                        [
+                          KNOWLEDGE_STATUS_CHECKING,
+                          KNOWLEDGE_STATUS_ANALYSING,
+                        ].includes(Number(scope.row.status))
+                          ? 'info'
+                          : ''
                       "
                     >
-                      {{ $t("common.button.delete") }}
+                      {{ $t('common.button.delete') }}
                     </el-button>
                     <el-button
                       size="mini"
                       round
                       :type="
-                        [0, 3, 5].includes(Number(scope.row.status))
+                        [
+                          KNOWLEDGE_STATUS_PENDING_PROCESSING,
+                          KNOWLEDGE_STATUS_ANALYSING,
+                          KNOWLEDGE_STATUS_FAIL,
+                        ].includes(Number(scope.row.status))
                           ? 'info'
                           : ''
                       "
-                      :disabled="[0, 3, 5].includes(Number(scope.row.status))"
+                      :disabled="
+                        [
+                          KNOWLEDGE_STATUS_PENDING_PROCESSING,
+                          KNOWLEDGE_STATUS_ANALYSING,
+                          KNOWLEDGE_STATUS_FAIL,
+                        ].includes(Number(scope.row.status))
+                      "
                       @click="handleView(scope.row)"
                     >
-                      {{ $t("knowledgeManage.view") }}
+                      {{ $t('knowledgeManage.view') }}
                     </el-button>
                   </template>
                 </el-table-column>
@@ -297,13 +332,13 @@
       />
       <span slot="footer" class="dialog-footer">
         <el-button @click="handleClose">
-          {{ $t("common.button.cancel") }}
+          {{ $t('common.button.cancel') }}
         </el-button>
         <el-button type="primary" @click="createMeta">
-          {{ $t("common.button.create") }}
+          {{ $t('common.button.create') }}
         </el-button>
         <el-button type="primary" @click="submitMeta" :disabled="isDisabled">
-          {{ $t("common.button.confirm") }}
+          {{ $t('common.button.confirm') }}
         </el-button>
       </span>
     </el-dialog>
@@ -315,53 +350,81 @@
       @reLoadDocList="reLoadDocList"
     />
     <!-- 批量编辑元数据值操作框 -->
-    <BatchMetatButton
-      ref="BatchMetatButton"
+    <BatchMetaButton
+      ref="BatchMetaButton"
       :selectedCount="selectedTableData.length"
+      type="knowledge"
       @showBatchMeta="showBatchMeta"
+      @handleBatchDelete="handleBatchDelete"
+      @handleBatchExport="handleBatchExport"
       @handleMetaCancel="handleMetaCancel"
     />
+    <!-- 导出记录 -->
+    <exportRecord ref="exportRecord" />
   </div>
 </template>
 
 <script>
-import Pagination from "@/components/pagination.vue";
-import SearchInput from "@/components/searchInput.vue";
-import mataData from "./metadata.vue";
-import batchMetaData from "./meta/batchMetaData.vue";
-import BatchMetatButton from "./meta/batchMetatButton.vue";
+import Pagination from '@/components/pagination.vue';
+import SearchInput from '@/components/searchInput.vue';
+import mataData from '../component/metadata.vue';
+import batchMetaData from '../component/meta/batchMetaData.vue';
+import BatchMetaButton from '../component/meta/batchMetaButton.vue';
 import {
   getDocList,
   delDocItem,
   uploadFileTips,
   updateDocMeta,
-} from "@/api/knowledge";
-import { mapGetters } from "vuex";
-import { KNOWLEDGE_GRAPH_STATUS } from "../config";
+  exportDoc,
+} from '@/api/knowledge';
+import { mapGetters } from 'vuex';
+import {
+  DROPDOWN_GROUPS,
+  KNOWLEDGE_GRAPH_STATUS,
+  KNOWLEDGE_STATUS_OPTIONS,
+} from '../config';
+import {
+  INITIAL,
+  POWER_TYPE_EDIT,
+  POWER_TYPE_ADMIN,
+  POWER_TYPE_SYSTEM_ADMIN,
+  KNOWLEDGE_STATUS_UPLOADED,
+  KNOWLEDGE_STATUS_ALL,
+  KNOWLEDGE_STATUS_PENDING_PROCESSING,
+  KNOWLEDGE_STATUS_FINISH,
+  KNOWLEDGE_STATUS_CHECKING,
+  KNOWLEDGE_STATUS_ANALYSING,
+  KNOWLEDGE_STATUS_CHECK_FAIL,
+  KNOWLEDGE_STATUS_FAIL,
+} from '@/views/knowledge/constants';
+import exportRecord from '@/views/knowledge/qaDatabase/exportRecord.vue';
+
 export default {
   components: {
+    exportRecord,
     Pagination,
     SearchInput,
     mataData,
     batchMetaData,
-    BatchMetatButton,
+    BatchMetaButton,
   },
   data() {
     return {
-      knowledgeName: "",
+      knowledgeName: '',
       loading: false,
       tableLoading: false,
       docQuery: {
-        docName: "",
+        docName: '',
+        metaValue: '',
         knowledgeId: this.$route.params.id,
-        status: -1,
+        status: KNOWLEDGE_STATUS_ALL,
       },
       fileList: [],
       listApi: getDocList,
-      title_tips: "",
+      title_tips: '',
       showTips: false,
       tableData: [],
-      knowLegOptions: this.getKnowOptions(),
+      knowLegOptions: KNOWLEDGE_STATUS_OPTIONS,
       knowledgeData: [],
       currentKnowValue: null,
       timer: null,
@@ -375,6 +438,18 @@ export default {
       graphSwitch: false,
       showGraphReport: false,
       knowledgeGraphStatus: KNOWLEDGE_GRAPH_STATUS,
+      dropdownGroups: DROPDOWN_GROUPS.slice(0, 1),
+      graphDropdownGroups: DROPDOWN_GROUPS.slice(2),
+      POWER_TYPE_EDIT,
+      POWER_TYPE_ADMIN,
+      POWER_TYPE_SYSTEM_ADMIN,
+      KNOWLEDGE_STATUS_ALL,
+      KNOWLEDGE_STATUS_PENDING_PROCESSING,
+      KNOWLEDGE_STATUS_FINISH,
+      KNOWLEDGE_STATUS_CHECKING,
+      KNOWLEDGE_STATUS_ANALYSING,
+      KNOWLEDGE_STATUS_CHECK_FAIL,
+      KNOWLEDGE_STATUS_FAIL,
     };
   },
   watch: {
@@ -389,7 +464,7 @@ export default {
     metaData: {
       handler(val) {
         if (
-          val.some((item) => !item.metaKey || !item.metaValueType) ||
+          val.some(item => !item.metaKey || !item.metaValueType) ||
           !val.length
         ) {
           this.isDisabled = true;
@@ -400,23 +475,33 @@ export default {
     },
   },
   computed: {
-    ...mapGetters("app", ["permissionType"]),
+    ...mapGetters('app', ['permissionType']),
+    hasManagePerm() {
+      return [
+        POWER_TYPE_EDIT,
+        POWER_TYPE_ADMIN,
+        POWER_TYPE_SYSTEM_ADMIN,
+      ].includes(this.permissionType);
+    },
   },
   mounted() {
     this.getTableData(this.docQuery);
     if (
-      this.permissionType === -1 ||
+      this.permissionType === INITIAL ||
       this.permissionType === null ||
       this.permissionType === undefined
     ) {
-      const savedData = localStorage.getItem("permission_data");
+      const savedData = localStorage.getItem('permission_data');
       if (savedData) {
         try {
           const parsed = JSON.parse(savedData);
           const savedPermissionType =
             parsed && parsed.app && parsed.app.permissionType;
-          if (savedPermissionType !== undefined && savedPermissionType !== -1) {
-            this.$store.dispatch("app/setPermissionType", savedPermissionType);
+          if (
+            savedPermissionType !== undefined &&
+            savedPermissionType !== INITIAL
+          ) {
+            this.$store.dispatch('app/setPermissionType', savedPermissionType);
           }
         } catch (e) {}
       }
@@ -426,6 +511,57 @@ export default {
     this.clearTimer();
   },
   methods: {
+    handleCommand(command) {
+      const actions = {
+        exportData: this.exportData,
+        exportRecord: this.exportRecord,
+        goKnowledgeGraph: this.goKnowledgeGraph,
+        goCommunityReport: this.goCommunityReport,
+      };
+      (actions[command] || this.exportData)();
+    },
+    goKnowledgeGraph() {
+      this.$router.push(
+        `/knowledge/graphMap/${this.docQuery.knowledgeId}?name=${this.knowledgeName}`,
+      );
+    },
+    goCommunityReport() {
+      this.$router.push(
+        `/knowledge/communityReport?knowledgeId=${this.docQuery.knowledgeId} &name=${this.knowledgeName}`,
+      );
+    },
+    exportData(docIdList) {
+      if (!this.docQuery.knowledgeId) {
+        this.$message.warning(this.$t('common.noData'));
+        return;
+      }
+      if (this.loading) return;
+      const params = {
+        knowledgeId: this.docQuery.knowledgeId,
+        docIdList: docIdList,
+      };
+      this.loading = true;
+      exportDoc(params)
+        .then(res => {
+          if (res.code === 0) {
+            this.$message.success(this.$t('common.message.success'));
+            const data = res.data || {};
+            const url = data.fileUrl || data.downloadUrl;
+            if (url) {
+              window.open(url, '_blank');
+            } else if (data.recordCreated) {
+              this.exportRecord();
+            }
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    exportRecord() {
+      this.$refs.exportRecord.showDialog(this.docQuery.knowledgeId);
+    },
     handleMetaCancel() {
       this.selectedTableData = [];
       this.selectedDocIds = [];
@@ -453,7 +589,7 @@ export default {
     showBatchMeta() {
       if (!this.selectedTableData || this.selectedTableData.length === 0) {
         this.$message.warning(
-          this.$t("knowledgeManage.docList.pleaseSelectDocFirst")
+          this.$t('knowledgeManage.docList.pleaseSelectDocFirst'),
         );
         return;
       }
@@ -462,21 +598,21 @@ export default {
     handleSelectionChange(val) {
       if (val.length > 100) {
         this.$message.warning(
-          this.$t("knowledgeManage.docList.maxSelect100Files")
+          this.$t('knowledgeManage.docList.maxSelect100Files'),
         );
         return;
       }
       this.selectedTableData = val;
-      this.selectedDocIds = val.map((item) => item.docId);
+      this.selectedDocIds = val.map(item => item.docId);
     },
     getSegmentMethodText(value) {
       switch (value) {
-        case "0":
-          return this.$t("knowledgeManage.config.commonSegment");
-        case "1":
-          return this.$t("knowledgeManage.config.parentSonSegment");
+        case '0':
+          return this.$t('knowledgeManage.config.commonSegment');
+        case '1':
+          return this.$t('knowledgeManage.config.parentSonSegment');
         default:
-          return this.$t("knowledgeManage.docList.unknown");
+          return this.$t('knowledgeManage.docList.unknown');
       }
     },
     createMeta() {
@@ -494,22 +630,22 @@ export default {
     submitMeta() {
       this.isDisabled = true;
       const metaList = this.metaData
-        .filter((item) => item.option !== "")
+        .filter(item => item.option !== '')
         .map(({ metaId, metaKey, metaValueType, option }) => ({
           metaKey,
-          ...(option === "add" ? { metaValueType } : {}),
+          ...(option === 'add' ? { metaValueType } : {}),
           option,
-          ...(option === "update" || option === "delete" ? { metaId } : {}),
+          ...(option === 'update' || option === 'delete' ? { metaId } : {}),
         }));
       const data = {
-        docId: "",
+        docId: '',
         knowledgeId: this.docQuery.knowledgeId,
         metaDataList: metaList,
       };
       updateDocMeta(data)
-        .then((res) => {
+        .then(res => {
           if (res.code === 0) {
-            this.$message.success(this.$t("common.message.success"));
+            this.$message.success(this.$t('common.message.success'));
             this.$refs.mataData.getList();
             this.metaVisible = false;
             this.isDisabled = false;
@@ -547,7 +683,7 @@ export default {
       }
     },
     goBack() {
-      this.$router.push({ path: "/knowledge" });
+      this.$router.push({ path: '/knowledge' });
     },
     reload() {
       this.getTableData(this.docQuery);
@@ -556,20 +692,12 @@ export default {
       this.docQuery.docName = val;
       this.getTableData(this.docQuery);
     },
-    getKnowOptions() {
-      const commonOptions = [
-        { label: this.$t("knowledgeManage.all"), value: -1 },
-        { label: this.$t("knowledgeManage.finish"), value: 1 },
-        { label: this.$t("knowledgeManage.fail"), value: 5 },
-        { label: this.$t("knowledgeManage.analysising"), value: 3 },
-        { label: this.$t("knowledgeManage.checkFail"), value: 4 },
-        { label: this.$t("knowledgeManage.pendingProcessing"), value: 0 },
-        { label: this.$t("knowledgeManage.checking"), value: 2 },
-      ];
-      return commonOptions;
+    handleSearchByMeta(val) {
+      this.docQuery.metaValue = val;
+      this.getTableData(this.docQuery);
     },
     submitDocname(formName) {
-      this.$refs[formName].validate((valid) => {
+      this.$refs[formName].validate(valid => {
         if (valid) {
           this.modifyDoc({
             id: this.currentDocdata.id,
@@ -582,7 +710,7 @@ export default {
       this.loading = true;
       const res = await modifyDoc(data);
       if (res.code === 0) {
-        this.$message.success(this.$t("knowledgeManage.operateSuccess"));
+        this.$message.success(this.$t('knowledgeManage.operateSuccess'));
         this.docListVisible = false;
         this.getTableData(this.docQuery);
       }
@@ -593,48 +721,69 @@ export default {
       this.docListVisible = true;
       this.currentDocdata = data;
     },
+    async handleDelete(docIdList) {
+      this.loading = true;
+      try {
+        let res = await delDocItem({
+          docIdList,
+          knowledgeId: this.docQuery.knowledgeId,
+        });
+        if (res.code === 0) {
+          this.$message.success(this.$t('common.info.delete'));
+        }
+      } finally {
+        this.reLoadDocList();
+        this.loading = false;
+      }
+    },
     handleDel(data) {
       this.$confirm(
-        this.$t("knowledgeManage.deleteTips"),
-        this.$t("knowledgeManage.tip"),
+        this.$t('knowledgeManage.deleteTips'),
+        this.$t('knowledgeManage.tip'),
         {
-          confirmButtonText: this.$t("common.button.confirm"),
-          cancelButtonText: this.$t("common.button.cancel"),
-          type: "warning",
-        }
+          confirmButtonText: this.$t('common.button.confirm'),
+          cancelButtonText: this.$t('common.button.cancel'),
+          type: 'warning',
+        },
       )
-        .then(async () => {
-          let jsondata = {
-            docIdList: [data.docId],
-            knowledgeId: this.docQuery.knowledgeId,
-          };
-          this.loading = true;
-          let res = await delDocItem(jsondata);
-          if (res.code === 0) {
-            this.$message.success(this.$t("common.info.delete"));
-            this.getTableData(this.docQuery); //获取知识分类数据
-          }
-          this.loading = false;
+        .then(() => {
+          this.handleDelete([data.docId]);
         })
-        .catch((error) => {
-          this.getTableData(this.docQuery);
-        });
+        .catch(() => {});
+    },
+    handleBatchDelete() {
+      this.$confirm(
+        this.$t('knowledgeManage.deleteBatchTips'),
+        this.$t('knowledgeManage.tip'),
+        {
+          confirmButtonText: this.$t('common.button.confirm'),
+          cancelButtonText: this.$t('common.button.cancel'),
+          type: 'warning',
+        },
+      )
+        .then(() => {
+          this.handleDelete(this.selectedDocIds);
+        })
+        .catch(() => {});
+    },
+    handleBatchExport() {
+      this.exportData(this.selectedDocIds);
     },
     async getTableData(data) {
       this.tableLoading = true;
-      this.tableData = await this.$refs["pagination"].getTableData(data);
+      this.tableData = await this.$refs['pagination'].getTableData(data);
       this.tableLoading = false;
       this.getTips();
     },
     getTips() {
-      uploadFileTips({ knowledgeId: this.docQuery.knowledgeId }).then((res) => {
+      uploadFileTips({ knowledgeId: this.docQuery.knowledgeId }).then(res => {
         if (res.code === 0) {
           if (res.data.uploadstatus === 1) {
             this.showTips = true;
-            this.title_tips = this.$t("knowledgeManage.refreshTips");
+            this.title_tips = this.$t('knowledgeManage.refreshTips');
           } else if (res.data.uploadstatus === 2) {
             this.showTips = false;
-            this.title_tips = "";
+            this.title_tips = '';
           } else {
             this.showTips = true;
             this.title_tips = res.data.msg;
@@ -648,35 +797,19 @@ export default {
       this.getTableData({ ...this.docQuery, pageNo: 1 });
     },
     filterStatus(status) {
-      switch (status) {
-        case 0:
-          return this.$t("knowledgeManage.pendingProcessing");
-          break;
-        case 1:
-          return this.$t("knowledgeManage.finish");
-          break;
-        case 2:
-          return this.$t("knowledgeManage.checking");
-          break;
-        case 3:
-          return this.$t("knowledgeManage.analysising");
-          break;
-        case 4:
-          return this.$t("knowledgeManage.checkFail");
-          break;
-        case 5:
-          return this.$t("knowledgeManage.fail");
-          break;
-        case -2:
-          return this.$t("knowledgeManage.beUploaded");
-          break;
-        default:
-          return this.$t("knowledgeManage.noStatus");
+      if (status === KNOWLEDGE_STATUS_UPLOADED) {
+        return this.$t('knowledgeManage.beUploaded');
       }
+      const statusOption = KNOWLEDGE_STATUS_OPTIONS.find(
+        option => option.value === status,
+      );
+      return statusOption
+        ? statusOption.label
+        : this.$t('knowledgeManage.noStatus');
     },
     handleView(row) {
       this.$router.push({
-        path: "/knowledge/section",
+        path: '/knowledge/section',
         query: {
           id: row.docId,
           type: row.docType,
@@ -688,15 +821,14 @@ export default {
     },
     handleUpload() {
       this.$router.push({
-        path: "/knowledge/fileUpload",
+        path: '/knowledge/fileUpload',
         query: { id: this.docQuery.knowledgeId, name: this.knowledgeName },
       });
     },
     refreshData(data, tableInfo) {
       this.tableData = data;
       if (tableInfo && tableInfo.docKnowledgeInfo) {
-        this.graphSwitch =
-          tableInfo.docKnowledgeInfo.graphSwitch === 1 ? true : false;
+        this.graphSwitch = tableInfo.docKnowledgeInfo.graphSwitch === 1;
         this.showGraphReport = tableInfo.docKnowledgeInfo.showGraphReport;
         this.knowledgeName = tableInfo.docKnowledgeInfo.knowledgeName;
       } else {
@@ -712,15 +844,18 @@ export default {
   max-height: 400px;
   overflow-y: auto;
 }
+
 .edit-icon {
   color: $color;
   cursor: pointer;
   font-size: 16px;
   margin-left: 5px;
 }
+
 .doc_tag {
   margin: 0 2px;
 }
+
 /deep/ {
   .el-button.is-disabled,
   .el-button--info.is-disabled {
@@ -728,49 +863,62 @@ export default {
     background-color: #fff !important;
     border-color: #ebeef5 !important;
   }
+
   .el-tree--highlight-current
     .el-tree-node.is-current
     > .el-tree-node__content {
     background: #ffefef;
   }
+
   .el-tabs__item.is-active {
     color: #e60001 !important;
   }
+
   .el-tabs__active-bar {
     background-color: #e60001 !important;
   }
+
   .el-tabs__content {
     width: 100%;
     height: calc(100% - 40px);
   }
+
   .el-tab-pane {
     width: 100%;
     height: 100%;
   }
+
   .el-tree .el-tree-node__content {
     height: 40px;
   }
+
   .custom-tree-node {
     padding: 0 10px;
   }
+
   .el-tree .el-tree-node__content:hover {
     background: #ffefef;
   }
+
   .el-tree-node__expand-icon {
     display: none;
   }
+
   .el-button.is-round {
     border-color: #dcdfe6;
     color: #606266;
   }
+
   .el-upload-list {
     max-height: 200px;
     overflow-y: auto;
   }
+
   .el-dialog__body {
     padding: 10px 20px;
   }
 }
+
 .fileNumber {
   margin-left: 10px;
   display: inline-block;
@@ -779,24 +927,31 @@ export default {
   background: rgb(243, 243, 243);
   border-radius: 8px;
 }
+
 .defalutColor {
   color: #e7e7e7 !important;
 }
+
 .border {
   border: 1px solid #e4e7ed;
 }
+
 .noPadding {
   padding: 0 10px;
 }
+
 .activeColor {
   color: #e60001;
 }
+
 .error {
   color: #e60001;
 }
+
 .marginRight {
   margin-right: 10px;
 }
+
 .full-content {
   //padding: 20px 20px 30px 20px;
   margin: auto;
@@ -808,36 +963,45 @@ export default {
     color: #333;
     padding: 10px 0;
   }
+
   .tips {
     font-size: 14px;
     color: #aaabb0;
     margin-bottom: 10px;
   }
+
   .block {
     width: 100%;
     height: calc(100% - 58px);
+
     .el-tabs {
       width: 100%;
       height: 100%;
+
       .konw_container {
         width: 100%;
         height: 100%;
+
         .tree {
           height: 100%;
           background: none;
+
           .custom-tree-node {
             width: 100%;
             display: flex;
             justify-content: space-between;
+
             .icon {
               font-size: 16px;
               transform: rotate(90deg);
               color: #aaabb0;
             }
+
             .nodeLabel {
               color: #e60001;
               display: flex;
               align-items: center;
+
               .tag {
                 display: block;
                 width: 5px;
@@ -851,14 +1015,17 @@ export default {
         }
       }
     }
+
     .classifyTitle {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 10px;
+
       h2 {
         font-size: 16px;
       }
+
       .content_title {
         display: flex;
         align-items: center;
@@ -866,13 +1033,16 @@ export default {
       }
     }
   }
+
   .uploadTips {
     color: #aaabb0;
     font-size: 12px;
     height: 30px;
   }
+
   .document_lise {
     list-style: none;
+
     li {
       display: flex;
       justify-content: space-between;
@@ -880,12 +1050,15 @@ export default {
       padding: 7px;
       border-radius: 3px;
       line-height: 1;
+
       .el-icon-success {
         display: block;
       }
+
       .el-icon-error {
         display: none;
       }
+
       &:hover {
         cursor: pointer;
         background: #eee;
@@ -893,10 +1066,12 @@ export default {
         .el-icon-success {
           display: none;
         }
+
         .el-icon-error {
           display: block;
         }
       }
+
       &.document_loading {
         &:hover {
           cursor: pointer;
@@ -905,11 +1080,13 @@ export default {
           .el-icon-success {
             display: none;
           }
+
           .el-icon-error {
             display: none;
           }
         }
       }
+
       .el-icon-success {
         color: #67c23a;
       }
@@ -917,10 +1094,12 @@ export default {
       .result_icon {
         float: right;
       }
+
       .size {
         font-weight: bold;
       }
     }
+
     .document_error {
       color: red;
     }
@@ -933,10 +1112,12 @@ export default {
   background-color: #fff; /* 设置背景颜色 */
   color: #666; /* 设置文字颜色 */
 }
-.custom-tooltip.el-tooltip__popper[x-placement^="top"] .popper__arrow::after {
+
+.custom-tooltip.el-tooltip__popper[x-placement^='top'] .popper__arrow::after {
   border-top-color: #fff !important;
 }
-.custom-tooltip.el-tooltip__popper.is-light[x-placement^="top"] .popper__arrow {
+
+.custom-tooltip.el-tooltip__popper.is-light[x-placement^='top'] .popper__arrow {
   border-top-color: #ccc !important;
 }
 </style>

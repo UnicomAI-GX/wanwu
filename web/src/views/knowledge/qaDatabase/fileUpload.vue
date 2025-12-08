@@ -17,16 +17,18 @@
         <fileUpload
           ref="fileUpload"
           :templateUrl="templateUrl"
-          accept=".csv"
+          :accept="'.csv'"
+          :maxSize="10"
+          :maxFileCount="1"
           @uploadFile="handleUploadFile"
         >
           <template #upload-tips>
             <div class="qa-upload-extra">
               <p>
-                {{ $t("knowledgeManage.qaDatabase.uploadTips") }}
+                {{ $t('knowledgeManage.qaDatabase.uploadTips') }}
               </p>
               <p>
-                {{ $t("knowledgeManage.qaDatabase.uploadTips1") }}
+                {{ $t('knowledgeManage.qaDatabase.uploadTips1') }}
               </p>
             </div>
           </template>
@@ -35,7 +37,7 @@
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="handleClose">
-        {{ $t("common.confirm.cancel") }}
+        {{ $t('common.confirm.cancel') }}
       </el-button>
       <el-button
         type="primary"
@@ -43,19 +45,19 @@
         :loading="loading"
         :disabled="!uploadedFileId"
       >
-        {{ $t("knowledgeManage.confirmImport") }}
+        {{ $t('knowledgeManage.confirmImport') }}
       </el-button>
     </span>
   </el-dialog>
 </template>
 
 <script>
-import fileUpload from "@/components/fileUpload.vue";
-import { qaDocImport } from "@/api/qaDatabase";
-import { USER_API } from "@/utils/requestConstants";
+import fileUpload from '@/components/fileUpload.vue';
+import { qaDocImport } from '@/api/qaDatabase';
+import { USER_API } from '@/utils/requestConstants';
 
 export default {
-  name: "QaFileUpload",
+  name: 'QaFileUpload',
   components: {
     fileUpload,
   },
@@ -100,24 +102,26 @@ export default {
     },
     handleConfirm() {
       if (!this.uploadedFileId) {
-        this.$message.warning(this.$t("knowledgeManage.selectFile"));
+        this.$message.warning(this.$t('knowledgeManage.selectFile'));
         return;
       }
 
       this.loading = true;
       const data = {
         knowledgeId: this.knowledgeId,
-        docInfoList: [{
-          docUrl: this.uploadedFileId,
-        }],
+        docInfoList: [
+          {
+            docUrl: this.uploadedFileId,
+          },
+        ],
       };
 
       qaDocImport(data)
-        .then((res) => {
+        .then(res => {
           if (res.code === 0) {
-            this.$message.success(this.$t("app.qaUplodFileTips"));
+            this.$message.success(this.$t('app.qaUplodFileTips'));
             this.handleClose();
-            this.$emit("reloadData");
+            this.$emit('updateData', 'fileUpload');
           }
         })
         .catch(() => {})
@@ -127,24 +131,24 @@ export default {
     },
     async downloadTemplate() {
       const url = `${USER_API}/static/docs/qa_import_template.xlsx`;
-      const fileName = "qa_import_template.xlsx";
+      const fileName = 'qa_import_template.xlsx';
       try {
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(this.$t("knowledgeManage.create.fileNotExist"));
+          throw new Error(this.$t('knowledgeManage.create.fileNotExist'));
         }
 
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
 
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = blobUrl;
         a.download = fileName;
         a.click();
 
         URL.revokeObjectURL(blobUrl);
       } catch (error) {
-        this.$message.error(this.$t("knowledgeManage.create.downloadFailed"));
+        this.$message.error(this.$t('knowledgeManage.create.downloadFailed'));
       }
     },
   },
@@ -166,8 +170,9 @@ export default {
     padding: 10px 20px 20px;
     border-top: 1px solid #f0f0f0;
   }
-  /deep/ .el-form-item__content{
-    margin-left:0 !important;
+
+  /deep/ .el-form-item__content {
+    margin-left: 0 !important;
   }
 }
 
@@ -234,4 +239,3 @@ export default {
   }
 }
 </style>
-
