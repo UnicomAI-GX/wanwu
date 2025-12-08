@@ -428,8 +428,8 @@ export default {
             this.editForm.avatar = res.data.avatar
             this.editForm.name = res.data.name
             this.editForm.desc = res.data.desc
-            this.editForm.modelParams = res.data.modelConfig.modelId
-
+            this.setModelInfo(res.data.modelConfig.modelId)
+            
             if (
               res.data.qaKnowledgeBaseConfig &&
               res.data.qaKnowledgeBaseConfig !== null
@@ -477,6 +477,17 @@ export default {
         .catch(() => {
           this.isSettingFromDetail = false
         })
+    },
+    setModelInfo(val){
+      const selectedModel = this.modleOptions.find(
+        (item) => item.modelId === val
+      );
+      if (selectedModel) {
+        this.editForm.modelParams = val;
+      }else{
+        this.editForm.modelParams = "";
+        this.$message.warning(this.$t("rag.form.modelNotSupport"));
+      }
     },
     getRerankData() {
       getRerankList().then((res) => {

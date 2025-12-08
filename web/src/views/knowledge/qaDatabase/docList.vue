@@ -409,7 +409,7 @@ export default {
       selectedTableData: [],
       selectedDocIds: [],
       qaImportStatus: COMMUNITY_IMPORT_STATUS,
-      dropdownGroups: DROPDOWN_GROUPS,
+      dropdownGroups: DROPDOWN_GROUPS.slice(0, 2),
       QA_STATUS_FAILED,
       QA_STATUS_FINISHED,
       QA_STATUS_PENDING,

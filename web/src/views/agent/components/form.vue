@@ -751,10 +751,14 @@ export default {
         (item) => item.modelId === val
       );
       if (selectedModel) {
+        this.editForm.modelParams = val;
         this.editForm.visionsupport = selectedModel.config.visionSupport;
         this.editForm.functionCalling = selectedModel.config.functionCalling;
         const maxTokens = selectedModel.config.maxTokens;
         this.limitMaxTokens = maxTokens && maxTokens > 0 ? maxTokens : 4096;
+      }else{
+        this.editForm.modelParams = "";
+        this.$message.warning(this.$t("agent.form.modelNotSupport"));
       }
     },
     submitMeta() {
@@ -1079,6 +1083,7 @@ export default {
           this.editForm.knowledgeBaseConfig.config = 
           res.data.knowledgeBaseConfig.config === null || !res.data.knowledgeBaseConfig.config.matchType ? this.editForm.knowledgeBaseConfig.config : res.data.knowledgeBaseConfig.config;
         }
+
         this.editForm = {
           ...this.editForm,
           newAgent:data.newAgent,
@@ -1093,7 +1098,6 @@ export default {
             data.modelConfig.config !== null
               ? data.modelConfig.config
               : this.editForm.modelConfig,
-          modelParams: data.modelConfig.modelId || "",
           recommendQuestion:
             data.recommendQuestion && data.recommendQuestion.length > 0
               ? data.recommendQuestion.map((n, index) => {
