@@ -180,11 +180,11 @@
           </p>
         </div>
         <!-- 闲聊模式 -->
-        <chiChat
+        <!-- <chiChat
           @chiSwitchChange="chiSwitchChange"
           :isDisabled="!editForm.knowledgeBaseConfig.knowledgebases.length"
           :chiChatSwitch="editForm.knowledgeBaseConfig.config.chiChat"
-        />
+        /> -->
       </div>
       <div class="drawer-test">
         <Chat :chatType="'test'" :editForm="editForm" />

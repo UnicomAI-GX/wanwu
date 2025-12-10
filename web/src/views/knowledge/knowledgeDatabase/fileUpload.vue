@@ -1224,7 +1224,10 @@ export default {
       return true;
     },
     nextStep() {
-      this.withCompressed = this.fileList;
+      this.withCompressed = this.fileList.some(file => {
+        const fileName = file.name;
+        return fileName.endsWith('.zip') || fileName.endsWith('.tar.gz');
+      });
       //上传文件类型
       if (this.fileType === 'file' || this.fileType === 'fileUrl') {
         if (this.fileIndex < this.fileList.length) {
