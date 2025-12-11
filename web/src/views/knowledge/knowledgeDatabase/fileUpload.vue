@@ -714,7 +714,7 @@ export default {
         if (res.code === 0) {
           this.ruleForm = deepMerge(this.ruleForm, res.data);
           this.ruleFormBackup = JSON.parse(JSON.stringify(this.ruleForm));
-          this.ruleForm.docAnalyzer = [...this.ruleForm.docAnalyzer]
+          this.ruleForm.docAnalyzer = [...this.ruleForm.docAnalyzer];
           this.getModelOptions();
         }
       });
@@ -890,7 +890,7 @@ export default {
     },
     showSplitterSet(type) {
       this.segmentType = type;
-      this.$refs.splitterDialog.showDiaglog(
+      this.$refs.splitterDialog.showDialog(
         this.checkSplitter[this.segmentType],
       );
     },

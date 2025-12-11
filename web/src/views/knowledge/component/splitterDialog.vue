@@ -105,7 +105,7 @@ export default {
     delTag(item) {
       this.$emit('delItem', item);
     },
-    showDiaglog(data = []) {
+    showDialog(data = []) {
       this.selectData = [];
       if (data.length) {
         this.selectData = data;
