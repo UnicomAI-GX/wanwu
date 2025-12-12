@@ -2877,6 +2877,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/chatflow/application/info": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "应用广场对话流关联应用信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chatflow"
+                ],
+                "summary": "应用广场对话流关联应用信息",
+                "parameters": [
+                    {
+                        "description": "关联智能体请求参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ChatflowApplicationInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.GetDraftIntelligenceInfoData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/chatflow/application/list": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "应用广场对话流关联应用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chatflow"
+                ],
+                "summary": "应用广场对话流关联应用",
+                "parameters": [
+                    {
+                        "description": "关联智能体请求参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ChatflowApplicationListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.DraftIntelligenceListData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/custom/home": {
             "post": {
                 "security": [
@@ -13913,6 +14015,32 @@ const docTemplate = `{
                 }
             }
         },
+        "request.ChatflowApplicationInfoReq": {
+            "type": "object",
+            "required": [
+                "intelligence_id",
+                "intelligence_type"
+            ],
+            "properties": {
+                "intelligence_id": {
+                    "type": "string"
+                },
+                "intelligence_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.ChatflowApplicationListReq": {
+            "type": "object",
+            "required": [
+                "workflow_id"
+            ],
+            "properties": {
+                "workflow_id": {
+                    "type": "string"
+                }
+            }
+        },
         "request.CheckFileListReq": {
             "type": "object",
             "required": [
@@ -17475,6 +17603,26 @@ const docTemplate = `{
                 }
             }
         },
+        "response.ConnectorInfo": {
+            "type": "object",
+            "properties": {
+                "connector_status": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "share_link": {
+                    "type": "string"
+                }
+            }
+        },
         "response.ConversationCreateResp": {
             "type": "object",
             "properties": {
@@ -17544,6 +17692,27 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.CozeUser": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "user_label": {
+                    "$ref": "#/definitions/response.UserLabel"
+                },
+                "user_unique_name": {
                     "type": "string"
                 }
             }
@@ -18280,6 +18449,26 @@ const docTemplate = `{
                 }
             }
         },
+        "response.DraftIntelligenceListData": {
+            "type": "object",
+            "properties": {
+                "has_more": {
+                    "type": "boolean"
+                },
+                "intelligences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.IntelligenceData"
+                    }
+                },
+                "next_cursor_id": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.EmbeddingModelInfo": {
             "type": "object",
             "properties": {
@@ -18345,6 +18534,34 @@ const docTemplate = `{
                 }
             }
         },
+        "response.FavoriteInfo": {
+            "type": "object",
+            "properties": {
+                "fav_time": {
+                    "type": "string"
+                },
+                "is_fav": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "response.GetDraftIntelligenceInfoData": {
+            "type": "object",
+            "properties": {
+                "basic_info": {
+                    "$ref": "#/definitions/response.IntelligenceBasicInfo"
+                },
+                "intelligence_type": {
+                    "type": "integer"
+                },
+                "owner_info": {
+                    "$ref": "#/definitions/response.CozeUser"
+                },
+                "publish_info": {
+                    "$ref": "#/definitions/response.IntelligencePublishInfo"
+                }
+            }
+        },
         "response.GetKnowledgeKeywordListResp": {
             "type": "object",
             "properties": {
@@ -18400,6 +18617,110 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.IntelligenceBasicInfo": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enterprise_id": {
+                    "type": "string"
+                },
+                "icon_uri": {
+                    "type": "string"
+                },
+                "icon_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organization_id": {
+                    "type": "integer"
+                },
+                "owner_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "publish_time": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "space_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "update_time": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "response.IntelligenceData": {
+            "type": "object",
+            "properties": {
+                "basic_info": {
+                    "$ref": "#/definitions/response.IntelligenceBasicInfo"
+                },
+                "favorite_info": {
+                    "$ref": "#/definitions/response.FavoriteInfo"
+                },
+                "owner_info": {
+                    "$ref": "#/definitions/response.CozeUser"
+                },
+                "permission_info": {
+                    "$ref": "#/definitions/response.IntelligencePermissionInfo"
+                },
+                "publish_info": {
+                    "$ref": "#/definitions/response.IntelligencePublishInfo"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.IntelligencePermissionInfo": {
+            "type": "object",
+            "properties": {
+                "can_delete": {
+                    "type": "boolean"
+                },
+                "can_view": {
+                    "type": "boolean"
+                },
+                "in_collaboration": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "response.IntelligencePublishInfo": {
+            "type": "object",
+            "properties": {
+                "connectors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.ConnectorInfo"
+                    }
+                },
+                "has_published": {
+                    "type": "boolean"
+                },
+                "publish_time": {
                     "type": "string"
                 }
             }
@@ -20643,6 +20964,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.UserLabel": {
+            "type": "object",
+            "properties": {
+                "icon_uri": {
+                    "type": "string"
+                },
+                "icon_url": {
+                    "type": "string"
+                },
+                "jump_link": {
+                    "type": "string"
+                },
+                "label_id": {
+                    "type": "string"
+                },
+                "label_name": {
                     "type": "string"
                 }
             }
