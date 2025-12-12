@@ -1401,6 +1401,23 @@ definitions:
     - question
     - ragId
     type: object
+  request.ChatflowApplicationInfoReq:
+    properties:
+      intelligence_id:
+        type: string
+      intelligence_type:
+        type: integer
+    required:
+    - intelligence_id
+    - intelligence_type
+    type: object
+  request.ChatflowApplicationListReq:
+    properties:
+      workflow_id:
+        type: string
+    required:
+    - workflow_id
+    type: object
   request.CheckFileListReq:
     properties:
       chunkName:
@@ -3812,6 +3829,19 @@ definitions:
         - $ref: '#/definitions/response.StatisticChart'
         description: 客户端
     type: object
+  response.ConnectorInfo:
+    properties:
+      connector_status:
+        type: integer
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      share_link:
+        type: string
+    type: object
   response.ConversationCreateResp:
     properties:
       conversationId:
@@ -3858,6 +3888,20 @@ definitions:
       createdAt:
         type: string
       title:
+        type: string
+    type: object
+  response.CozeUser:
+    properties:
+      avatar_url:
+        type: string
+      nickname:
+        type: string
+      user_id:
+        example: "0"
+        type: string
+      user_label:
+        $ref: '#/definitions/response.UserLabel'
+      user_unique_name:
         type: string
     type: object
   response.CozeWorkflowIDData:
@@ -4343,6 +4387,19 @@ definitions:
       url:
         type: string
     type: object
+  response.DraftIntelligenceListData:
+    properties:
+      has_more:
+        type: boolean
+      intelligences:
+        items:
+          $ref: '#/definitions/response.IntelligenceData'
+        type: array
+      next_cursor_id:
+        type: string
+      total:
+        type: integer
+    type: object
   response.EmbeddingModelInfo:
     properties:
       modelId:
@@ -4386,6 +4443,24 @@ definitions:
         - $ref: '#/definitions/response.User'
         description: 作者信息
     type: object
+  response.FavoriteInfo:
+    properties:
+      fav_time:
+        type: string
+      is_fav:
+        type: boolean
+    type: object
+  response.GetDraftIntelligenceInfoData:
+    properties:
+      basic_info:
+        $ref: '#/definitions/response.IntelligenceBasicInfo'
+      intelligence_type:
+        type: integer
+      owner_info:
+        $ref: '#/definitions/response.CozeUser'
+      publish_info:
+        $ref: '#/definitions/response.IntelligencePublishInfo'
+    type: object
   response.GetKnowledgeKeywordListResp:
     properties:
       list:
@@ -4422,6 +4497,76 @@ definitions:
       id:
         type: string
       name:
+        type: string
+    type: object
+  response.IntelligenceBasicInfo:
+    properties:
+      create_time:
+        example: "0"
+        type: string
+      description:
+        type: string
+      enterprise_id:
+        type: string
+      icon_uri:
+        type: string
+      icon_url:
+        type: string
+      id:
+        example: "0"
+        type: string
+      name:
+        type: string
+      organization_id:
+        type: integer
+      owner_id:
+        example: "0"
+        type: string
+      publish_time:
+        example: "0"
+        type: string
+      space_id:
+        example: "0"
+        type: string
+      status:
+        type: integer
+      update_time:
+        example: "0"
+        type: string
+    type: object
+  response.IntelligenceData:
+    properties:
+      basic_info:
+        $ref: '#/definitions/response.IntelligenceBasicInfo'
+      favorite_info:
+        $ref: '#/definitions/response.FavoriteInfo'
+      owner_info:
+        $ref: '#/definitions/response.CozeUser'
+      permission_info:
+        $ref: '#/definitions/response.IntelligencePermissionInfo'
+      publish_info:
+        $ref: '#/definitions/response.IntelligencePublishInfo'
+      type:
+        type: integer
+    type: object
+  response.IntelligencePermissionInfo:
+    properties:
+      can_delete:
+        type: boolean
+      can_view:
+        type: boolean
+      in_collaboration:
+        type: boolean
+    type: object
+  response.IntelligencePublishInfo:
+    properties:
+      connectors:
+        items:
+          $ref: '#/definitions/response.ConnectorInfo'
+        type: array
+      has_published:
+        type: boolean
+      publish_time:
         type: string
     type: object
   response.KeywordsInfo:
@@ -5922,6 +6067,19 @@ definitions:
       userId:
         type: string
       username:
+        type: string
+    type: object
+  response.UserLabel:
+    properties:
+      icon_uri:
+        type: string
+      icon_url:
+        type: string
+      jump_link:
+        type: string
+      label_id:
+        type: string
+      label_name:
         type: string
     type: object
   response.UserOrgPermission:
@@ -7784,6 +7942,64 @@ paths:
       summary: 邮箱注册验证码发送
       tags:
       - guest
+  /chatflow/application/info:
+    post:
+      consumes:
+      - application/json
+      description: 应用广场对话流关联应用信息
+      parameters:
+      - description: 关联智能体请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ChatflowApplicationInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.GetDraftIntelligenceInfoData'
+              type: object
+      security:
+      - JWT: []
+      summary: 应用广场对话流关联应用信息
+      tags:
+      - chatflow
+  /chatflow/application/list:
+    post:
+      consumes:
+      - application/json
+      description: 应用广场对话流关联应用
+      parameters:
+      - description: 关联智能体请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ChatflowApplicationListReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.DraftIntelligenceListData'
+              type: object
+      security:
+      - JWT: []
+      summary: 应用广场对话流关联应用
+      tags:
+      - chatflow
   /custom/home:
     post:
       consumes:

@@ -62,3 +62,33 @@ type WorkflowRunReq struct {
 func (r *WorkflowRunReq) Check() error {
 	return nil
 }
+
+type ChatflowApplicationListReq struct {
+	WorkflowID string `json:"workflow_id" validate:"required"`
+}
+
+func (r *ChatflowApplicationListReq) Check() error {
+	return nil
+}
+
+type ChatflowApplicationInfoReq struct {
+	IntelligenceID   string `json:"intelligence_id" validate:"required"`
+	IntelligenceType int64  `json:"intelligence_type" validate:"required"`
+}
+
+func (r *ChatflowApplicationInfoReq) Check() error {
+	return nil
+}
+
+type ChatflowConversationCreateReq struct {
+	WorkflowID       string `json:"workflow_id" validate:"required"`
+	AppID            string `json:"app_id" validate:"required"`
+	ConnectorID      string `json:"connector_id" `
+	ConversationName string `json:"conversation_name" validate:"required"`
+	DraftMode        bool   `json:"draft_mode"`
+	GetOrCreate      bool   `json:"get_or_create"`
+}
+
+func (r *ChatflowConversationCreateReq) Check() error {
+	return nil
+}
