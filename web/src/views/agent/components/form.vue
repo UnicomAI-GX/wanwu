@@ -758,6 +758,7 @@ export default {
       this.setModelInfo(val);
     },
     setModelInfo(val) {
+      if (!val) return;
       const selectedModel = this.modleOptions.find(
         item => item.modelId === val,
       );
