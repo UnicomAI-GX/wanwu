@@ -159,6 +159,8 @@ export default {
       fold: '收起',
       expand: '展开',
       detail: '详情 >>',
+      all: '全选',
+      filter: '筛选',
     },
     switch: {
       start: '开启',
@@ -692,10 +694,6 @@ export default {
     brNum: '换行符',
     newClassfiy: '新建知识分类',
     all: '全部',
-    finish: '处理完成',
-    fail: '解析失败',
-    analysing: '正在解析中',
-    pendingProcessing: '待处理',
     beUploaded: '待上传',
     checking: '正在审核中',
     checkFail: '审核未通过',
@@ -1386,7 +1384,7 @@ export default {
       yes: '是',
       no: '否',
     },
-    toolDialog:{
+    toolDialog: {
       tool: '工具',
       addTool: '新增工具',
       searchTool: '搜索工具',

@@ -14,20 +14,6 @@
           <el-container>
             <el-header class="classifyTitle">
               <div class="searchInfo">
-                <el-select
-                  @change="changeOption($event)"
-                  v-model="docQuery.status"
-                  :placeholder="$t('knowledgeManage.please')"
-                  style="width: 150px"
-                  class="marginRight no-border-select cover-input-icon"
-                >
-                  <el-option
-                    v-for="item in knowLegOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
                 <search-input
                   class="cover-input-icon"
                   :placeholder="$t('knowledgeManage.docPlaceholder')"
@@ -191,11 +177,17 @@
                   :label="$t('knowledgeManage.importTime')"
                   width="200"
                 ></el-table-column>
-                <el-table-column
-                  prop="status"
-                  :label="$t('knowledgeManage.currentStatus')"
-                  width="150"
-                >
+                <el-table-column prop="status" width="150">
+                  <template #header>
+                    <div style="display: flex; align-items: center">
+                      <span>{{ $t('knowledgeManage.currentStatus') }}</span>
+                      <FilterPopover
+                        style="margin-left: 5px"
+                        :options="KNOWLEDGE_STATUS_OPTIONS"
+                        @applyFilter="filterCurrentStatus"
+                      />
+                    </div>
+                  </template>
                   <template slot-scope="scope">
                     <span
                       :class="[
@@ -207,7 +199,7 @@
                           : '',
                       ]"
                     >
-                      {{ filterStatus(scope.row.status) }}
+                      {{ getCurrentStatus(scope.row.status) }}
                     </span>
                     <el-tooltip
                       class="item"
@@ -224,14 +216,20 @@
                     </el-tooltip>
                   </template>
                 </el-table-column>
-                <el-table-column
-                  v-if="graphSwitch"
-                  prop="graphStatus"
-                  :label="$t('knowledgeManage.graph.graphStatus')"
-                >
+                <el-table-column v-if="graphSwitch" prop="graphStatus">
+                  <template #header>
+                    <div style="display: flex; align-items: center">
+                      <span>{{ $t('knowledgeManage.graph.graphStatus') }}</span>
+                      <FilterPopover
+                        style="margin-left: 5px"
+                        :options="KNOWLEDGE_GRAPH_STATUS_OPTIONS"
+                        @applyFilter="filterGraphStatus"
+                      />
+                    </div>
+                  </template>
                   <template slot-scope="scope">
                     <span>
-                      {{ knowledgeGraphStatus[scope.row.graphStatus] }}
+                      {{ getGraphStatus(scope.row.graphStatus) }}
                     </span>
                     <el-tooltip
                       class="item"
@@ -240,7 +238,7 @@
                         scope.row.graphErrMsg ? scope.row.graphErrMsg : ''
                       "
                       placement="top"
-                      v-if="scope.row.graphStatus === 3"
+                      v-if="scope.row.graphStatus === STATUS_FAILED"
                       popper-class="custom-tooltip"
                     >
                       <span
@@ -384,6 +382,7 @@ import SearchInput from '@/components/searchInput.vue';
 import mataData from '../component/metadata.vue';
 import batchMetaData from '../component/meta/batchMetaData.vue';
 import BatchMetaButton from '../component/meta/batchMetaButton.vue';
+import FilterPopover from '@/components/filterPopover.vue';
 import {
   getDocList,
   delDocItem,
@@ -394,16 +393,17 @@ import {
 import { mapGetters } from 'vuex';
 import {
   DROPDOWN_GROUPS,
-  KNOWLEDGE_GRAPH_STATUS,
+  KNOWLEDGE_GRAPH_STATUS_OPTIONS,
   KNOWLEDGE_STATUS_OPTIONS,
 } from '../config';
 import {
   INITIAL,
+  STATUS_FAILED,
   POWER_TYPE_EDIT,
   POWER_TYPE_ADMIN,
   POWER_TYPE_SYSTEM_ADMIN,
   KNOWLEDGE_STATUS_UPLOADED,
-  KNOWLEDGE_STATUS_ALL,
+  ALL,
   KNOWLEDGE_STATUS_PENDING_PROCESSING,
   KNOWLEDGE_STATUS_FINISH,
   KNOWLEDGE_STATUS_CHECKING,
@@ -421,6 +421,7 @@ export default {
     mataData,
     batchMetaData,
     BatchMetaButton,
+    FilterPopover,
   },
   data() {
     return {
@@ -431,14 +432,15 @@ export default {
         docName: '',
         metaValue: '',
         knowledgeId: this.$route.params.id,
-        status: KNOWLEDGE_STATUS_ALL,
+        status: [ALL],
+        graphStatus: [ALL],
       },
       fileList: [],
       listApi: getDocList,
       title_tips: '',
       showTips: false,
       tableData: [],
-      knowLegOptions: KNOWLEDGE_STATUS_OPTIONS,
+      KNOWLEDGE_STATUS_OPTIONS,
       knowledgeData: [],
       currentKnowValue: null,
       timer: null,
@@ -451,13 +453,13 @@ export default {
       selectedDocIds: [],
       graphSwitch: false,
       showGraphReport: false,
-      knowledgeGraphStatus: KNOWLEDGE_GRAPH_STATUS,
+      KNOWLEDGE_GRAPH_STATUS_OPTIONS,
       dropdownGroups: DROPDOWN_GROUPS.slice(0, 1),
       graphDropdownGroups: DROPDOWN_GROUPS.slice(2),
+      STATUS_FAILED,
       POWER_TYPE_EDIT,
       POWER_TYPE_ADMIN,
       POWER_TYPE_SYSTEM_ADMIN,
-      KNOWLEDGE_STATUS_ALL,
       KNOWLEDGE_STATUS_PENDING_PROCESSING,
       KNOWLEDGE_STATUS_FINISH,
       KNOWLEDGE_STATUS_CHECKING,
@@ -851,16 +853,27 @@ export default {
         }
       });
     },
-    changeOption(data) {
-      //通过文档状态查找
+    filterCurrentStatus(data) {
       this.docQuery.status = data;
       this.getTableData({ ...this.docQuery, pageNo: 1 });
     },
-    filterStatus(status) {
+    filterGraphStatus(data) {
+      this.docQuery.graphStatus = data;
+      this.getTableData({ ...this.docQuery, pageNo: 1 });
+    },
+    getCurrentStatus(status) {
       if (status === KNOWLEDGE_STATUS_UPLOADED) {
         return this.$t('knowledgeManage.beUploaded');
       }
       const statusOption = KNOWLEDGE_STATUS_OPTIONS.find(
+        option => option.value === status,
+      );
+      return statusOption
+        ? statusOption.label
+        : this.$t('knowledgeManage.noStatus');
+    },
+    getGraphStatus(status) {
+      const statusOption = KNOWLEDGE_GRAPH_STATUS_OPTIONS.find(
         option => option.value === status,
       );
       return statusOption
