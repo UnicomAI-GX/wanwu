@@ -56,6 +56,8 @@ func buildHistory(history []request.AssistantConversionHistory, maxHistory int) 
 	// 处理所有历史记录
 	for _, conversionHistory := range history {
 		historyList = append(historyList, schema.UserMessage(conversionHistory.Query))
+		//todo 先不传ToolCall(后续版本考虑传进去)
+		historyList = append(historyList, schema.AssistantMessage(conversionHistory.Response, nil))
 	}
 	if maxHistory <= 0 {
 		return historyList
