@@ -476,6 +476,7 @@ export default {
       qwen: '通义千问',
       huoshan: '火山引擎',
       infini: '无问芯穹',
+      qianfan: '百度千帆',
       pdfParser: '文档解析服务',
       asr: '语音识别模型',
     },
