@@ -220,6 +220,7 @@ message DocSegmentListResp{
   repeated MetaData metaDataList = 9;//文档元数据信息
   string segmentImportStatus = 10;//文档分段导入状态
   string segmentMethod = 11;
+  repeated string docAnalyzer = 12;// 文档解析方式
 }
 
 message SegmentContent{

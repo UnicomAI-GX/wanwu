@@ -981,6 +981,12 @@ func buildSegmentListResp(importTask *model.KnowledgeImportTask, doc *model.Know
 		log.Errorf("SegmentConfig process error %s", err.Error())
 		return nil, err
 	}
+	var analyzer = &model.DocAnalyzer{}
+	err = json.Unmarshal([]byte(importTask.DocAnalyzer), analyzer)
+	if err != nil {
+		log.Errorf("DocAnalyzer process error %s", err.Error())
+		return nil, err
+	}
 	segmentConfigMap := buildSegmentConfigMap([]*model.KnowledgeImportTask{importTask})
 	var resp = &knowledgebase_doc_service.DocSegmentListResp{
 		FileName:            doc.Name,
@@ -994,6 +1000,7 @@ func buildSegmentListResp(importTask *model.KnowledgeImportTask, doc *model.Know
 		MetaDataList:        buildMetaList(metaDataList),
 		SegmentImportStatus: buildSegmentImportStatus(segmentImportTask),
 		SegmentMethod:       buildSegmentMethod(doc, segmentConfigMap),
+		DocAnalyzer:         analyzer.AnalyzerList,
 	}
 	return resp, nil
 }

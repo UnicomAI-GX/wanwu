@@ -387,6 +387,7 @@ func buildDocSegmentResp(docSegmentListResp *knowledgebase_doc_service.DocSegmen
 		MetaDataList:        buildMetaDataResultList(docSegmentListResp.MetaDataList),
 		SegmentImportStatus: docSegmentListResp.SegmentImportStatus,
 		SegmentMethod:       docSegmentListResp.SegmentMethod,
+		DocAnalyzer:         docSegmentListResp.DocAnalyzer,
 	}
 }
 
