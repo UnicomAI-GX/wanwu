@@ -30,6 +30,14 @@
             ></span>
             <LinkIcon type="agent" />
             <p>{{ editForm.desc || $t('agent.form.noInfo') }}</p>
+            <p>
+              uuid: {{ this.editForm.uuid }}
+              <copyIcon
+                :text="this.editForm.uuid"
+                :onlyIcon="true"
+                size="mini"
+              />
+            </p>
           </div>
         </div>
       </div>
@@ -520,8 +528,10 @@ import createPrompt from '@/components/createApp/createPrompt.vue';
 import PromptOptimize from '@/components/promptOptimize.vue';
 import knowledgeDataField from '@/components/app/knowledgeDataField.vue';
 import VersionPopover from '@/components/versionPopover.vue';
+import CopyIcon from '@/components/copyIcon.vue';
 export default {
   components: {
+    CopyIcon,
     VersionPopover,
     LinkIcon,
     Chat,
@@ -653,6 +663,7 @@ export default {
         functionCalling: '',
         visionsupport: '',
         assistantId: '',
+        uuid: '',
         avatar: {},
         name: '',
         desc: '',

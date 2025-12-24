@@ -21,6 +21,14 @@
             ></span>
             <LinkIcon type="rag" />
             <p>{{ editForm.desc || '' }}</p>
+            <p>
+              uuid: {{ this.editForm.appId }}
+              <copyIcon
+                :text="this.editForm.appId"
+                :onlyIcon="true"
+                size="mini"
+              />
+            </p>
           </div>
         </div>
       </div>
@@ -266,8 +274,10 @@ import LinkIcon from '@/components/linkIcon.vue';
 import knowledgeSelect from '@/components/knowledgeSelect.vue';
 import knowledgeDataField from '@/components/app/knowledgeDataField.vue';
 import { RAG } from '@/utils/commonSet';
+import CopyIcon from '@/components/copyIcon.vue';
 export default {
   components: {
+    CopyIcon,
     LinkIcon,
     Chat,
     CreateTxtQues,
