@@ -17,6 +17,7 @@ func registerAssistant(apiV1 *gin.RouterGroup) {
 	mid.Sub("agent").Reg(apiV1, "/assistant", http.MethodPut, v1.AssistantUpdate, "修改智能体基本信息")
 	mid.Sub("agent").Reg(apiV1, "/assistant/config", http.MethodPut, v1.AssistantConfigUpdate, "修改智能体配置信息")
 	mid.Sub("agent").Reg(apiV1, "/assistant/draft", http.MethodGet, v1.GetDraftAssistantInfo, "查看草稿智能体详情")
+	mid.Sub("agent").Reg(apiV1, "/assistant", http.MethodGet, v1.GetPublishedAssistantInfo, "查看已发布智能体详情")
 	mid.Sub("agent").Reg(apiV1, "/assistant/copy", http.MethodPost, v1.AssistantCopy, "智能体复制")
 
 	mid.Sub("agent").Reg(apiV1, "/assistant/tool/workflow", http.MethodPost, v1.AssistantWorkFlowCreate, "添加工作流")
