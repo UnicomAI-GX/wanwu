@@ -18,6 +18,7 @@ type EmbeddingReq struct {
 	Model          string   `json:"model" validate:"required"`
 	Input          []string `json:"input" validate:"required"`
 	EncodingFormat *string  `json:"encoding_format,omitempty"`
+	User           *string  `json:"user,omitempty"` // 用户标识（兼容千帆)
 }
 
 func (req *EmbeddingReq) Check() error { return nil }

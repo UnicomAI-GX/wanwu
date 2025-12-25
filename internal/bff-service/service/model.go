@@ -179,6 +179,7 @@ func toModelInfo(ctx *gin.Context, modelInfo *model_service.ModelInfo) (*respons
 	}
 	res := &response.ModelInfo{
 		ModelId:     modelInfo.ModelId,
+		Uuid:        modelInfo.Uuid,
 		Provider:    modelInfo.Provider,
 		Model:       modelInfo.Model,
 		ModelType:   modelInfo.ModelType,

@@ -56,103 +56,132 @@ func ValidateLLMModel(ctx *gin.Context, modelInfo *model_service.ModelInfo) erro
 		return fmt.Errorf("invalid provider")
 	}
 	// mock  request
-	var stream bool = false
-	req := &mp_common.LLMReq{
-		Model: modelInfo.Model,
-		Messages: []mp_common.OpenAIReqMsg{
-			{
-				Role:    mp_common.MsgRoleUser,
-				Content: "几点了",
-			},
-		},
-		Stream: &stream,
-	}
-
-	toolCallFlag := false // ToolCall 校验标识
-
+	stream := false
 	var result map[string]interface{}
 	err = json.Unmarshal([]byte(modelInfo.ProviderConfig), &result)
 	if err != nil {
 		return err
 	}
 
-	//Function call 支持校验
+	toolCallFlag := false // ToolCall 校验标识
 	fc, ok := result["functionCalling"].(string)
 	if ok && mp_common.FCType(fc) == mp_common.FCTypeToolCall {
 		toolCallFlag = true
+	}
+
+	visionSupportFlag := false // VisionSupport 校验标识
+	vs, ok := result["visionSupport"].(string)
+	if ok && mp_common.VSType(vs) == mp_common.VSTypeSupport {
+		visionSupportFlag = true
+	}
+	// 工具调用校验
+	if toolCallFlag {
+		reqTool := &mp_common.LLMReq{
+			Model: modelInfo.Model,
+			Messages: []mp_common.OpenAIReqMsg{
+				{
+					Role:    mp_common.MsgRoleUser,
+					Content: "What time is it in Beijing now?", // 工具调用专属Content
+				},
+			},
+			Stream: &stream,
+		}
 		tools := []mp_common.OpenAITool{
 			{
 				Type: mp_common.ToolTypeFunction,
 				Function: &mp_common.OpenAIFunction{
 					Name:        "get_current_time",
-					Description: "当你想知道现在的时间时非常有用。",
+					Description: "It's very useful when you want to know the current time in Beijing.",
 					Parameters: &mp_common.OpenAIFunctionParameters{
 						Type:       "object",
 						Properties: map[string]mp_common.OpenAIFunctionParametersProperty{},
+						Required:   []string{},
 					},
 				},
 			},
 		}
-		req.Tools = tools
+		reqTool.Tools = tools
+		// 执行工具调用校验
+		llmReqTool, err := iLLM.NewReq(reqTool)
+		if err != nil {
+			return err
+		}
+		respTool, _, err := iLLM.ChatCompletions(ctx.Request.Context(), llmReqTool)
+		if err != nil {
+			return fmt.Errorf("toolcall validation failed: %v, maybe model does not support toolcall functionality", err)
+		}
+		openAIRespTool, ok := respTool.ConvertResp()
+		if !ok {
+			return fmt.Errorf("toolcall validation: invalid response format")
+		}
+		if len(openAIRespTool.Choices) == 0 || openAIRespTool.Choices[0].Message.ToolCalls == nil {
+			return fmt.Errorf("model does not support toolcall functionality")
+		}
+		// 打印工具调用日志
+		data, _ := json.MarshalIndent(openAIRespTool.Choices[0].Message.ToolCalls, "", "  ")
+		log.Debugf("tool call: %v", string(data))
 	}
 
-	// VisionSupport 支持校验
-	visionSupportFlag := false // VisionSupport 校验标识
-	vs, ok := result["visionSupport"].(string)
-	if ok && mp_common.VSType(vs) == mp_common.VSTypeSupport {
-		visionSupportFlag = true
-		content := []map[string]interface{}{
-			{
-				"type": "image_url",
-				"image_url": map[string]string{
-					"url": "https://img0.baidu.com/it/u=3197002195,3024915584&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1420",
-				},
-			},
-			{
-				"type": "text",
-				"text": "这里有什么字",
-			},
-		}
-		req = &mp_common.LLMReq{
+	// 视觉支持校验（独立请求，用专属Content和配置）
+	if visionSupportFlag {
+		// 视觉支持专属req：Content为图片+“这里有什么字”，无Tools配置
+		reqVision := &mp_common.LLMReq{
 			Model: modelInfo.Model,
 			Messages: []mp_common.OpenAIReqMsg{
 				{
-					Role:    mp_common.MsgRoleUser,
-					Content: content,
+					Role: mp_common.MsgRoleUser,
+					Content: []map[string]interface{}{ // 视觉支持专属Content
+						{
+							"type": "image_url",
+							"image_url": map[string]string{
+								"url": "https://img0.baidu.com/it/u=3197002195,3024915584&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1420",
+							},
+						},
+						{
+							"type": "text",
+							"text": "这里有什么字",
+						},
+					},
 				},
 			},
 			Stream: &stream,
 		}
-	}
-
-	llmReq, err := iLLM.NewReq(req)
-	if err != nil {
-		return err
-	}
-
-	resp, _, err := iLLM.ChatCompletions(ctx.Request.Context(), llmReq)
-	if err != nil {
-		if visionSupportFlag {
-			return fmt.Errorf("model API call failed: %v, maybe model does not support vision functionality", err)
+		// 执行视觉支持校验
+		llmReqVision, err := iLLM.NewReq(reqVision)
+		if err != nil {
+			return err
 		}
-		if toolCallFlag {
-			return fmt.Errorf("model API call failed: %v, maybe model does not support toolcall functionality", err)
+		_, _, err = iLLM.ChatCompletions(ctx.Request.Context(), llmReqVision)
+		if err != nil {
+			return fmt.Errorf("vision validation failed: %v, maybe model does not support vision functionality", err)
 		}
-		return fmt.Errorf("model API call failed: %v", err)
 	}
 
-	openAIResp, ok := resp.ConvertResp()
-	if !ok {
-		return fmt.Errorf("invalid response format")
+	if !toolCallFlag && !visionSupportFlag {
+		// 执行基础校验
+		reqBase := &mp_common.LLMReq{
+			Model: modelInfo.Model,
+			Messages: []mp_common.OpenAIReqMsg{
+				{
+					Role:    mp_common.MsgRoleUser,
+					Content: "ping",
+				},
+			},
+			Stream: &stream,
+		}
+		llmReqBase, err := iLLM.NewReq(reqBase)
+		if err != nil {
+			return fmt.Errorf("base llm validation failed: %v", err)
+		}
+		baseResp, _, err := iLLM.ChatCompletions(ctx.Request.Context(), llmReqBase)
+		if err != nil {
+			return fmt.Errorf("base llm chat failed: %v, maybe model is unavailable", err)
+		}
+		_, ok = baseResp.ConvertResp()
+		if !ok {
+			return fmt.Errorf("invalid response format")
+		}
 	}
-
-	if toolCallFlag && (len(openAIResp.Choices) == 0 || openAIResp.Choices[0].Message.ToolCalls == nil) {
-		return fmt.Errorf("model does not support toolcall functionality")
-	} else if toolCallFlag {
-		data, _ := json.MarshalIndent(openAIResp.Choices[0].Message.ToolCalls, "", "  ")
-		log.Debugf("tool call: %v", string(data))
-	}
-
 	return nil
 }
 

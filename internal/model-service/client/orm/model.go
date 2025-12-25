@@ -37,7 +37,6 @@ func (c *Client) ImportModel(ctx context.Context, tab *model_client.ModelImporte
 	if tab.DisplayName != "" {
 		if err := sqlopt.SQLOptions(
 			sqlopt.WithProvider(tab.Provider),
-			sqlopt.WithModelType(tab.ModelType),
 			sqlopt.WithDisplayName(tab.DisplayName),
 			sqlopt.WithOrgID(tab.OrgID),
 			sqlopt.WithUserID(tab.UserID),
@@ -75,6 +74,7 @@ func (c *Client) UpdateModel(ctx context.Context, tab *model_client.ModelImporte
 	// 模型显示名称判重
 	var existing model_client.ModelImported
 	if err := sqlopt.SQLOptions(
+		sqlopt.WithProvider(tab.Provider),
 		sqlopt.WithDisplayName(tab.DisplayName),
 		sqlopt.WithOrgID(tab.OrgID),
 		sqlopt.WithUserID(tab.UserID),
@@ -176,4 +176,12 @@ func (c *Client) ListTypeModels(ctx context.Context, tab *model_client.ModelImpo
 		return nil, toErrStatus("model_list_type_models_err", err.Error())
 	}
 	return modelInfos, nil
+}
+
+func (c *Client) GetModelByUUID(ctx context.Context, uuid string) (*model_client.ModelImported, *errs.Status) {
+	info := &model_client.ModelImported{}
+	if err := sqlopt.WithUUID(uuid).Apply(c.db).WithContext(ctx).First(info).Error; err != nil {
+		return nil, toErrStatus("model_get_by_uuid_err", err.Error())
+	}
+	return info, nil
 }

@@ -1,18 +1,16 @@
-package mp_huoshan
+package mp_deepseek
 
 import (
 	"context"
 	"fmt"
-	"net/url"
-
 	mp_common "github.com/UnicomAI/wanwu/pkg/model-provider/mp-common"
+	"net/url"
 )
 
 type LLM struct {
 	ApiKey          string `json:"apiKey"`                                              // ApiKey
 	EndpointUrl     string `json:"endpointUrl"`                                         // 推理url
 	FunctionCalling string `json:"functionCalling" validate:"oneof=noSupport toolCall"` // 函数调用是否支持
-	VisionSupport   string `json:"visionSupport" validate:"oneof=noSupport support"`    // 视觉支持
 	MaxTokens       *int   `json:"maxTokens"`                                           // 模型回答最大tokens
 	ContextSize     *int   `json:"contextSize"`                                         // 上下文长度
 }
@@ -23,7 +21,6 @@ func (cfg *LLM) Tags() []mp_common.Tag {
 			Text: mp_common.TagChat,
 		},
 	}
-	tags = append(tags, mp_common.GetTagsByVisionSupport(cfg.VisionSupport)...)
 	tags = append(tags, mp_common.GetTagsByFunctionCall(cfg.FunctionCalling)...)
 	tags = append(tags, mp_common.GetTagsByContentSize(cfg.ContextSize)...)
 	return tags
@@ -41,7 +38,7 @@ func (cfg *LLM) NewReq(req *mp_common.LLMReq) (mp_common.ILLMReq, error) {
 }
 
 func (cfg *LLM) ChatCompletions(ctx context.Context, req mp_common.ILLMReq, headers ...mp_common.Header) (mp_common.ILLMResp, <-chan mp_common.ILLMResp, error) {
-	return mp_common.ChatCompletions(ctx, "huoshan", cfg.ApiKey, cfg.chatCompletionsUrl(), req, mp_common.NewLLMResp, headers...)
+	return mp_common.ChatCompletions(ctx, "deepseek", cfg.ApiKey, cfg.chatCompletionsUrl(), req, mp_common.NewLLMResp, headers...)
 }
 
 func (cfg *LLM) chatCompletionsUrl() string {

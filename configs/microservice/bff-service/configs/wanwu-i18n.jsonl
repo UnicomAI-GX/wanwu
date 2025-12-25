@@ -206,6 +206,7 @@
 {"code":250007,"key":"model_change_model_status_err","langs":{"zh":"模型启停异常:%v"}}
 {"code":250008,"key":"model_list_type_models_err","langs":{"zh":"模型类型列表异常:%v"}}
 {"code":250009,"key":"model_get_by_ids_err","langs":{"zh":"根据id列表获取模型列表信息异常:%v"}}
+{"code":250010,"key":"model_get_by_uuid_err","langs":{"zh":"根据uuid获取模型列表信息异常:%v"}}
 {"code":140000,"key":"","langs":{"zh":"系统异常，请稍后重试"}}
 {"code":140001,"key":"know_doc_unsupported_file_format","langs":{"zh":"文件格式不支持"}}
 {"code":140001,"key":"know_doc_file_size_exceed","langs":{"zh":"文件大小超过限制"}}
@@ -402,6 +403,10 @@
 {"code":160007,"key":"assistant_custom_prompt_update_err","langs":{"zh":"更新自定义提示词错误: %v"}}
 {"code":160007,"key":"assistant_custom_prompt_get_list_err","langs":{"zh":"获取自定义提示词列表错误: %v"}}
 {"code":160007,"key":"assistant_custom_prompt_copy_err","langs":{"zh":"复制自定义提示词错误: %v"}}
+{"code":160008,"key":"assistant_multi_agent_repeat","langs":{"zh":"已存在相同子智能体"}}
+{"code":160008,"key":"assistant_multi_agent_update","langs":{"zh":"更新多智能体配置错误: %v"}}
+{"code":160008,"key":"assistant_multi_agent_delete","langs":{"zh":"删除多智能体配置错误: %v"}}
+{"code":160008,"key":"assistant_multi_agent_get","langs":{"zh":"获取多智能体配置错误: %v"}}
 {"code":300000,"key":"app_config_delete","langs":{"zh":"删除应用配置错误:%v"}}
 {"code":300001,"key":"app_api_keys_get","langs":{"zh":"获取ApiKey列表错误:%v"}}
 {"code":300001,"key":"app_api_key_delete","langs":{"zh":"删除ApiKey错误:%v"}}

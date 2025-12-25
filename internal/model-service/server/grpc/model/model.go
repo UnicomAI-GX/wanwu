@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"github.com/UnicomAI/wanwu/internal/rag-service/pkg/generator"
 
 	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
 	model_service "github.com/UnicomAI/wanwu/api/proto/model-service"
@@ -11,7 +12,9 @@ import (
 )
 
 func (s *Service) ImportModel(ctx context.Context, req *model_service.ModelInfo) (*emptypb.Empty, error) {
+	modelUUID := generator.GetGenerator().NewID()
 	if err := s.cli.ImportModel(ctx, &model.ModelImported{
+		UUID:           modelUUID,
 		Provider:       req.Provider,
 		ModelType:      req.ModelType,
 		Model:          req.Model,
@@ -90,6 +93,7 @@ func (s *Service) GetModelById(ctx context.Context, req *model_service.GetModelB
 func toModelInfo(modelInfo *model.ModelImported) *model_service.ModelInfo {
 	return &model_service.ModelInfo{
 		ModelId:        util.Int2Str(modelInfo.ID),
+		Uuid:           modelInfo.UUID,
 		Provider:       modelInfo.Provider,
 		ModelType:      modelInfo.ModelType,
 		Model:          modelInfo.Model,
@@ -172,4 +176,18 @@ func (s *Service) ListTypeModels(ctx context.Context, req *model_service.ListTyp
 		return nil, errStatus(errs.Code_ModelListTypeModels, err)
 	}
 	return toModelInfos(modelInfos), nil
+}
+
+func (s *Service) GetModelInfoByUuid(ctx context.Context, req *model_service.GetModelInfoByUuidReq) (*model_service.GetModelInfoByUuidResp, error) {
+
+	modelInfo, err := s.cli.GetModelByUUID(ctx, req.Uuid)
+	if err != nil {
+		return nil, errStatus(errs.Code_ModelGetModelByUUID, err)
+	}
+
+	return &model_service.GetModelInfoByUuidResp{
+		ModelInfoRespData: &model_service.ModelInfoRespData{
+			ModelId: util.Int2Str(modelInfo.ID),
+		},
+	}, nil
 }

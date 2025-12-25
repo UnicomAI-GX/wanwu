@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	mp_deepseek "github.com/UnicomAI/wanwu/pkg/model-provider/mp-deepseek"
+	mp_qianfan "github.com/UnicomAI/wanwu/pkg/model-provider/mp-qianfan"
 
 	mp_common "github.com/UnicomAI/wanwu/pkg/model-provider/mp-common"
 	mp_huoshan "github.com/UnicomAI/wanwu/pkg/model-provider/mp-huoshan"
@@ -226,6 +228,40 @@ func ToModelTags(provider, modelType, cfg string) ([]mp_common.Tag, error) {
 		default:
 			return nil, fmt.Errorf("ToModelTags:invalid provider %v model type %v", provider, modelType)
 		}
+	case ProviderQianfan:
+		switch modelType {
+		case ModelTypeLLM:
+			llm := &mp_qianfan.LLM{}
+			if err := json.Unmarshal([]byte(cfg), llm); err != nil {
+				return nil, fmt.Errorf("unmarshal model config err: %v", err)
+			}
+			tags = llm.Tags()
+		case ModelTypeRerank:
+			rerank := &mp_qianfan.Rerank{}
+			if err := json.Unmarshal([]byte(cfg), rerank); err != nil {
+				return nil, fmt.Errorf("unmarshal model config err: %v", err)
+			}
+			tags = rerank.Tags()
+		case ModelTypeEmbedding:
+			embedding := &mp_qianfan.Embedding{}
+			if err := json.Unmarshal([]byte(cfg), embedding); err != nil {
+				return nil, fmt.Errorf("unmarshal model config err: %v", err)
+			}
+			tags = embedding.Tags()
+		default:
+			return nil, fmt.Errorf("ToModelTags:invalid provider %v model type %v", provider, modelType)
+		}
+	case ProviderDeepSeek:
+		switch modelType {
+		case ModelTypeLLM:
+			llm := &mp_deepseek.LLM{}
+			if err := json.Unmarshal([]byte(cfg), llm); err != nil {
+				return nil, fmt.Errorf("unmarshal model config err: %v", err)
+			}
+			tags = llm.Tags()
+		default:
+			return nil, fmt.Errorf("ToModelTags:invalid provider %v model type %v", provider, modelType)
+		}
 	default:
 		return nil, fmt.Errorf("ToModelTags:invalid provider: %v", provider)
 	}
@@ -312,8 +348,26 @@ func ToModelConfig(provider, modelType, cfg string) (interface{}, error) {
 		default:
 			return nil, fmt.Errorf("ToModelConfig:invalid provider %v model type %v", provider, modelType)
 		}
+	case ProviderQianfan:
+		switch modelType {
+		case ModelTypeLLM:
+			ret = &mp_qianfan.LLM{}
+		case ModelTypeRerank:
+			ret = &mp_qianfan.Rerank{}
+		case ModelTypeEmbedding:
+			ret = &mp_qianfan.Embedding{}
+		default:
+			return nil, fmt.Errorf("ToModelConfig:invalid provider %v model type %v", provider, modelType)
+		}
+	case ProviderDeepSeek:
+		switch modelType {
+		case ModelTypeLLM:
+			ret = &mp_deepseek.LLM{}
+		default:
+			return nil, fmt.Errorf("ToModelConfig:invalid provider %v model type %v", provider, modelType)
+		}
 	default:
-		return nil, fmt.Errorf("ToModelConfig:invalid provider: %v", modelType)
+		return nil, fmt.Errorf("ToModelConfig:invalid provider: %v", provider)
 	}
 
 	if err := json.Unmarshal([]byte(cfg), ret); err != nil {

@@ -171,6 +171,7 @@ enum Code {
   ModelChangeModelStatus = 250007;   // 模型启用/关停错误
   ModelListTypeModels = 250008; // 模型llm/rerank/embedding列表错误
   ModelGetModelByIds = 250009; // 根据模型ID列表查询错误
+  ModelGetModelByUUID = 250010; // 根据模型UUID查询错误
 
   // --- app-service ---
   // [300000, 309999]

@@ -18,4 +18,5 @@ type IClient interface {
 
 	GetModelById(ctx context.Context, modelId uint32) (*model.ModelImported, *errs.Status)
 	GetModelByIds(ctx context.Context, modelIds []uint32) ([]*model.ModelImported, *errs.Status)
+	GetModelByUUID(ctx context.Context, uuid string) (*model.ModelImported, *errs.Status)
 }

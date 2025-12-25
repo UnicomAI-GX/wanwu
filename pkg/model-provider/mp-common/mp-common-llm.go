@@ -50,6 +50,16 @@ func GetTagsByFunctionCall(fcType string) []Tag {
 	return tags
 }
 
+func GetTagsByVisionSupport(visionType string) []Tag {
+	var tags []Tag
+	if VSType(visionType) == VSTypeSupport {
+		tags = append(tags, Tag{
+			Text: TagVisionSupport,
+		})
+	}
+	return tags
+}
+
 func GetTagsByContentSize(size *int) []Tag {
 	var tags []Tag
 	if size != nil && *size > 0 {
@@ -211,7 +221,7 @@ type OpenAIFunction struct {
 type OpenAIFunctionParameters struct {
 	Type       string                                      `json:"type"`
 	Properties map[string]OpenAIFunctionParametersProperty `json:"properties"`
-	Required   []string                                    `json:"required"`
+	Required   []string                                    `json:"required,omitempty"`
 }
 type OpenAIFunctionParametersProperty struct {
 	Description string `json:"description"`

@@ -15,11 +15,12 @@ import (
 // --- openapi request ---
 
 type RerankReq struct {
-	Documents       []string `json:"documents" validate:"required"`
+	Documents       []string `json:"documents" validate:"required"` // 需要重排序的文本
 	Model           string   `json:"model" validate:"required"`
 	Query           string   `json:"query" validate:"required"`
 	ReturnDocuments *bool    `json:"return_documents,omitempty"`
-	TopN            *int     `json:"top_n,omitempty"`
+	TopN            *int     `json:"top_n,omitempty"` // 返回排序后的top_n个文档。默认返回全部文档。
+	User            *string  `json:"user,omitempty"`  // 用户标识（兼容千帆)
 }
 
 func (req *RerankReq) Check() error {
@@ -62,9 +63,9 @@ type Document struct {
 }
 
 type Usage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	TotalTokens      int `json:"total_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
+	PromptTokens     int `json:"prompt_tokens,omitempty"`
+	TotalTokens      int `json:"total_tokens,omitempty"`
+	CompletionTokens int `json:"completion_tokens,omitempty"`
 }
 
 // --- request ---

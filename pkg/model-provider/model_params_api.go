@@ -3,6 +3,8 @@ package mp
 import (
 	"encoding/json"
 	"fmt"
+	mp_deepseek "github.com/UnicomAI/wanwu/pkg/model-provider/mp-deepseek"
+	mp_qianfan "github.com/UnicomAI/wanwu/pkg/model-provider/mp-qianfan"
 	"net/url"
 
 	mp_huoshan "github.com/UnicomAI/wanwu/pkg/model-provider/mp-huoshan"
@@ -118,6 +120,31 @@ func ToModelParams(provider, modelType, cfg string) (interface{}, map[string]int
 			}
 		case ModelTypeRerank:
 		case ModelTypeEmbedding:
+		default:
+			return nil, nil, fmt.Errorf("invalid model type: %v", modelType)
+		}
+	case ProviderQianfan:
+		switch modelType {
+		case ModelTypeLLM:
+			llm := &mp_qianfan.LLMParams{}
+			if err = json.Unmarshal([]byte(cfg), llm); err == nil {
+				ret = llm
+				params = llm.GetParams()
+			}
+		case ModelTypeRerank:
+		case ModelTypeEmbedding:
+		case ModelTypeOcr:
+		default:
+			return nil, nil, fmt.Errorf("invalid model type: %v", modelType)
+		}
+	case ProviderDeepSeek:
+		switch modelType {
+		case ModelTypeLLM:
+			llm := &mp_deepseek.LLMParams{}
+			if err = json.Unmarshal([]byte(cfg), llm); err == nil {
+				ret = llm
+				params = llm.GetParams()
+			}
 		default:
 			return nil, nil, fmt.Errorf("invalid model type: %v", modelType)
 		}
