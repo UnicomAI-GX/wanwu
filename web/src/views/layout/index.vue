@@ -690,7 +690,7 @@ export default {
         bottom: 0;
         width: 100%;
         text-align: center;
-        padding-bottom: 10px;
+        padding-bottom: 8px;
         img {
           cursor: pointer;
         }
