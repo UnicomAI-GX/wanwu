@@ -157,7 +157,7 @@
             </el-tooltip>
           </div>
         </div>
-        <div class="rl" style="padding-top: 10px">
+        <div class="rl" style="height: calc(100% - 200px); padding-top: 10px">
           <el-input
             class="desc-input"
             v-model="editForm.instructions"
@@ -639,7 +639,7 @@ export default {
         version: [
           {
             required: true,
-            message: this.$t('list.version.noPlaceholder'),
+            message: this.$t('list.version.noMsg'),
             trigger: 'blur',
           },
           {
@@ -766,7 +766,20 @@ export default {
     this.initialEditForm = JSON.parse(JSON.stringify(this.editForm));
   },
   created() {
-    this.reloadData();
+    this.getModelData(); //获取模型列表
+    this.getRerankData(); //获取rerank模型
+    if (this.$route.query.id) {
+      this.editForm.assistantId = this.$route.query.id;
+      setTimeout(() => {
+        this.getAppDetail();
+      }, 500);
+    }
+    //判断是否有插件管理的权限
+    const accessCert = localStorage.getItem('access_cert');
+    const permission = accessCert
+      ? JSON.parse(accessCert).user.permission.orgPermission
+      : '';
+    this.hasPluginPermission = permission.indexOf('plugin') !== -1;
   },
   beforeDestroy() {
     store.dispatch('app/initState');
@@ -774,20 +787,8 @@ export default {
   },
   methods: {
     reloadData() {
-      this.getModelData(); //获取模型列表
-      this.getRerankData(); //获取rerank模型
-      if (this.$route.query.id) {
-        this.editForm.assistantId = this.$route.query.id;
-        setTimeout(() => {
-          this.getAppDetail();
-        }, 500);
-      }
-      //判断是否有插件管理的权限
-      const accessCert = localStorage.getItem('access_cert');
-      const permission = accessCert
-        ? JSON.parse(accessCert).user.permission.orgPermission
-        : '';
-      this.hasPluginPermission = permission.indexOf('plugin') !== -1;
+      this.disableClick = false;
+      this.getAppDetail();
     },
     previewVersion(item) {
       this.disableClick = !item.isCurrent;
@@ -1324,7 +1325,7 @@ export default {
   .drawer-info {
     position: relative;
     width: 30%;
-    margin: 10px 0;
+    margin: 10px 0 10px 10px;
   }
 
   .labelTitle {
@@ -1374,7 +1375,6 @@ export default {
 
   .drawer-form {
     width: 30%;
-    margin: 10px 0;
 
     /*通用*/
     .block {
