@@ -62,6 +62,8 @@ func buildHistory(history []request.AssistantConversionHistory, maxHistory int) 
 	if maxHistory <= 0 {
 		return historyList
 	}
+	// 每条记录占用2个位置(问/答)
+	maxHistory = maxHistory * 2
 	// 只返回最后maxHistory条
 	if len(historyList) > maxHistory {
 		return historyList[len(historyList)-maxHistory:]
