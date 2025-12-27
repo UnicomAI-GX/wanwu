@@ -8,8 +8,8 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm/sqlopt"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
@@ -285,7 +285,7 @@ func buildPermissionRecord(permission *model.KnowledgePermission, fromPermission
 	}
 	milli := time.Now().UnixMilli()
 	return &model.KnowledgePermissionRecord{
-		RecordId:           generator.GetGenerator().NewID(),
+		RecordId:           wanwu_util.NewID(),
 		KnowledgeId:        permission.KnowledgeId,
 		Option:             option,
 		OperatorUserId:     permission.GrantUserId,

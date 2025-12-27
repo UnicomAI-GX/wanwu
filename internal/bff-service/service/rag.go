@@ -184,10 +184,10 @@ func DeleteRag(ctx *gin.Context, req request.RagReq) error {
 	return err
 }
 
-func GetRag(ctx *gin.Context, req request.RagReq, needLatestPublished bool) (*response.RagInfo, error) {
+func GetRag(ctx *gin.Context, req request.RagReq, needPublished bool) (*response.RagInfo, error) {
 	resp, err := rag.GetRagDetail(ctx.Request.Context(), &rag_service.RagDetailReq{
 		RagId:   req.RagID,
-		Publish: util.IfElse(needLatestPublished, int32(1), int32(0)),
+		Publish: util.IfElse(needPublished, int32(1), int32(0)),
 		Version: req.Version,
 	})
 	if err != nil {
@@ -216,7 +216,7 @@ func GetRag(ctx *gin.Context, req request.RagReq, needLatestPublished bool) (*re
 func appModelRerankProto2Model(ctx *gin.Context, resp *rag_service.RagInfo) (request.AppModelConfig, request.AppModelConfig, request.AppModelConfig, error) {
 	var modelConfig, rerankConfig, qaRerankConfig request.AppModelConfig
 	if resp.ModelConfig.ModelId != "" {
-		modelInfo, err := model.GetModelById(ctx.Request.Context(), &model_service.GetModelByIdReq{ModelId: resp.ModelConfig.ModelId})
+		modelInfo, err := model.GetModel(ctx.Request.Context(), &model_service.GetModelReq{ModelId: resp.ModelConfig.ModelId})
 		if err != nil {
 			return request.AppModelConfig{}, request.AppModelConfig{}, request.AppModelConfig{}, err
 		}
@@ -226,7 +226,7 @@ func appModelRerankProto2Model(ctx *gin.Context, resp *rag_service.RagInfo) (req
 		}
 	}
 	if resp.RerankConfig.ModelId != "" {
-		rerankInfo, err := model.GetModelById(ctx.Request.Context(), &model_service.GetModelByIdReq{ModelId: resp.RerankConfig.ModelId})
+		rerankInfo, err := model.GetModel(ctx.Request.Context(), &model_service.GetModelReq{ModelId: resp.RerankConfig.ModelId})
 		if err != nil {
 			return request.AppModelConfig{}, request.AppModelConfig{}, request.AppModelConfig{}, err
 		}
@@ -236,7 +236,7 @@ func appModelRerankProto2Model(ctx *gin.Context, resp *rag_service.RagInfo) (req
 		}
 	}
 	if resp.QArerankConfig.ModelId != "" {
-		qaRerankInfo, err := model.GetModelById(ctx.Request.Context(), &model_service.GetModelByIdReq{ModelId: resp.QArerankConfig.ModelId})
+		qaRerankInfo, err := model.GetModel(ctx.Request.Context(), &model_service.GetModelReq{ModelId: resp.QArerankConfig.ModelId})
 		if err != nil {
 			return request.AppModelConfig{}, request.AppModelConfig{}, request.AppModelConfig{}, err
 		}

@@ -119,22 +119,6 @@ func (c *Client) ChangeModelStatus(ctx context.Context, tab *model_client.ModelI
 	return nil
 }
 
-func (c *Client) GetModelById(ctx context.Context, modelId uint32) (*model_client.ModelImported, *errs.Status) {
-	info := &model_client.ModelImported{}
-	if err := sqlopt.WithID(modelId).Apply(c.db).WithContext(ctx).First(info).Error; err != nil {
-		return nil, toErrStatus("model_get_by_id_err", err.Error())
-	}
-	return info, nil
-}
-
-func (c *Client) GetModelByIds(ctx context.Context, modelIds []uint32) ([]*model_client.ModelImported, *errs.Status) {
-	var models []*model_client.ModelImported
-	if err := sqlopt.WithIDs(modelIds).Apply(c.db).WithContext(ctx).Find(&models).Error; err != nil {
-		return nil, toErrStatus("model_get_by_ids_err", err.Error())
-	}
-	return models, nil
-}
-
 func (c *Client) GetModel(ctx context.Context, tab *model_client.ModelImported) (*model_client.ModelImported, *errs.Status) {
 	info := &model_client.ModelImported{}
 	if err := sqlopt.SQLOptions(
@@ -145,6 +129,22 @@ func (c *Client) GetModel(ctx context.Context, tab *model_client.ModelImported) 
 		return nil, toErrStatus("model_get_err", err.Error())
 	}
 	return info, nil
+}
+
+func (c *Client) GetModelByUUID(ctx context.Context, uuid string) (*model_client.ModelImported, *errs.Status) {
+	info := &model_client.ModelImported{}
+	if err := sqlopt.WithUUID(uuid).Apply(c.db).WithContext(ctx).First(info).Error; err != nil {
+		return nil, toErrStatus("model_get_by_uuid_err", err.Error())
+	}
+	return info, nil
+}
+
+func (c *Client) GetModelByIds(ctx context.Context, modelIds []uint32) ([]*model_client.ModelImported, *errs.Status) {
+	var models []*model_client.ModelImported
+	if err := sqlopt.WithIDs(modelIds).Apply(c.db).WithContext(ctx).Find(&models).Error; err != nil {
+		return nil, toErrStatus("model_get_by_ids_err", err.Error())
+	}
+	return models, nil
 }
 
 func (c *Client) ListModels(ctx context.Context, tab *model_client.ModelImported) ([]*model_client.ModelImported, *errs.Status) {
@@ -176,12 +176,4 @@ func (c *Client) ListTypeModels(ctx context.Context, tab *model_client.ModelImpo
 		return nil, toErrStatus("model_list_type_models_err", err.Error())
 	}
 	return modelInfos, nil
-}
-
-func (c *Client) GetModelByUUID(ctx context.Context, uuid string) (*model_client.ModelImported, *errs.Status) {
-	info := &model_client.ModelImported{}
-	if err := sqlopt.WithUUID(uuid).Apply(c.db).WithContext(ctx).First(info).Error; err != nil {
-		return nil, toErrStatus("model_get_by_uuid_err", err.Error())
-	}
-	return info, nil
 }

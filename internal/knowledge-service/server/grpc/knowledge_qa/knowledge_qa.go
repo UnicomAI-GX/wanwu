@@ -13,12 +13,12 @@ import (
 	knowledgebase_qa_service "github.com/UnicomAI/wanwu/api/proto/knowledgebase-qa-service"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/server/grpc/knowledge"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	"github.com/UnicomAI/wanwu/pkg/log"
 	util2 "github.com/UnicomAI/wanwu/pkg/util"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -159,7 +159,7 @@ func (s *Service) CreateQAPair(ctx context.Context, req *knowledgebase_qa_servic
 		return nil, util.ErrCode(errs.Code_KnowledgeDuplicateQAPirQuestion)
 	}
 	// 3.新建问答对
-	qaPairId := generator.GetGenerator().NewID()
+	qaPairId := wanwu_util.NewID()
 	qaPairs, ragParams := buildCreateQAPairParams(knowledgeBase, question, answer, questionMD5, qaPairId, req.UserId, req.OrgId)
 	err = orm.CreateKnowledgeQAPairAndCount(ctx, req.KnowledgeId, qaPairs, ragParams)
 	if err != nil {
@@ -497,7 +497,7 @@ func buildQAPairImportTask(req *knowledgebase_qa_service.ImportQAPairReq) (*mode
 		return nil, err
 	}
 	return &model.KnowledgeQAPairImportTask{
-		ImportId:    generator.GetGenerator().NewID(),
+		ImportId:    wanwu_util.NewID(),
 		KnowledgeId: req.KnowledgeId,
 		CreatedAt:   time.Now().UnixMilli(),
 		UpdatedAt:   time.Now().UnixMilli(),
@@ -511,7 +511,7 @@ func buildQAPairImportTask(req *knowledgebase_qa_service.ImportQAPairReq) (*mode
 // buildExportTask 构造导出任务
 func buildQAPairExportTask(req *knowledgebase_qa_service.ExportQAPairReq) (*model.KnowledgeExportTask, error) {
 	return &model.KnowledgeExportTask{
-		ExportId:    generator.GetGenerator().NewID(),
+		ExportId:    wanwu_util.NewID(),
 		KnowledgeId: req.KnowledgeId,
 		CreatedAt:   time.Now().UnixMilli(),
 		UpdatedAt:   time.Now().UnixMilli(),

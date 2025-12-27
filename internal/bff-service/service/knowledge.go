@@ -13,7 +13,6 @@ import (
 	err_code "github.com/UnicomAI/wanwu/api/proto/err-code"
 	iam_service "github.com/UnicomAI/wanwu/api/proto/iam-service"
 	knowledgebase_service "github.com/UnicomAI/wanwu/api/proto/knowledgebase-service"
-	model_service "github.com/UnicomAI/wanwu/api/proto/model-service"
 	"github.com/UnicomAI/wanwu/internal/bff-service/config"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/request"
 	"github.com/UnicomAI/wanwu/internal/bff-service/model/response"
@@ -282,17 +281,6 @@ func GetKnowledgeGraph(ctx *gin.Context, userId, orgId string, req *request.Know
 		return nil, grpc_util.ErrorStatus(err_code.Code_BFFGeneral, fmt.Sprintf("knowledge graph unmarshal err: %v", err))
 	}
 	return graph, nil
-}
-
-func getModelIdByUuid(ctx *gin.Context, uuid string) (string, error) {
-	resp, err := model.GetModelInfoByUuid(ctx, &model_service.GetModelInfoByUuidReq{Uuid: uuid})
-	if err != nil {
-		return "", err
-	}
-	if resp == nil || resp.ModelInfoRespData == nil || resp.ModelInfoRespData.ModelId == "" {
-		return "", grpc_util.ErrorStatus(err_code.Code_BFFInvalidArg, "无法找到该模型")
-	}
-	return resp.ModelInfoRespData.ModelId, nil
 }
 
 func buildUserKnowledgeList(knowledgeList *response.KnowledgeListResp) map[string][]*request.RagKnowledgeInfo {

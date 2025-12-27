@@ -10,11 +10,11 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/config"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	file_extract "github.com/UnicomAI/wanwu/internal/knowledge-service/task/file-extract"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 )
 
 type FileDocImportService struct{}
@@ -187,7 +187,7 @@ func buildDocList(ctx context.Context, isCompress bool, file *model.DocInfo) ([]
 func buildKnowledgeDoc(importTask *model.KnowledgeImportTask, checkFileResult *CheckFileResult) *model.KnowledgeDoc {
 	docInfo := checkFileResult.DocInfo
 	return &model.KnowledgeDoc{
-		DocId:        generator.GetGenerator().NewID(),
+		DocId:        wanwu_util.NewID(),
 		ImportTaskId: importTask.ImportId,
 		KnowledgeId:  importTask.KnowledgeId,
 		FilePath:     docInfo.DocUrl,

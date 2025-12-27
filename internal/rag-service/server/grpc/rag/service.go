@@ -12,11 +12,11 @@ import (
 	"github.com/UnicomAI/wanwu/internal/rag-service/client"
 	"github.com/UnicomAI/wanwu/internal/rag-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/rag-service/client/orm"
-	"github.com/UnicomAI/wanwu/internal/rag-service/pkg/generator"
 	message_builder "github.com/UnicomAI/wanwu/internal/rag-service/service/message-builder"
 	grpc_util "github.com/UnicomAI/wanwu/pkg/grpc-util"
 	http_client "github.com/UnicomAI/wanwu/pkg/http-client"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	"github.com/UnicomAI/wanwu/pkg/util"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -86,7 +86,7 @@ func (s *Service) ChatRag(req *rag_service.ChatRagReq, stream grpc.ServerStreami
 	}
 	knowledgeIds, qaIds, knowledgeIDToName := splitKnowledgeIdList(knowledgeInfoList)
 	return message_builder.BuildMessage(ctx, &message_builder.RagContext{
-		MessageId:         generator.GetGenerator().NewID(),
+		MessageId:         util.NewID(),
 		Req:               req,
 		Rag:               rag,
 		KnowledgeIDToName: knowledgeIDToName,
@@ -120,7 +120,7 @@ func (s *Service) CreateRag(ctx context.Context, in *rag_service.CreateRagReq) (
 	if rag != nil {
 		return nil, grpc_util.ErrorStatus(errs.Code_RagDuplicateName)
 	}
-	ragId := generator.GetGenerator().NewID()
+	ragId := util.NewID()
 	err := s.cli.CreateRag(ctx, &model.RagInfo{
 		RagID: ragId,
 		BriefConfig: model.AppBriefConfig{
@@ -352,7 +352,7 @@ func (s *Service) CopyRag(ctx context.Context, in *rag_service.CopyRagReq) (*rag
 		return nil, errStatus(errs.Code_RagGetErr, err)
 	}
 	replicaName := fmt.Sprintf("%s_%d", info.BriefConfig.Name, index)
-	replicaId := generator.GetGenerator().NewID()
+	replicaId := util.NewID()
 	err = s.cli.CreateRag(ctx, &model.RagInfo{
 		RagID: replicaId,
 		BriefConfig: model.AppBriefConfig{

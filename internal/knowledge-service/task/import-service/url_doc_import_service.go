@@ -7,9 +7,9 @@ import (
 
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 )
 
 const (
@@ -96,7 +96,7 @@ func buildKnowledgeUrlDoc(importTask *model.KnowledgeImportTask, docInfo *CheckF
 		fileSize = 10 // 10b,经bff转换后为0.01kb
 	}
 	return &model.KnowledgeDoc{
-		DocId:        generator.GetGenerator().NewID(),
+		DocId:        wanwu_util.NewID(),
 		ImportTaskId: importTask.ImportId,
 		KnowledgeId:  importTask.KnowledgeId,
 		FilePath:     docInfo.DocInfo.DocUrl,

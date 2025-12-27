@@ -33,7 +33,7 @@ func GetAppKeyByKey(ctx *gin.Context, appKey string) (*app_service.AppKeyInfo, e
 	return app.GetAppKeyByKey(ctx.Request.Context(), &app_service.GetAppKeyByKeyReq{AppKey: appKey})
 }
 
-func GenAppKey(ctx *gin.Context, userId, orgId string, req request.GenAppKeyRequest) (*response.AppResponse, error) {
+func GenAppKey(ctx *gin.Context, userId, orgId string, req request.GenAppKeyRequest) (*response.AppKeyInfo, error) {
 	key, err := app.GenAppKey(ctx.Request.Context(), &app_service.GenAppKeyReq{
 		AppId:   req.AppId,
 		AppType: req.AppType,
@@ -43,7 +43,7 @@ func GenAppKey(ctx *gin.Context, userId, orgId string, req request.GenAppKeyRequ
 	if err != nil {
 		return nil, err
 	}
-	return &response.AppResponse{
+	return &response.AppKeyInfo{
 		ApiID:     key.AppKeyId,
 		ApiKey:    key.AppKey,
 		CreatedAt: util.Time2Str(key.CreatedAt),
@@ -60,8 +60,8 @@ func DelAppKey(ctx *gin.Context, req request.DelAppKeyRequest) error {
 	return nil
 }
 
-func GetAppKeyList(ctx *gin.Context, userId string, req request.GetAppKeyListRequest) ([]*response.AppResponse, error) {
-	apiKeyList, err := app.GetAppKeyList(ctx.Request.Context(), &app_service.GetAppKeyListReq{
+func GetAppKeyList(ctx *gin.Context, userId string, req request.GetAppKeyListRequest) ([]*response.AppKeyInfo, error) {
+	appKeyList, err := app.GetAppKeyList(ctx.Request.Context(), &app_service.GetAppKeyListReq{
 		AppId:   req.AppId,
 		AppType: req.AppType,
 		UserId:  userId,
@@ -69,17 +69,17 @@ func GetAppKeyList(ctx *gin.Context, userId string, req request.GetAppKeyListReq
 	if err != nil {
 		return nil, err
 	}
-	var apiRes []*response.AppResponse
-	for _, apiKeyInfo := range apiKeyList.Info {
-		apiRes = append(apiRes, toAppResp(apiKeyInfo))
+	var appKeys []*response.AppKeyInfo
+	for _, appKey := range appKeyList.Info {
+		appKeys = append(appKeys, toAppKeyInfo(appKey))
 	}
-	return apiRes, nil
+	return appKeys, nil
 }
 
-func toAppResp(apiKeyInfo *app_service.AppKeyInfo) *response.AppResponse {
-	return &response.AppResponse{
-		ApiID:     apiKeyInfo.AppKeyId,
-		ApiKey:    apiKeyInfo.AppKey,
-		CreatedAt: util.Time2Str(apiKeyInfo.CreatedAt),
+func toAppKeyInfo(appKey *app_service.AppKeyInfo) *response.AppKeyInfo {
+	return &response.AppKeyInfo{
+		ApiID:     appKey.AppKeyId,
+		ApiKey:    appKey.AppKey,
+		CreatedAt: util.Time2Str(appKey.CreatedAt),
 	}
 }

@@ -6,8 +6,8 @@ import (
 
 	err_code "github.com/UnicomAI/wanwu/api/proto/err-code"
 	"github.com/UnicomAI/wanwu/internal/assistant-service/client/model"
-	"github.com/UnicomAI/wanwu/internal/rag-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	"github.com/UnicomAI/wanwu/pkg/util"
 	"gorm.io/gorm"
 )
 
@@ -40,7 +40,6 @@ func NewClient(db *gorm.DB) (*Client, error) {
 
 func initAssistantUUID(dbClient *gorm.DB) error {
 	const batchSize = 100
-	gen := generator.GetGenerator()
 
 	for {
 		var ids []uint32
@@ -56,7 +55,7 @@ func initAssistantUUID(dbClient *gorm.DB) error {
 		var args []interface{}
 		for _, id := range ids {
 			caseWhen += "WHEN ? THEN ? "
-			args = append(args, id, gen.NewID())
+			args = append(args, id, util.NewID())
 		}
 		caseWhen += "END"
 

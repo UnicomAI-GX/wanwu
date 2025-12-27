@@ -3,13 +3,7 @@ package util
 import (
 	"math"
 	"strings"
-
-	uuid "github.com/satori/go.uuid"
 )
-
-func UUID() string {
-	return uuid.NewV4().String()
-}
 
 func Reverse[T any](lst []T) {
 	// 反转

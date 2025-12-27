@@ -3,8 +3,9 @@ package mp_qianfan
 import (
 	"context"
 	"fmt"
-	mp_common "github.com/UnicomAI/wanwu/pkg/model-provider/mp-common"
 	"net/url"
+
+	mp_common "github.com/UnicomAI/wanwu/pkg/model-provider/mp-common"
 )
 
 type LLM struct {

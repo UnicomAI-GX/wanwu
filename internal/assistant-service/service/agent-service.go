@@ -71,13 +71,6 @@ type ToolParams struct {
 	McpToolList    []*MCPToolInfo                `json:"mcpToolList,omitempty"`
 }
 
-type APIAuth struct {
-	Type  string `json:"type"`
-	In    string `json:"in"`
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
 type MCPToolInfo struct {
 	URL          string   `json:"url"`
 	Transport    string   `json:"transport"`

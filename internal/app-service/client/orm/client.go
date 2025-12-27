@@ -33,16 +33,16 @@ func NewClient(db *gorm.DB) (*Client, error) {
 	}
 	// 自动迁移表结构
 	if err := db.AutoMigrate(
-		model.AppConversation{},
-		model.ApiKey{},
-		model.AppHistory{},
+		model.OpenApiKey{},
+		model.ApiKey{}, // appKey
 		model.App{},
+		model.AppHistory{},
 		model.AppFavorite{},
+		model.AppUrl{},
+		model.AppConversation{},
 		model.SensitiveWordTable{},
 		model.SensitiveWordVocabulary{},
-		model.AppUrl{},
 		model.ChatflowApplcation{},
-		model.OpenApiKey{},
 	); err != nil {
 		return nil, err
 	}

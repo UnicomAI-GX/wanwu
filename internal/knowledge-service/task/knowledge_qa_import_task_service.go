@@ -13,7 +13,6 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
 	async_task_pkg "github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/async-task"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	"github.com/UnicomAI/wanwu/pkg/log"
 	"github.com/UnicomAI/wanwu/pkg/util"
@@ -291,7 +290,7 @@ func buildQAPairBatchProcessor(knowledgeBase *model.KnowledgeBase, importTask *m
 		var QAPairs []*model.KnowledgeQAPair
 		var successCount int64 = 0
 		for _, lineData := range batchData {
-			QAPairId := generator.GetGenerator().NewID()
+			qaPairId := util.NewID()
 			question := strings.Trim(lineData[0], " ")
 			answer := strings.Trim(lineData[1], " ")
 			questionMD5 := util.MD5([]byte(question))
@@ -300,12 +299,12 @@ func buildQAPairBatchProcessor(knowledgeBase *model.KnowledgeBase, importTask *m
 				continue
 			}
 			chunks = append(chunks, &service.RagQAPairItem{
-				QAPairId: QAPairId,
+				QAPairId: qaPairId,
 				Question: question,
 				Answer:   answer,
 			})
 			QAPairs = append(QAPairs, &model.KnowledgeQAPair{
-				QAPairId:     QAPairId,
+				QAPairId:     qaPairId,
 				ImportTaskId: importTask.ImportId,
 				KnowledgeId:  knowledgeBase.KnowledgeId,
 				Question:     question,

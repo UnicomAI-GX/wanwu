@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	mp_deepseek "github.com/UnicomAI/wanwu/pkg/model-provider/mp-deepseek"
 	mp_qianfan "github.com/UnicomAI/wanwu/pkg/model-provider/mp-qianfan"
 
@@ -65,7 +66,7 @@ type IGui interface {
 	Gui(ctx context.Context, req mp_common.IGuiReq, headers ...mp_common.Header) (mp_common.IGuiResp, error)
 }
 
-// ToModelTags ILLM、IEmbedding或IRerank 的 标签列表
+// ToModelTags ILLM、IEmbedding或IRerank 的标签列表
 func ToModelTags(provider, modelType, cfg string) ([]mp_common.Tag, error) {
 	if cfg == "" {
 		return nil, nil
@@ -379,10 +380,12 @@ func ToModelConfig(provider, modelType, cfg string) (interface{}, error) {
 type ProviderModelConfig struct {
 	ProviderYuanJing         ProviderModelByYuanjing         `json:"providerYuanJing"`
 	ProviderOpenAICompatible ProviderModelByOpenAICompatible `json:"providerOpenAICompatible"`
-	ProviderHuoshan          ProviderModelByHuoshan          `json:"providerHuoshan"`
+	ProviderHuoshan          ProviderModelByHuoShan          `json:"providerHuoShan"`
 	ProviderQwen             ProviderModelByQwen             `json:"providerQwen"`
 	ProviderOllama           ProviderModelByOllama           `json:"providerOllama"`
-	ProviderInfini           ProviderModelByInfini           `json:"providerModelByInfini"`
+	ProviderInfini           ProviderModelByInfini           `json:"providerInfini"`
+	ProviderQianFan          ProviderModelByQianFan          `json:"providerQianFan"`
+	ProviderDeepSeek         ProviderModelByDeepSeek         `json:"providerDeepSeek"`
 }
 
 type ProviderModelByOpenAICompatible struct {
@@ -400,7 +403,7 @@ type ProviderModelByYuanjing struct {
 	PdfParser mp_yuanjing.PdfParser `json:"pdf-parser"`
 }
 
-type ProviderModelByHuoshan struct {
+type ProviderModelByHuoShan struct {
 	Llm       mp_huoshan.LLM       `json:"llm"`
 	Embedding mp_huoshan.Embedding `json:"embedding"`
 }
@@ -420,4 +423,14 @@ type ProviderModelByInfini struct {
 	Llm       mp_infini.LLM       `json:"llm"`
 	Rerank    mp_infini.Rerank    `json:"rerank"`
 	Embedding mp_infini.Embedding `json:"embedding"`
+}
+
+type ProviderModelByQianFan struct {
+	Llm       mp_qianfan.LLM       `json:"llm"`
+	Rerank    mp_qianfan.Rerank    `json:"rerank"`
+	Embedding mp_qianfan.Embedding `json:"embedding"`
+}
+
+type ProviderModelByDeepSeek struct {
+	Llm mp_deepseek.LLM `json:"llm"`
 }

@@ -25,7 +25,7 @@ import (
 //	@Router		/model/{modelId} [get]
 func GetModelById(ctx *gin.Context) {
 	modelId := ctx.Param("modelId")
-	resp, err := service.GetModelById(ctx, &request.GetModelByIdRequest{
+	resp, err := service.GetModelById(ctx, &request.GetModelRequest{
 		BaseModelRequest: request.BaseModelRequest{ModelId: modelId}})
 	// 替换callback返回的模型中的apiKey/endpointUrl信息
 	if resp != nil && resp.Config != nil {

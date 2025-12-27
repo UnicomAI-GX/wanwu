@@ -14,6 +14,7 @@ import (
 
 	"github.com/UnicomAI/wanwu/internal/agent-service/model/request"
 	http_client "github.com/UnicomAI/wanwu/internal/rag-service/pkg/http-client"
+	openapi3_util "github.com/UnicomAI/wanwu/pkg/openapi3-util"
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/schema"
 	"github.com/eino-contrib/jsonschema"
@@ -302,7 +303,7 @@ func buildParametersSchema(operation *openapi3.Operation) *openapi3.Schema {
 	}
 }
 
-func createHTTPHandler(serverURL, path, method string, auth *request.APIAuth, contentType string) func(ctx context.Context, arguments string) (string, error) {
+func createHTTPHandler(serverURL, path, method string, auth *openapi3_util.Auth, contentType string) func(ctx context.Context, arguments string) (string, error) {
 	return func(ctx context.Context, arguments string) (string, error) {
 		start := time.Now().UnixMilli()
 		requestURL := serverURL + path

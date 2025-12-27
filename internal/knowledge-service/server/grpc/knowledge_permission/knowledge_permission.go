@@ -10,9 +10,9 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
@@ -153,7 +153,7 @@ func buildKnowledgePermissionList(req *knowledgebase_permission_service.AddKnowl
 	milli := time.Now().UnixMilli()
 	for _, info := range req.KnowledgeUserList {
 		dataList = append(dataList, &model.KnowledgePermission{
-			PermissionId:   generator.GetGenerator().NewID(),
+			PermissionId:   wanwu_util.NewID(),
 			KnowledgeId:    req.KnowledgeId,
 			GrantOrgId:     req.OrgId,
 			GrantUserId:    req.UserId,
@@ -189,7 +189,7 @@ func buildKnowledgePermissionTransferList(req *knowledgebase_permission_service.
 	//正常此处是新增
 	milli := time.Now().UnixMilli()
 	addList = append(addList, &model.KnowledgePermission{
-		PermissionId:   generator.GetGenerator().NewID(),
+		PermissionId:   wanwu_util.NewID(),
 		KnowledgeId:    req.KnowledgeId,
 		GrantOrgId:     req.OrgId,
 		GrantUserId:    req.UserId,

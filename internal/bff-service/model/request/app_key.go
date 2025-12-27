@@ -1,6 +1,6 @@
 package request
 
-// note: app_key命名的相关文件是针对应用生成的key（老版本），而api_key是针对用户生成的openapikey。
+// note: app_key命名的相关文件是针对应用生成的key（老版本），而api_key是针对用户生成的openapi key。
 type GenAppKeyRequest struct {
 	AppId   string `json:"appId" validate:"required"`   // 应用id
 	AppType string `json:"appType" validate:"required"` // 应用类型

@@ -15,10 +15,10 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm/sqlopt"
 	async_task "github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/async-task"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"gorm.io/gorm"
 )
 
@@ -245,7 +245,7 @@ func buildKnowledgeDocMeta(doc *model.KnowledgeDoc, importTask *model.KnowledgeI
 	}
 	return &model.KnowledgeDocMeta{
 		KnowledgeId: importTask.KnowledgeId,
-		MetaId:      generator.GetGenerator().NewID(),
+		MetaId:      wanwu_util.NewID(),
 		DocId:       doc.DocId,
 		Key:         meta.Key,
 		ValueMain:   meta.ValueMain,

@@ -82,10 +82,10 @@ func AssistantConfigUpdate(ctx *gin.Context, userId, orgId string, req request.A
 	return nil, err
 }
 
-func GetAssistantInfo(ctx *gin.Context, userId, orgId string, req request.AssistantIdRequest, needLatestPublished bool) (*response.Assistant, error) {
+func GetAssistantInfo(ctx *gin.Context, userId, orgId string, req request.AssistantIdRequest, needPublished bool) (*response.Assistant, error) {
 	var resp *assistant_service.AssistantInfo
 	var err error
-	if needLatestPublished {
+	if needPublished {
 		resp, err = assistant.AssistantSnapshotInfo(ctx.Request.Context(), &assistant_service.AssistantSnapshotInfoReq{
 			AssistantId: req.AssistantId,
 			Version:     req.Version,
@@ -103,6 +103,16 @@ func GetAssistantInfo(ctx *gin.Context, userId, orgId string, req request.Assist
 		return nil, err
 	}
 	return transAssistantResp2Model(ctx, resp)
+}
+
+func GetAssistantIdByUuid(ctx *gin.Context, uuid string) (string, error) {
+	resp, err := assistant.GetAssistantIdByUuid(ctx.Request.Context(), &assistant_service.GetAssistantIdByUuidReq{
+		Uuid: uuid,
+	})
+	if err != nil {
+		return "", err
+	}
+	return resp.AssistantId, nil
 }
 
 func AssistantCopy(ctx *gin.Context, userId, orgId string, req request.AssistantIdRequest) (*response.AssistantCreateResp, error) {
@@ -256,7 +266,7 @@ func AssistantToolConfig(ctx *gin.Context, userId, orgId string, req request.Ass
 func assistantModelConvert(ctx *gin.Context, modelConfigInfo *common.AppModelConfig) (modelConfig request.AppModelConfig, err error) {
 	if modelConfigInfo != nil && modelConfigInfo.ModelId != "" {
 		log.Debugf("检测到模型配置，模型ID: %s", modelConfigInfo.ModelId)
-		modelInfo, err := model.GetModelById(ctx.Request.Context(), &model_service.GetModelByIdReq{ModelId: modelConfigInfo.ModelId})
+		modelInfo, err := model.GetModel(ctx.Request.Context(), &model_service.GetModelReq{ModelId: modelConfigInfo.ModelId})
 		if err != nil {
 			log.Errorf("获取模型信息失败，模型ID: %s, 错误: %v", modelConfigInfo.ModelId, err)
 		}
@@ -278,7 +288,7 @@ func assistantRerankConvert(ctx *gin.Context, rerankConfigInfo *common.AppModelC
 	var rerankConfig request.AppModelConfig
 	if rerankConfigInfo != nil && rerankConfigInfo.ModelId != "" {
 		log.Debugf("检测到Rerank配置，模型ID: %s", rerankConfigInfo.ModelId)
-		modelInfo, err := model.GetModelById(ctx.Request.Context(), &model_service.GetModelByIdReq{ModelId: rerankConfigInfo.ModelId})
+		modelInfo, err := model.GetModel(ctx.Request.Context(), &model_service.GetModelReq{ModelId: rerankConfigInfo.ModelId})
 		if err != nil {
 			log.Errorf("获取Rerank模型信息失败，模型ID: %s, 错误: %v", rerankConfigInfo.ModelId, err)
 		} else {
@@ -635,16 +645,6 @@ func GetConversationDetailList(ctx *gin.Context, userId, orgId string, req reque
 	}
 
 	return response.PageResult{Total: resp.Total, List: convertedList, PageNo: req.PageNo, PageSize: req.PageSize}, nil
-}
-
-func GetAssistantIdByUuid(ctx *gin.Context, uuid string) (string, error) {
-	resp, err := assistant.GetAssistantIdByUuid(ctx.Request.Context(), &assistant_service.GetAssistantIdByUuidReq{
-		Uuid: uuid,
-	})
-	if err != nil {
-		return "", err
-	}
-	return resp.AssistantId, nil
 }
 
 func transKnowledgebases2Proto(kbConfig request.AppKnowledgebaseConfig) *assistant_service.AssistantKnowledgeBaseConfig {

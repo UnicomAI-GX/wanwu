@@ -41,9 +41,11 @@ definitions:
     type: object
   mp.AppModelParams:
     properties:
+      providerDeepSeek:
+        $ref: '#/definitions/mp.AppModelParamsDeepSeek'
       providerHuoshan:
-        $ref: '#/definitions/mp.AppModelParamsHuoshan'
-      providerModelByInfini:
+        $ref: '#/definitions/mp.AppModelParamsHuoShan'
+      providerInfini:
         $ref: '#/definitions/mp.AppModelParamsInfini'
       providerOllama:
         $ref: '#/definitions/mp.AppModelParamsOllama'
@@ -51,6 +53,8 @@ definitions:
         allOf:
         - $ref: '#/definitions/mp.AppModelParamsOpenAICompatible'
         description: OpenAI-API-compatible模型配置
+      providerQianFan:
+        $ref: '#/definitions/mp.AppModelParamsQianFan'
       providerQwen:
         $ref: '#/definitions/mp.AppModelParamsQwen'
       providerYuanjing:
@@ -58,49 +62,68 @@ definitions:
         - $ref: '#/definitions/mp.AppModelParamsYuanjing'
         description: YuanJing模型配置
     type: object
-  mp.AppModelParamsHuoshan:
+  mp.AppModelParamsDeepSeek:
     properties:
       llm:
         allOf:
-        - $ref: '#/definitions/mp_huoshan.LLMParams'
+        - $ref: '#/definitions/mp_common.LLMParams'
+        description: 大语言模型配置
+    type: object
+  mp.AppModelParamsHuoShan:
+    properties:
+      llm:
+        allOf:
+        - $ref: '#/definitions/mp_common.LLMParams'
         description: 大语言模型配置
     type: object
   mp.AppModelParamsInfini:
     properties:
       llm:
         allOf:
-        - $ref: '#/definitions/mp_infini.LLMParams'
+        - $ref: '#/definitions/mp_common.LLMParams'
         description: 大语言模型配置
     type: object
   mp.AppModelParamsOllama:
     properties:
       llm:
         allOf:
-        - $ref: '#/definitions/mp_ollama.LLMParams'
+        - $ref: '#/definitions/mp_common.LLMParams'
         description: 大语言模型配置
     type: object
   mp.AppModelParamsOpenAICompatible:
     properties:
       llm:
         allOf:
-        - $ref: '#/definitions/mp_openai_compatible.LLMParams'
+        - $ref: '#/definitions/mp_common.LLMParams'
+        description: 大语言模型配置
+    type: object
+  mp.AppModelParamsQianFan:
+    properties:
+      llm:
+        allOf:
+        - $ref: '#/definitions/mp_common.LLMParams'
         description: 大语言模型配置
     type: object
   mp.AppModelParamsQwen:
     properties:
       llm:
         allOf:
-        - $ref: '#/definitions/mp_qwen.LLMParams'
+        - $ref: '#/definitions/mp_common.LLMParams'
         description: 大语言模型配置
     type: object
   mp.AppModelParamsYuanjing:
     properties:
       llm:
         allOf:
-        - $ref: '#/definitions/mp_yuanjing.LLMParams'
+        - $ref: '#/definitions/mp_common.LLMParams'
         description: 大语言模型配置
     type: object
-  mp.ProviderModelByHuoshan:
+  mp.ProviderModelByDeepSeek:
+    properties:
+      llm:
+        $ref: '#/definitions/mp_deepseek.LLM'
+    type: object
+  mp.ProviderModelByHuoShan:
     properties:
       embedding:
         $ref: '#/definitions/mp_huoshan.Embedding'
@@ -132,6 +155,15 @@ definitions:
       rerank:
         $ref: '#/definitions/mp_openai_compatible.Rerank'
     type: object
+  mp.ProviderModelByQianFan:
+    properties:
+      embedding:
+        $ref: '#/definitions/mp_qianfan.Embedding'
+      llm:
+        $ref: '#/definitions/mp_qianfan.LLM'
+      rerank:
+        $ref: '#/definitions/mp_qianfan.Rerank'
+    type: object
   mp.ProviderModelByQwen:
     properties:
       embedding:
@@ -158,23 +190,81 @@ definitions:
     type: object
   mp.ProviderModelConfig:
     properties:
-      providerHuoshan:
-        $ref: '#/definitions/mp.ProviderModelByHuoshan'
-      providerModelByInfini:
+      providerDeepSeek:
+        $ref: '#/definitions/mp.ProviderModelByDeepSeek'
+      providerHuoShan:
+        $ref: '#/definitions/mp.ProviderModelByHuoShan'
+      providerInfini:
         $ref: '#/definitions/mp.ProviderModelByInfini'
       providerOllama:
         $ref: '#/definitions/mp.ProviderModelByOllama'
       providerOpenAICompatible:
         $ref: '#/definitions/mp.ProviderModelByOpenAICompatible'
+      providerQianFan:
+        $ref: '#/definitions/mp.ProviderModelByQianFan'
       providerQwen:
         $ref: '#/definitions/mp.ProviderModelByQwen'
       providerYuanJing:
         $ref: '#/definitions/mp.ProviderModelByYuanjing'
     type: object
+  mp_common.LLMParams:
+    properties:
+      frequencyPenalty:
+        description: 频率惩罚
+        type: number
+      frequencyPenaltyEnable:
+        description: 频率惩罚(开关)
+        type: boolean
+      maxTokens:
+        description: 最大标记
+        type: integer
+      maxTokensEnable:
+        description: 最大标记(开关)
+        type: boolean
+      presencePenalty:
+        description: 存在惩罚
+        type: number
+      presencePenaltyEnable:
+        description: 存在惩罚(开关)
+        type: boolean
+      temperature:
+        description: 温度
+        type: number
+      temperatureEnable:
+        description: 温度(开关)
+        type: boolean
+      topP:
+        description: Top P
+        type: number
+      topPEnable:
+        description: Top P(开关)
+        type: boolean
+    type: object
   mp_common.Tag:
     properties:
       text:
         type: string
+    type: object
+  mp_deepseek.LLM:
+    properties:
+      apiKey:
+        description: ApiKey
+        type: string
+      contextSize:
+        description: 上下文长度
+        type: integer
+      endpointUrl:
+        description: 推理url
+        type: string
+      functionCalling:
+        description: 函数调用是否支持
+        enum:
+        - noSupport
+        - toolCall
+        type: string
+      maxTokens:
+        description: 模型回答最大tokens
+        type: integer
     type: object
   mp_huoshan.Embedding:
     properties:
@@ -215,39 +305,6 @@ definitions:
         - support
         type: string
     type: object
-  mp_huoshan.LLMParams:
-    properties:
-      frequencyPenalty:
-        description: 频率惩罚
-        type: number
-      frequencyPenaltyEnable:
-        description: 频率惩罚(开关)
-        type: boolean
-      maxTokens:
-        description: 最大标记
-        type: integer
-      maxTokensEnable:
-        description: 最大标记(开关)
-        type: boolean
-      presencePenalty:
-        description: 存在惩罚
-        type: number
-      presencePenaltyEnable:
-        description: 存在惩罚(开关)
-        type: boolean
-      temperature:
-        description: 温度
-        type: number
-      temperatureEnable:
-        description: 温度(开关)
-        type: boolean
-      topP:
-        description: Top P
-        type: number
-      topPEnable:
-        description: Top P(开关)
-        type: boolean
-    type: object
   mp_infini.Embedding:
     properties:
       apiKey:
@@ -286,39 +343,6 @@ definitions:
         - noSupport
         - support
         type: string
-    type: object
-  mp_infini.LLMParams:
-    properties:
-      frequencyPenalty:
-        description: 频率惩罚
-        type: number
-      frequencyPenaltyEnable:
-        description: 频率惩罚(开关)
-        type: boolean
-      maxTokens:
-        description: 最大标记
-        type: integer
-      maxTokensEnable:
-        description: 最大标记(开关)
-        type: boolean
-      presencePenalty:
-        description: 存在惩罚
-        type: number
-      presencePenaltyEnable:
-        description: 存在惩罚(开关)
-        type: boolean
-      temperature:
-        description: 温度
-        type: number
-      temperatureEnable:
-        description: 温度(开关)
-        type: boolean
-      topP:
-        description: Top P
-        type: number
-      topPEnable:
-        description: Top P(开关)
-        type: boolean
     type: object
   mp_infini.Rerank:
     properties:
@@ -371,39 +395,6 @@ definitions:
         - support
         type: string
     type: object
-  mp_ollama.LLMParams:
-    properties:
-      frequencyPenalty:
-        description: 频率惩罚
-        type: number
-      frequencyPenaltyEnable:
-        description: 频率惩罚(开关)
-        type: boolean
-      maxTokens:
-        description: 最大标记
-        type: integer
-      maxTokensEnable:
-        description: 最大标记(开关)
-        type: boolean
-      presencePenalty:
-        description: 存在惩罚
-        type: number
-      presencePenaltyEnable:
-        description: 存在惩罚(开关)
-        type: boolean
-      temperature:
-        description: 温度
-        type: number
-      temperatureEnable:
-        description: 温度(开关)
-        type: boolean
-      topP:
-        description: Top P
-        type: number
-      topPEnable:
-        description: Top P(开关)
-        type: boolean
-    type: object
   mp_openai_compatible.Embedding:
     properties:
       apiKey:
@@ -443,40 +434,58 @@ definitions:
         - support
         type: string
     type: object
-  mp_openai_compatible.LLMParams:
-    properties:
-      frequencyPenalty:
-        description: 频率惩罚
-        type: number
-      frequencyPenaltyEnable:
-        description: 频率惩罚(开关)
-        type: boolean
-      maxTokens:
-        description: 最大标记
-        type: integer
-      maxTokensEnable:
-        description: 最大标记(开关)
-        type: boolean
-      presencePenalty:
-        description: 存在惩罚
-        type: number
-      presencePenaltyEnable:
-        description: 存在惩罚(开关)
-        type: boolean
-      temperature:
-        description: 温度
-        type: number
-      temperatureEnable:
-        description: 温度(开关)
-        type: boolean
-      topP:
-        description: Top P
-        type: number
-      topPEnable:
-        description: Top P(开关)
-        type: boolean
-    type: object
   mp_openai_compatible.Rerank:
+    properties:
+      apiKey:
+        description: ApiKey
+        type: string
+      contextSize:
+        description: 上下文长度
+        type: integer
+      endpointUrl:
+        description: 推理url
+        type: string
+    type: object
+  mp_qianfan.Embedding:
+    properties:
+      apiKey:
+        description: ApiKey
+        type: string
+      contextSize:
+        description: 上下文长度
+        type: integer
+      endpointUrl:
+        description: 推理url
+        type: string
+    type: object
+  mp_qianfan.LLM:
+    properties:
+      apiKey:
+        description: ApiKey
+        type: string
+      contextSize:
+        description: 上下文长度
+        type: integer
+      endpointUrl:
+        description: 推理url
+        type: string
+      functionCalling:
+        description: 函数调用是否支持
+        enum:
+        - noSupport
+        - toolCall
+        type: string
+      maxTokens:
+        description: 模型回答最大tokens
+        type: integer
+      visionSupport:
+        description: 视觉支持
+        enum:
+        - noSupport
+        - support
+        type: string
+    type: object
+  mp_qianfan.Rerank:
     properties:
       apiKey:
         description: ApiKey
@@ -526,39 +535,6 @@ definitions:
         - noSupport
         - support
         type: string
-    type: object
-  mp_qwen.LLMParams:
-    properties:
-      frequencyPenalty:
-        description: 频率惩罚
-        type: number
-      frequencyPenaltyEnable:
-        description: 频率惩罚(开关)
-        type: boolean
-      maxTokens:
-        description: 最大标记
-        type: integer
-      maxTokensEnable:
-        description: 最大标记(开关)
-        type: boolean
-      presencePenalty:
-        description: 存在惩罚
-        type: number
-      presencePenaltyEnable:
-        description: 存在惩罚(开关)
-        type: boolean
-      temperature:
-        description: 温度
-        type: number
-      temperatureEnable:
-        description: 温度(开关)
-        type: boolean
-      topP:
-        description: Top P
-        type: number
-      topPEnable:
-        description: Top P(开关)
-        type: boolean
     type: object
   mp_qwen.Rerank:
     properties:
@@ -619,39 +595,6 @@ definitions:
         - noSupport
         - support
         type: string
-    type: object
-  mp_yuanjing.LLMParams:
-    properties:
-      frequencyPenalty:
-        description: 频率惩罚
-        type: number
-      frequencyPenaltyEnable:
-        description: 频率惩罚(开关)
-        type: boolean
-      maxTokens:
-        description: 最大标记
-        type: integer
-      maxTokensEnable:
-        description: 最大标记(开关)
-        type: boolean
-      presencePenalty:
-        description: 存在惩罚
-        type: number
-      presencePenaltyEnable:
-        description: 存在惩罚(开关)
-        type: boolean
-      temperature:
-        description: 温度
-        type: number
-      temperatureEnable:
-        description: 温度(开关)
-        type: boolean
-      topP:
-        description: Top P
-        type: number
-      topPEnable:
-        description: Top P(开关)
-        type: boolean
     type: object
   mp_yuanjing.Ocr:
     properties:
@@ -3614,7 +3557,7 @@ definitions:
         description: 应用更新时间(用于历史记录排序)
         type: string
     type: object
-  response.AppResponse:
+  response.AppKeyInfo:
     properties:
       apiId:
         description: ApiID
@@ -6425,24 +6368,51 @@ definitions:
     type: object
 info:
   contact: {}
-  description: "## HTTP Header\r\n| Header        | 说明      |\r\n| ------------- |
-    --------- |\r\n| Authorization | JWT token |\r\n| X-Language    | 语言Code  |\r\n|
-    X-Org-Id      | 组织ID    |\r\n| X-Client-Id   | 客户端标识|\r\n\r\n## HTTP Status\r\n|
-    HTTP Status             | 说明                   |\r\n| -----------------------
-    | ---------------------- |\r\n| 200, StatusOK           | 请求返回成功           |\r\n|
-    400, StatusBadRequest   | 请求返回失败，用于业务 |\r\n| 401, StatusUnauthorized | JWT认证失败
-    \           |\r\n| 403, StatusForbidden    | 没有权限               |\r\n\r\n## 权限-菜单对应表\r\n|
-    一级权限        | 二级权限  | 三级权限 | 一级菜单 | 二级菜单 | 三级菜单 |\r\n|-------------|-------|------|------|------|------|\r\n|
-    guest       |       |      | 【访客】 |      |      |\r\n| common      |       |      |
-    【通用】 |      |      |\r\n| permission  |       |      | 权限管理 |      |      |\r\n|
-    permission  | user  |      | 权限管理 | 用户管理 |      |\r\n| permission  | org   |      |
-    权限管理 | 组织管理 |      |\r\n| permission  | role  |      | 权限管理 | 角色管理 |      |\r\n\r\n##
-    `/v1/user/permission`返回用例\r\n```json\r\n{\r\n  \"code\": 0,\r\n  \"data\": {\r\n
-    \   \"orgPermission\": {\r\n      \"org\": {\"id\": \"test-org-id\", \"name\":
-    \"test-org-name\"},\r\n      \"permissions\": [\r\n        {\"perm\": \"permission\"},\r\n
-    \       {\"perm\": \"permission.user\"},\r\n        {\"perm\": \"permission.org\"},\r\n
-    \       {\"perm\": \"permission.role\"}\r\n      ]\r\n    }\r\n  },\r\n  \"msg\":
-    \"操作成功\"\r\n}\r\n```"
+  description: |-
+    ## HTTP Header
+    | Header        | 说明      |
+    | ------------- | --------- |
+    | Authorization | JWT token |
+    | X-Language    | 语言Code  |
+    | X-Org-Id      | 组织ID    |
+    | X-Client-Id   | 客户端标识|
+
+    ## HTTP Status
+    | HTTP Status             | 说明                   |
+    | ----------------------- | ---------------------- |
+    | 200, StatusOK           | 请求返回成功           |
+    | 400, StatusBadRequest   | 请求返回失败，用于业务 |
+    | 401, StatusUnauthorized | JWT认证失败            |
+    | 403, StatusForbidden    | 没有权限               |
+
+    ## 权限-菜单对应表
+    | 一级权限        | 二级权限  | 三级权限 | 一级菜单 | 二级菜单 | 三级菜单 |
+    |-------------|-------|------|------|------|------|
+    | guest       |       |      | 【访客】 |      |      |
+    | common      |       |      | 【通用】 |      |      |
+    | permission  |       |      | 权限管理 |      |      |
+    | permission  | user  |      | 权限管理 | 用户管理 |      |
+    | permission  | org   |      | 权限管理 | 组织管理 |      |
+    | permission  | role  |      | 权限管理 | 角色管理 |      |
+
+    ## `/v1/user/permission`返回用例
+    ```json
+    {
+      "code": 0,
+      "data": {
+        "orgPermission": {
+          "org": {"id": "test-org-id", "name": "test-org-name"},
+          "permissions": [
+            {"perm": "permission"},
+            {"perm": "permission.user"},
+            {"perm": "permission.org"},
+            {"perm": "permission.role"}
+          ]
+        }
+      },
+      "msg": "操作成功"
+    }
+    ```
   title: AI Agent Productivity Platform API
   version: v0.0.1
 paths:
@@ -6652,7 +6622,7 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/response.AppResponse'
+                  $ref: '#/definitions/response.AppKeyInfo'
               type: object
       summary: 生成AppKey
       tags:
@@ -6684,7 +6654,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/response.AppResponse'
+                    $ref: '#/definitions/response.AppKeyInfo'
                   type: array
               type: object
       summary: 获取AppKey

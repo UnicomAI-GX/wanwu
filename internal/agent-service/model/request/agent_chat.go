@@ -2,6 +2,7 @@ package request
 
 import (
 	"github.com/UnicomAI/wanwu/internal/agent-service/model"
+	openapi3_util "github.com/UnicomAI/wanwu/pkg/openapi3-util"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -85,15 +86,8 @@ type AssistantConversionHistory struct {
 }
 
 type PluginToolInfo struct {
-	APISchema *openapi3.T `json:"api_schema"`
-	APIAuth   *APIAuth    `json:"api_auth,omitempty"`
-}
-
-type APIAuth struct {
-	Type  string `json:"type"`
-	In    string `json:"in"`
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	APISchema *openapi3.T         `json:"api_schema"`
+	APIAuth   *openapi3_util.Auth `json:"api_auth,omitempty"`
 }
 
 type MCPToolInfo struct {

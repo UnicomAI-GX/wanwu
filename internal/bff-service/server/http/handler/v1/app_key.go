@@ -35,7 +35,7 @@ func GetAppBaseUrl(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			data	body		request.GenAppKeyRequest	true	"生成AppKey参数"
-//	@Success		200		{object}	response.Response{data=response.AppResponse}
+//	@Success		200		{object}	response.Response{data=response.AppKeyInfo}
 //	@Router			/appspace/app/key [post]
 func GenAppKey(ctx *gin.Context) {
 	var req request.GenAppKeyRequest
@@ -73,7 +73,7 @@ func DelAppKey(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			data	query		request.GetAppKeyListRequest	true	"获取AppKeyList参数"
-//	@Success		200		{object}	response.Response{data=[]response.AppResponse}
+//	@Success		200		{object}	response.Response{data=[]response.AppKeyInfo}
 //	@Router			/appspace/app/key/list [get]
 func GetAppKeyList(ctx *gin.Context) {
 	var req request.GetAppKeyListRequest

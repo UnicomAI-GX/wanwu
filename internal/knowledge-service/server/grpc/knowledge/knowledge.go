@@ -8,17 +8,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
-
 	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
 	knowledgebase_service "github.com/UnicomAI/wanwu/api/proto/knowledgebase-service"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
+	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	rag_service "github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	"github.com/UnicomAI/wanwu/pkg/log"
-	pkg_util "github.com/UnicomAI/wanwu/pkg/util"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -392,7 +390,7 @@ func buildExportRecordListResp(knowledge *model.KnowledgeBase, list []*model.Kno
 				ErrorMsg:       item.ErrorMsg,
 				FilePath:       item.ExportFilePath,
 				UserId:         item.UserId,
-				ExportTime:     pkg_util.Time2Str(item.CreatedAt),
+				ExportTime:     wanwu_util.Time2Str(item.CreatedAt),
 				KnowledgeName:  knowledge.Name,
 			})
 		}
@@ -472,7 +470,7 @@ func handleAddMeta(req *knowledgebase_service.UpdateKnowledgeMetaValueReq, meta 
 			}
 		} else {
 			*addList = append(*addList, &model.KnowledgeDocMeta{
-				MetaId:      generator.GetGenerator().NewID(),
+				MetaId:      wanwu_util.NewID(),
 				DocId:       docId,
 				KnowledgeId: knowledgeId,
 				UserId:      req.UserId,
@@ -497,7 +495,7 @@ func handleUpdateMeta(req *knowledgebase_service.UpdateKnowledgeMetaValueReq, me
 			}
 		} else if req.ApplyToSelected {
 			*addList = append(*addList, &model.KnowledgeDocMeta{
-				MetaId:      generator.GetGenerator().NewID(),
+				MetaId:      wanwu_util.NewID(),
 				DocId:       docId,
 				KnowledgeId: knowledgeId,
 				UserId:      req.UserId,
@@ -754,14 +752,14 @@ func buildKnowledgeInfo(knowledge *model.KnowledgeBase) *knowledgebase_service.K
 		DocCount:           int32(docCount),
 		ShareCount:         int32(knowledge.ShareCount),
 		EmbeddingModelInfo: embeddingModelInfo,
-		CreatedAt:          pkg_util.Time2Str(knowledge.CreatedAt),
+		CreatedAt:          wanwu_util.Time2Str(knowledge.CreatedAt),
 		CreateOrgId:        knowledge.OrgId,
 		CreateUserId:       knowledge.UserId,
 		RagName:            knowledge.RagName,
 		GraphSwitch:        int32(knowledge.KnowledgeGraphSwitch),
 		Category:           int32(knowledge.Category),
 		LlmModelId:         graph.GraphModelId,
-		UpdatedAt:          pkg_util.Time2Str(knowledge.UpdatedAt),
+		UpdatedAt:          wanwu_util.Time2Str(knowledge.UpdatedAt),
 	}
 }
 
@@ -789,9 +787,9 @@ func buildKnowledgeBaseModel(req *knowledgebase_service.CreateKnowledgeReq) (*mo
 		return nil, err
 	}
 	return &model.KnowledgeBase{
-		KnowledgeId:          generator.GetGenerator().NewID(),
+		KnowledgeId:          wanwu_util.NewID(),
 		Name:                 req.Name,
-		RagName:              generator.GetGenerator().NewID(), //重新生成的 不是knowledgeID
+		RagName:              wanwu_util.NewID(), //重新生成的 不是knowledgeID
 		Description:          req.Description,
 		OrgId:                req.OrgId,
 		UserId:               req.UserId,
@@ -940,7 +938,7 @@ func buildKnowledgeMetaValueListResp(metaList []*model.KnowledgeDocMeta) *knowle
 func storeKnowledgeStoreSchema(knowledgeId string, knowledgeGraph *knowledgebase_service.KnowledgeGraph) {
 	if knowledgeGraph.Switch && knowledgeGraph.SchemaUrl != "" {
 		go func() {
-			defer pkg_util.PrintPanicStack()
+			defer wanwu_util.PrintPanicStack()
 			copyFile, _, _, err := rag_service.CopyFile(context.Background(), knowledgeGraph.SchemaUrl, "", false)
 			if err != nil {
 				log.Errorf("store knowledge copy file (%v) err: %v", knowledgeGraph.SchemaUrl, err)

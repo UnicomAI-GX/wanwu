@@ -11,11 +11,11 @@ import (
 )
 
 func (s *Service) GenAppKey(ctx context.Context, req *app_service.GenAppKeyReq) (*app_service.AppKeyInfo, error) {
-	apiKey, err := s.cli.GenAppKey(ctx, req.UserId, req.OrgId, req.AppId, req.AppType, util.GenApiUUID())
+	appKey, err := s.cli.GenAppKey(ctx, req.UserId, req.OrgId, req.AppId, req.AppType, util.GenApiUUID())
 	if err != nil {
 		return nil, errStatus(errs.Code_AppApikey, err)
 	}
-	return toProtoAppKey(apiKey), nil
+	return toProtoAppKey(appKey), nil
 }
 
 func (s *Service) GetAppKeyList(ctx context.Context, req *app_service.GetAppKeyListReq) (*app_service.AppKeyInfoList, error) {
@@ -26,8 +26,8 @@ func (s *Service) GetAppKeyList(ctx context.Context, req *app_service.GetAppKeyL
 	ret := &app_service.AppKeyInfoList{
 		Total: int64(len(appKeyList)),
 	}
-	for _, apiKey := range appKeyList {
-		ret.Info = append(ret.Info, toProtoAppKey(apiKey))
+	for _, appKey := range appKeyList {
+		ret.Info = append(ret.Info, toProtoAppKey(appKey))
 	}
 	return ret, nil
 }

@@ -10,7 +10,6 @@ import (
 	errs "github.com/UnicomAI/wanwu/api/proto/err-code"
 	"github.com/UnicomAI/wanwu/internal/assistant-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/assistant-service/config"
-	"github.com/UnicomAI/wanwu/internal/rag-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/pkg/log"
 	"github.com/UnicomAI/wanwu/pkg/util"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -53,10 +52,9 @@ func (s *Service) GetAssistantByIds(ctx context.Context, req *assistant_service.
 
 // AssistantCreate 创建智能体
 func (s *Service) AssistantCreate(ctx context.Context, req *assistant_service.AssistantCreateReq) (*assistant_service.AssistantCreateResp, error) {
-	assistantUUID := generator.GetGenerator().NewID()
 	// 组装model参数
 	assistant := &model.Assistant{
-		UUID:       assistantUUID,
+		UUID:       util.NewID(),
 		AvatarPath: req.AssistantBrief.AvatarPath,
 		Name:       req.AssistantBrief.Name,
 		Desc:       req.AssistantBrief.Desc,

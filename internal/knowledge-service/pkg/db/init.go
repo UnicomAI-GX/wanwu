@@ -8,9 +8,9 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/config"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/pkg/db"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"gorm.io/gorm"
 )
 
@@ -247,7 +247,7 @@ func initKnowledgePermission(dbClient *gorm.DB) error {
 			continue
 		}
 		permissionList = append(permissionList, &model.KnowledgePermission{
-			PermissionId:   generator.GetGenerator().NewID(),
+			PermissionId:   wanwu_util.NewID(),
 			KnowledgeId:    knowledgeBase.KnowledgeId,
 			UserId:         knowledgeBase.UserId,
 			OrgId:          knowledgeBase.OrgId,

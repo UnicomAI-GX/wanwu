@@ -13,13 +13,13 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/model"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	import_service "github.com/UnicomAI/wanwu/internal/knowledge-service/task/import-service"
 	"github.com/UnicomAI/wanwu/pkg/log"
 	pkg_util "github.com/UnicomAI/wanwu/pkg/util"
 	util2 "github.com/UnicomAI/wanwu/pkg/util"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -440,7 +440,7 @@ func buildAddMetaList(req *knowledgebase_doc_service.UpdateDocMetaDataReq) []*mo
 		if reqMeta.Option == MetaOptionAdd {
 			addList = append(addList, &model.KnowledgeDocMeta{
 				KnowledgeId: req.KnowledgeId,
-				MetaId:      generator.GetGenerator().NewID(),
+				MetaId:      wanwu_util.NewID(),
 				Key:         reqMeta.Key,
 				ValueType:   reqMeta.ValueType,
 				Rule:        "",
@@ -835,7 +835,7 @@ func buildImportTask(req *knowledgebase_doc_service.ImportDocReq) (*model.Knowle
 		docImportMetaData = string(importMetaDataByte)
 	}
 	return &model.KnowledgeImportTask{
-		ImportId:      generator.GetGenerator().NewID(),
+		ImportId:      wanwu_util.NewID(),
 		KnowledgeId:   req.KnowledgeId,
 		ImportType:    int(req.DocImportType),
 		SegmentConfig: string(segmentConfig),
@@ -891,7 +891,7 @@ func buildReImportTask(req *knowledgebase_doc_service.UpdateDocImportConfigReq, 
 		return nil, err
 	}
 	return &model.KnowledgeImportTask{
-		ImportId:      generator.GetGenerator().NewID(),
+		ImportId:      wanwu_util.NewID(),
 		KnowledgeId:   docImportReq.KnowledgeId,
 		ImportType:    int(docImportReq.DocImportType),
 		TaskType:      model.ImportTaskTypeUpdateConfig,
@@ -925,7 +925,7 @@ func buildReimportTask(req *knowledgebase_doc_service.ReImportDocReq, task *mode
 		return nil, err
 	}
 	return &model.KnowledgeImportTask{
-		ImportId:      generator.GetGenerator().NewID(),
+		ImportId:      wanwu_util.NewID(),
 		KnowledgeId:   req.KnowledgeId,
 		ImportType:    task.ImportType,
 		TaskType:      model.ImportTaskTypeUpdateConfig,
@@ -953,7 +953,7 @@ func buildDocExportTask(req *knowledgebase_doc_service.ExportDocReq) (*model.Kno
 		return nil, err
 	}
 	return &model.KnowledgeExportTask{
-		ExportId:     generator.GetGenerator().NewID(),
+		ExportId:     wanwu_util.NewID(),
 		KnowledgeId:  req.KnowledgeId,
 		CreatedAt:    time.Now().UnixMilli(),
 		UpdatedAt:    time.Now().UnixMilli(),
@@ -1117,7 +1117,7 @@ func buildDocMetaModelList(metaDataList []*knowledgebase_doc_service.MetaData, o
 		if data.Option == MetaOptionAdd {
 			addList = append(addList, &model.KnowledgeDocMeta{
 				KnowledgeId: knowledgeId,
-				MetaId:      generator.GetGenerator().NewID(),
+				MetaId:      wanwu_util.NewID(),
 				DocId:       docId,
 				Key:         data.Key,
 				ValueMain:   data.Value,

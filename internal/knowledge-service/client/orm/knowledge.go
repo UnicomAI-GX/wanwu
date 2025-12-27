@@ -9,10 +9,10 @@ import (
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/client/orm/sqlopt"
 	async_task "github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/async-task"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/db"
-	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/generator"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/pkg/util"
 	"github.com/UnicomAI/wanwu/internal/knowledge-service/service"
 	"github.com/UnicomAI/wanwu/pkg/log"
+	wanwu_util "github.com/UnicomAI/wanwu/pkg/util"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
@@ -198,7 +198,7 @@ func UpdateKnowledge(ctx context.Context, name, description string, knowledgeBas
 			return updateKnowledge(tx, knowledgeBase.Id, name, description)
 		}
 		//2.更新数据
-		ragName := generator.GetGenerator().NewID()
+		ragName := wanwu_util.NewID()
 		err := updateKnowledgeWithRagName(tx, knowledgeBase.Id, name, ragName, description)
 		if err != nil {
 			return err
@@ -363,7 +363,7 @@ func logicDeleteKnowledge(tx *gorm.DB, knowledge *model.KnowledgeBase) error {
 // buildKnowledgePermission 构建知识库权限信息
 func buildKnowledgePermission(knowledge *model.KnowledgeBase) *model.KnowledgePermission {
 	return &model.KnowledgePermission{
-		PermissionId:   generator.GetGenerator().NewID(),
+		PermissionId:   wanwu_util.NewID(),
 		KnowledgeId:    knowledge.KnowledgeId,
 		GrantUserId:    knowledge.UserId,
 		GrantOrgId:     knowledge.OrgId,

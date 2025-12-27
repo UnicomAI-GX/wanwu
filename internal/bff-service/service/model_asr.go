@@ -18,7 +18,7 @@ import (
 
 func ModelAsr(ctx *gin.Context, modelID string, req *mp_common.AsrReq) {
 	// modelInfo by modelID
-	modelInfo, err := model.GetModelById(ctx.Request.Context(), &model_service.GetModelByIdReq{ModelId: modelID})
+	modelInfo, err := model.GetModel(ctx.Request.Context(), &model_service.GetModelReq{ModelId: modelID})
 	if err != nil {
 		gin_util.Response(ctx, nil, err)
 		return

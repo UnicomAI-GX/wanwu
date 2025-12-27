@@ -1,4 +1,4 @@
-package mp_deepseek
+package mp_common
 
 type LLMParams struct {
 	Temperature            float32 `json:"temperature"`            // 温度
