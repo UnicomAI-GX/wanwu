@@ -664,6 +664,7 @@ export default {
         ],
       },
       editForm: {
+        category: 1,
         newAgent: false,
         functionCalling: '',
         visionsupport: '',
@@ -1185,19 +1186,17 @@ export default {
       if (res.code === 0) {
         this.startLoading(100);
         let data = res.data;
+        this.editForm.category = data.category;
         this.publishType = data.publishType;
         //兼容后端知识库数据返回null
-        if (
-          res.data.knowledgeBaseConfig &&
-          res.data.knowledgeBaseConfig !== null
-        ) {
+        if (data.knowledgeBaseConfig) {
           this.editForm.knowledgeBaseConfig.knowledgebases =
-            res.data.knowledgeBaseConfig.knowledgebases;
+            data.knowledgeBaseConfig.knowledgebases;
           this.editForm.knowledgeBaseConfig.config =
-            res.data.knowledgeBaseConfig.config === null ||
-            !res.data.knowledgeBaseConfig.config.matchType
+            data.knowledgeBaseConfig.config === null ||
+            !data.knowledgeBaseConfig.config.matchType
               ? this.editForm.knowledgeBaseConfig.config
-              : res.data.knowledgeBaseConfig.config;
+              : data.knowledgeBaseConfig.config;
         }
 
         this.editForm = {
@@ -1230,7 +1229,7 @@ export default {
         };
 
         this.editForm.knowledgeBaseConfig.config.rerankModelId =
-          res.data.rerankConfig.modelId;
+          data.rerankConfig.modelId;
         //设置模型信息
         this.setModelInfo(data.modelConfig.modelId);
 
