@@ -42,6 +42,21 @@
         </div>
       </div>
       <div class="header-right">
+        <div class="header-api">
+          <el-tag effect="plain" class="root-url">
+            {{ $t('rag.form.apiRootUrl') }}
+          </el-tag>
+          {{ apiURL }}
+        </div>
+        <el-button
+          @click="$router.push('/openApiKey')"
+          plain
+          class="apikeyBtn"
+          size="small"
+        >
+          <img :src="require('@/assets/imgs/apikey.png')" />
+          {{ $t('rag.form.apiKey') }}
+        </el-button>
         <VersionPopover
           ref="versionPopover"
           v-if="publishType"
@@ -498,7 +513,7 @@
 </template>
 
 <script>
-import { appPublish } from '@/api/appspace';
+import { appPublish, getApiKeyRoot } from '@/api/appspace';
 import { store } from '@/store/index';
 import { mapGetters, mapActions } from 'vuex';
 import CreateIntelligent from '@/components/createApp/createIntelligent';
@@ -632,6 +647,7 @@ export default {
       activeIndex: -1,
       rerankOptions: [],
       initialEditForm: null,
+      apiURL: '',
       publishType: this.$route.query.publishType,
       publishForm: {
         publishType: 'private',
@@ -775,7 +791,8 @@ export default {
     if (this.$route.query.id) {
       this.editForm.assistantId = this.$route.query.id;
       setTimeout(() => {
-        this.getAppDetail();
+        this.getAppDetail(); //获取详情
+        this.apiKeyRootUrl(); //获取api根地址
       }, 500);
     }
     //判断是否有插件管理的权限
@@ -1027,6 +1044,14 @@ export default {
               this.$router.push({ path: '/explore' });
             }
           });
+        }
+      });
+    },
+    apiKeyRootUrl() {
+      const data = { appId: this.editForm.assistantId, appType: 'agent' };
+      getApiKeyRoot(data).then(res => {
+        if (res.code === 0) {
+          this.apiURL = res.data || '';
         }
       });
     },
