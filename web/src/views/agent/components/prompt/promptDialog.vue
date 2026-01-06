@@ -119,7 +119,7 @@ export default {
     },
   },
   methods: {
-    showDiglog(data, type) {
+    showDialog(data, type) {
       this.dialogVisible = true;
       this.activeTab = type;
       if (data && data.length) {

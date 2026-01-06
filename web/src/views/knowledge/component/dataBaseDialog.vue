@@ -243,7 +243,7 @@ export default {
       index.option = 'delete';
       this.submitDialog('delete');
     },
-    showDiglog(data, id) {
+    showDialog(data, id) {
       this.dialogVisible = true;
       this.docId = id;
       this.tableData = data.map(item => ({

@@ -6,7 +6,7 @@
       :before-close="handleClose"
     >
       <template slot="title">
-        <div class="diglog_title">
+        <div class="dialog_title">
           <h3>
             {{
               category === 0
@@ -157,7 +157,7 @@ export default {
     }
   }
 }
-.diglog_title {
+.dialog_title {
   display: flex;
   justify-content: space-between;
   align-items: center;

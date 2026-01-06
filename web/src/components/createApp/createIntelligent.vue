@@ -9,7 +9,7 @@
     >
       <el-form ref="form" :model="form" label-width="120px" :rules="rules">
         <el-form-item
-          :label="$t('agentDiglog.agentLogo') + ':'"
+          :label="$t('agentDialog.agentLogo') + ':'"
           prop="avatar.path"
         >
           <el-upload
@@ -35,18 +35,18 @@
             </div>
           </el-upload>
         </el-form-item>
-        <el-form-item :label="$t('agentDiglog.agentName') + ':'" prop="name">
+        <el-form-item :label="$t('agentDialog.agentName') + ':'" prop="name">
           <el-input
-            :placeholder="$t('agentDiglog.nameplaceholder')"
+            :placeholder="$t('agentDialog.nameplaceholder')"
             v-model="form.name"
             maxlength="30"
             show-word-limit
           ></el-input>
         </el-form-item>
-        <el-form-item :label="$t('agentDiglog.agentDesc') + ':'" prop="desc">
+        <el-form-item :label="$t('agentDialog.agentDesc') + ':'" prop="desc">
           <el-input
             type="textarea"
-            :placeholder="$t('agentDiglog.descplaceholder')"
+            :placeholder="$t('agentDialog.descplaceholder')"
             v-model="form.desc"
             show-word-limit
             maxlength="600"
@@ -99,7 +99,7 @@ export default {
         name: [
           {
             required: true,
-            message: this.$t('agentDiglog.nameRules'),
+            message: this.$t('agentDialog.nameRules'),
             trigger: 'blur',
           },
           {
@@ -107,33 +107,33 @@ export default {
               if (/^[A-Za-z0-9.\u4e00-\u9fa5_-]+$/.test(value)) {
                 callback();
               } else {
-                callback(new Error(this.$t('agentDiglog.nameplaceholder')));
+                callback(new Error(this.$t('agentDialog.nameplaceholder')));
               }
             },
             trigger: 'blur',
           },
           {
             max: 30,
-            message: this.$t('agentDiglog.pluginNameRules'),
+            message: this.$t('agentDialog.pluginNameRules'),
             trigger: 'blur',
           },
         ],
         desc: [
           {
             required: true,
-            message: this.$t('agentDiglog.descplaceholder'),
+            message: this.$t('agentDialog.descplaceholder'),
             trigger: 'blur',
           },
           {
             max: 600,
-            message: this.$t('agentDiglog.descRules'),
+            message: this.$t('agentDialog.descRules'),
             trigger: 'blur',
           },
         ],
       },
       titleMap: {
-        edit: this.$t('agentDiglog.editApp'),
-        create: this.$t('agentDiglog.createApp'),
+        edit: this.$t('agentDialog.editApp'),
+        create: this.$t('agentDialog.createApp'),
       },
     };
   },
