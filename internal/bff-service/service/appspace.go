@@ -15,10 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	successCode = 0
-)
-
 func DeleteAppSpaceApp(ctx *gin.Context, userId, orgId, appId, appType string) error {
 	// delete publish app
 	_, err := app.DeleteApp(ctx.Request.Context(), &app_service.DeleteAppReq{
@@ -45,10 +41,6 @@ func DeleteAppSpaceApp(ctx *gin.Context, userId, orgId, appId, appType string) e
 		if err != nil {
 			return err
 		}
-		// AgentScope Workflow
-		// err = DeleteAgentScopeWorkFlow(ctx, userId, orgId, appId)
-
-		// Coze Workflow
 		err = DeleteWorkflow(ctx, orgId, appId)
 	case constant.AppTypeChatflow:
 		_, err = assistant.AssistantWorkFlowDeleteByWorkflowId(ctx.Request.Context(), &assistant_service.AssistantWorkFlowDeleteByWorkflowIdReq{
@@ -57,7 +49,7 @@ func DeleteAppSpaceApp(ctx *gin.Context, userId, orgId, appId, appType string) e
 		if err != nil {
 			return err
 		}
-		// Coze Chatflow 复用工作流的删除接口
+		// 复用工作流的删除接口
 		err = DeleteWorkflow(ctx, orgId, appId)
 	}
 	return err
@@ -96,16 +88,6 @@ func GetAppSpaceAppList(ctx *gin.Context, userId, orgId, name, appType string) (
 		}
 	}
 	if appType == "" || appType == constant.AppTypeWorkflow {
-		// AgentScope Workflow
-		// resp, err := ListAgentScopeWorkFlow(ctx, userId, orgId, name)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// for _, workflowInfo := range resp.List {
-		// 	ret = append(ret, agentscopeWorkflowInfo2Model(workflowInfo))
-		// }
-
-		// Coze Workflow
 		resp, err := ListWorkflow(ctx, orgId, name, constant.AppTypeWorkflow)
 		if err != nil {
 			return nil, err
@@ -152,12 +134,6 @@ func GetAppSpaceAppList(ctx *gin.Context, userId, orgId, name, appType string) (
 }
 
 func PublishApp(ctx *gin.Context, userId, orgId string, req request.PublishAppRequest) error {
-	// 特殊处理AgentScope工作流的发布
-	// if req.AppType == constant.AppTypeWorkflow {
-	// 	if err := PublishAgentScopeWorkFlow(ctx, userId, orgId, req.AppId); err != nil {
-	// 		return err
-	// 	}
-	// }
 	if req.AppType == constant.AppTypeWorkflow || req.AppType == constant.AppTypeChatflow {
 		if err := PublishWorkflow(ctx, orgId, req.AppId, req.Version, req.Desc); err != nil {
 			return err
@@ -242,13 +218,6 @@ func UnPublishApp(ctx *gin.Context, userId, orgId string, req request.UnPublishA
 	if err != nil {
 		return err
 	}
-	// 特殊处理AgentScope工作流的取消发布
-	// if req.AppType == constant.AppTypeWorkflow {
-	// 	err = UnPublishAgentScopeWorkFlow(ctx, userId, orgId, req.AppId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
 	return nil
 }
 

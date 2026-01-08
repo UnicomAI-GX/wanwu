@@ -36,19 +36,18 @@ type Config struct {
 	Minio minio.Config `json:"minio" mapstructure:"minio"`
 	Redis redis.Config `json:"redis" mapstructure:"redis"`
 	// microservice
-	Iam                ServiceConfig                   `json:"iam" mapstructure:"iam"`
-	Model              ServiceModelConfig              `json:"model" mapstructure:"model"`
-	MCP                ServiceConfig                   `json:"mcp" mapstructure:"mcp"`
-	App                ServiceConfig                   `json:"app" mapstructure:"app"`
-	Knowledge          ServiceConfig                   `json:"knowledge" mapstructure:"knowledge"`
-	Rag                ServiceConfig                   `json:"rag" mapstructure:"rag"`
-	Assistant          ServiceConfig                   `json:"assistant" mapstructure:"assistant"`
-	Operate            ServiceConfig                   `json:"operate" mapstructure:"operate"`
-	Agent              AgentServiceConfig              `json:"agent" mapstructure:"agent"`
-	RagKnowledgeConfig RagKnowledgeConfig              `json:"rag-knowledge" mapstructure:"rag-knowledge"`
-	Workflow           WorkflowServiceConfig           `json:"workflow" mapstructure:"workflow"`
-	AgentScopeWorkFlow AgentScopeWorkFlowServiceConfig `json:"agentscope-workflow" mapstructure:"agentscope-workflow"`
-	Models             []*ModelConfig                  `json:"models" mapstructure:"models"`
+	Iam                ServiceConfig         `json:"iam" mapstructure:"iam"`
+	Model              ServiceModelConfig    `json:"model" mapstructure:"model"`
+	MCP                ServiceConfig         `json:"mcp" mapstructure:"mcp"`
+	App                ServiceConfig         `json:"app" mapstructure:"app"`
+	Knowledge          ServiceConfig         `json:"knowledge" mapstructure:"knowledge"`
+	Rag                ServiceConfig         `json:"rag" mapstructure:"rag"`
+	Assistant          ServiceConfig         `json:"assistant" mapstructure:"assistant"`
+	Operate            ServiceConfig         `json:"operate" mapstructure:"operate"`
+	Agent              AgentServiceConfig    `json:"agent" mapstructure:"agent"`
+	RagKnowledgeConfig RagKnowledgeConfig    `json:"rag-knowledge" mapstructure:"rag-knowledge"`
+	Workflow           WorkflowServiceConfig `json:"workflow" mapstructure:"workflow"`
+	Models             []*ModelConfig        `json:"models" mapstructure:"models"`
 }
 
 type ModelConfig struct {
@@ -205,15 +204,6 @@ type WorkflowModelParamDefaultVal struct {
 	Balance    string `json:"balance" mapstructure:"balance"`
 	Creative   string `json:"creative" mapstructure:"creative"`
 	DefaultVal string `json:"default_val" mapstructure:"default_val"`
-}
-
-type AgentScopeWorkFlowServiceConfig struct {
-	Endpoint                string `json:"endpoint" mapstructure:"endpoint"`
-	WorkFlowListUri         string `json:"workflow_list_uri" mapstructure:"workflow_list_uri"`
-	WorkFlowListUriInternal string `json:"workflow_list_uri_internal" mapstructure:"workflow_list_uri_internal"`
-	DeleteWorkFlowUri       string `json:"delete_workflow_uri" mapstructure:"delete_workflow_uri"`
-	PublishWorkFlowUri      string `json:"publish_workflow_uri" mapstructure:"publish_workflow_uri"`
-	UnPublishWorkFlowUri    string `json:"unpublish_workflow_uri" mapstructure:"unpublish_workflow_uri"`
 }
 
 type AgentServiceConfig struct {
