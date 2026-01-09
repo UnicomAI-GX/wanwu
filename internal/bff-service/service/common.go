@@ -336,8 +336,24 @@ func cacheWorkflowAvatar(avatarURL, appType string) request.Avatar {
 			newAvatarURL += "?" + parsedURL.RawQuery
 		}
 	} else {
-		// 直接使用原始URL（如 http://localhost:8081/api/static/icon/icon-HTTP.png）
-		newAvatarURL = avatarURL
+		// 直接转换URL为容器内可访问URL（如 http://localhost:8081/api/static/icon/icon-HTTP.png ->http://workflow-wanuw:8998/api/static/icon/icon-HTTP.png）
+		parsedURL, err := url.Parse(avatarURL)
+		if err != nil {
+			log.Errorf("cache avatar URL %s invalid ", avatarURL)
+			return avatar
+		}
+		// 获取内部服务 host（优先从配置中的 MinioProxyEndpoint 提取）
+		internalURL, err := url.Parse(config.Cfg().Workflow.MinioProxyEndpoint)
+		if err != nil {
+			log.Errorf("cache avatar invalid MinioProxyEndpoint %s", config.Cfg().Workflow.MinioProxyEndpoint)
+			return avatar
+		} else {
+			if parsedURL.Scheme+"://"+parsedURL.Host == config.Cfg().Server.WebBaseUrl {
+				parsedURL.Scheme = internalURL.Scheme
+				parsedURL.Host = internalURL.Host
+			}
+		}
+		newAvatarURL = parsedURL.String()
 	}
 	// 从HTTP URL下载文件
 	resp, err := http.Get(newAvatarURL)
